@@ -1,0 +1,260 @@
+package controller;
+
+import javafx.fxml.FXML;
+import javafx.scene.control.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import dao.HieuXeDAO;
+import dao.XeDAO;
+import dao.ChuXeDAO; // Import ChuXeDAO
+import dao.TiepNhanDAO; // Import TiepNhanDAO (formerly HoSoSuaChuaDAO)
+import model.HieuXe;
+import model.Xe;
+import model.ChuXe; // Import ChuXe entity
+import model.TiepNhan; // Import TiepNhan entity (formerly HoSoSuaChua)
+import utils.AlertUtils; // Utility class for showing alerts
+import java.sql.SQLException;
+import java.time.LocalDate;
+
+public class TiepNhanController {
+
+    // FXML elements from TiepNhanView.fxml
+    @FXML
+    private TextField txtTenChuXe;
+    @FXML
+    private TextField txtBienSoXe;
+    @FXML
+    private TextField txtDienThoai;
+    @FXML
+    private TextField txtDiaChi;
+    @FXML
+    private ComboBox<String> cbHieuXe; // ComboBox for car brands
+    @FXML
+    private DatePicker dpNgayTiepNhan;
+    @FXML
+    private Label lblSoXeTrongNgay;
+    @FXML
+    private TableView<TiepNhan> tblXeTiepNhanTrongNgay; // Changed to TiepNhan
+    @FXML
+    private TableColumn<TiepNhan, String> colBienSo; // Changed to TiepNhan
+    @FXML
+    private TableColumn<TiepNhan, String> colTenChuXe; // Changed to TiepNhan
+    @FXML
+    private TableColumn<TiepNhan, String> colHieuXe; // Changed to TiepNhan
+    @FXML
+    private TableColumn<TiepNhan, String> colDienThoai; // Changed to TiepNhan
+    @FXML
+    private TableColumn<TiepNhan, String> colDiaChi; // Changed to TiepNhan
+
+    // Data Access Objects
+    private HieuXeDAO hieuXeDAO;
+    private XeDAO xeDAO;
+    private ChuXeDAO chuXeDAO; // New DAO for ChuXe
+    private TiepNhanDAO tiepNhanDAO; // Renamed from HoSoSuaChuaDAO
+
+    // ObservableList for the TableView
+    private ObservableList<TiepNhan> danhSachXeTiepNhanTrongNgay; // Changed to TiepNhan
+
+    /**
+     * Initializes the controller. This method is automatically called after the FXML file has been loaded.
+     */
+    @FXML
+    public void initialize() {
+        // Initialize DAOs
+        hieuXeDAO = new HieuXeDAO();
+        xeDAO = new XeDAO();
+        chuXeDAO = new ChuXeDAO(); // Initialize new DAO
+        tiepNhanDAO = new TiepNhanDAO(); // Initialize renamed DAO
+
+        // Set default date for DatePicker to today
+        dpNgayTiepNhan.setValue(LocalDate.now());
+
+        // Initialize ObservableList
+        danhSachXeTiepNhanTrongNgay = FXCollections.observableArrayList();
+        tblXeTiepNhanTrongNgay.setItems(danhSachXeTiepNhanTrongNgay);
+
+        // Configure TableView columns
+        // These PropertyValueFactory mappings now correctly use TiepNhan properties
+        colBienSo.setCellValueFactory(cellData -> cellData.getValue().bienSoProperty());
+        colTenChuXe.setCellValueFactory(cellData -> cellData.getValue().tenChuXeProperty());
+        colHieuXe.setCellValueFactory(cellData -> cellData.getValue().tenHieuXeProperty());
+        colDienThoai.setCellValueFactory(cellData -> cellData.getValue().dienThoaiChuXeProperty());
+        colDiaChi.setCellValueFactory(cellData -> cellData.getValue().diaChiChuXeProperty());
+
+        // Load initial data
+        loadHieuXeData();
+        loadXeTiepNhanTrongNgay(); // Corrected method name
+    }
+
+    /**
+     * Loads car brands (HieuXe) from the database into the ComboBox.
+     */
+    private void loadHieuXeData() {
+        try {
+            ObservableList<String> hieuXeNames = FXCollections.observableArrayList();
+            for (HieuXe hieuXe : hieuXeDAO.getAllHieuXe()) {
+                hieuXeNames.add(hieuXe.getTenHieuXe());
+            }
+            cbHieuXe.setItems(hieuXeNames);
+        } catch (SQLException e) {
+            AlertUtils.showErrorAlert("Lỗi tải dữ liệu", "Không thể tải danh sách hiệu xe từ cơ sở dữ liệu.");
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Loads cars accepted for the current day into the TableView and updates the count label.
+     */
+    private void loadXeTiepNhanTrongNgay() { // Corrected method name
+        try {
+            LocalDate ngayHienTai = dpNgayTiepNhan.getValue(); // Use the selected date in DatePicker
+            if (ngayHienTai == null) {
+                ngayHienTai = LocalDate.now(); // Fallback to current date if not set
+                dpNgayTiepNhan.setValue(ngayHienTai);
+            }
+            ObservableList<TiepNhan> xeTrongNgay = tiepNhanDAO.getTiepNhanByNgayTiepNhan(ngayHienTai); // Changed to tiepNhanDAO and TiepNhan
+            danhSachXeTiepNhanTrongNgay.clear();
+            danhSachXeTiepNhanTrongNgay.addAll(xeTrongNgay);
+
+            // Update the count label
+            try {
+                // Use the correct parameter name from your updated SQL script
+                int maxXeTrongNgay = Integer.parseInt(hieuXeDAO.getThamSoHeThong("SoXeToiDaMoiNgay"));
+                lblSoXeTrongNgay.setText(danhSachXeTiepNhanTrongNgay.size() + "/" + maxXeTrongNgay);
+                if (danhSachXeTiepNhanTrongNgay.size() >= maxXeTrongNgay) {
+                    lblSoXeTrongNgay.setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
+                } else {
+                    lblSoXeTrongNgay.setStyle("-fx-text-fill: #2c3e50; -fx-font-weight: bold;"); // Default color
+                }
+            } catch (NumberFormatException e) {
+                lblSoXeTrongNgay.setText(danhSachXeTiepNhanTrongNgay.size() + "/Giới hạn không xác định");
+                AlertUtils.showWarningAlert("Cảnh báo", "Không thể đọc giới hạn số xe tối đa trong ngày từ cấu hình.");
+            }
+
+        } catch (SQLException e) {
+            AlertUtils.showErrorAlert("Lỗi tải dữ liệu", "Không thể tải danh sách xe tiếp nhận trong ngày.");
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Handles the "Tiếp nhận xe" button action.
+     * This method will validate inputs, save car info, and create a new repair record.
+     */
+    @FXML
+    private void handleTiepNhanXe() {
+        // 1. Get data from input fields
+        String tenChuXe = txtTenChuXe.getText().trim();
+        String bienSoXe = txtBienSoXe.getText().trim();
+        String dienThoai = txtDienThoai.getText().trim();
+        String diaChi = txtDiaChi.getText().trim();
+        String tenHieuXe = cbHieuXe.getValue();
+        LocalDate ngayTiepNhan = dpNgayTiepNhan.getValue();
+
+        // 2. Validate inputs
+        if (tenChuXe.isEmpty() || bienSoXe.isEmpty() || tenHieuXe == null || ngayTiepNhan == null) {
+            AlertUtils.showWarningAlert("Thiếu thông tin", "Vui lòng nhập đầy đủ Tên chủ xe, Biển số xe, Hiệu xe và Ngày tiếp nhận.");
+            return;
+        }
+
+        // Basic phone number validation (optional, can be more robust)
+        if (!dienThoai.isEmpty() && !dienThoai.matches("\\d{10,15}")) {
+            AlertUtils.showWarningAlert("Lỗi định dạng", "Số điện thoại không hợp lệ. Vui lòng nhập từ 10 đến 15 chữ số.");
+            return;
+        }
+
+        try {
+            // Check daily acceptance limit (QĐ1)
+            int maxXeTrongNgay = Integer.parseInt(hieuXeDAO.getThamSoHeThong("SoXeToiDaMoiNgay")); // Use new param name
+            if (danhSachXeTiepNhanTrongNgay.size() >= maxXeTrongNgay) {
+                AlertUtils.showErrorAlert("Vượt quá giới hạn", "Số lượng xe tiếp nhận trong ngày đã đạt giới hạn tối đa (" + maxXeTrongNgay + " xe).");
+                return;
+            }
+
+            // Handle ChuXe (Owner)
+            ChuXe chuXe = chuXeDAO.getChuXeByDienThoai(dienThoai);
+            int maChuXe;
+            if (chuXe == null) {
+                // Create new ChuXe if not exists
+                chuXe = new ChuXe();
+                chuXe.setTenChuXe(tenChuXe);
+                chuXe.setDienThoai(dienThoai);
+                chuXe.setDiaChi(diaChi);
+                // Email is optional, can be set if available in future
+                maChuXe = chuXeDAO.addChuXe(chuXe); // addChuXe returns int for generated ID
+            } else {
+                // Use existing ChuXe's ID, update info if changed
+                maChuXe = chuXe.getMaChuXe();
+                // Only update if changes are detected or if you want to force update
+                if (!chuXe.getTenChuXe().equals(tenChuXe) || !chuXe.getDiaChi().equals(diaChi) || !chuXe.getDienThoai().equals(dienThoai)) {
+                    chuXe.setTenChuXe(tenChuXe);
+                    chuXe.setDiaChi(diaChi);
+                    chuXe.setDienThoai(dienThoai); // Update phone if it was changed in UI
+                    chuXeDAO.updateChuXe(chuXe);
+                }
+            }
+
+            // Get MaHieuXe
+            HieuXe hieuXe = hieuXeDAO.getHieuXeByName(tenHieuXe);
+            if (hieuXe == null) {
+                AlertUtils.showErrorAlert("Lỗi", "Hiệu xe không tồn tại trong hệ thống.");
+                return;
+            }
+            int maHieuXe = hieuXe.getMaHieuXe();
+
+            // Handle Xe (Car)
+            Xe xe = xeDAO.getXeByBienSo(bienSoXe);
+            if (xe == null) {
+                // Create new Xe if not exists
+                xe = new Xe();
+                xe.setBienSo(bienSoXe);
+                xe.setMaHieuXe(maHieuXe);
+                xe.setMaChuXe(maChuXe);
+                xeDAO.addXe(xe); // addXe now returns void, just executes
+            } else {
+                // Update existing Xe's MaHieuXe and MaChuXe if necessary
+                // This assumes BienSo is immutable (PK)
+                if (xe.getMaHieuXe() != maHieuXe || xe.getMaChuXe() != maChuXe) {
+                    xe.setMaHieuXe(maHieuXe);
+                    xe.setMaChuXe(maChuXe);
+                    xeDAO.updateXe(xe);
+                }
+            }
+
+            // Create new TiepNhan (acceptance record)
+            TiepNhan newTiepNhan = new TiepNhan();
+            newTiepNhan.setBienSo(bienSoXe);
+            newTiepNhan.setNgayTiepNhan(ngayTiepNhan);
+            newTiepNhan.setTongTienNo(0.0); // Initially no debt
+            newTiepNhan.setTrangThaiHoanTat(false); // Not completed yet
+
+            tiepNhanDAO.addTiepNhan(newTiepNhan); // Changed to tiepNhanDAO
+
+            AlertUtils.showInformationAlert("Thành công", "Tiếp nhận xe và tạo hồ sơ tiếp nhận thành công!");
+
+            // Refresh the table and clear inputs
+            loadXeTiepNhanTrongNgay();
+            handleLamMoi();
+
+        } catch (SQLException e) {
+            AlertUtils.showErrorAlert("Lỗi cơ sở dữ liệu", "Đã xảy ra lỗi khi lưu thông tin: " + e.getMessage());
+            e.printStackTrace();
+        } catch (NumberFormatException e) {
+            AlertUtils.showErrorAlert("Lỗi cấu hình", "Giá trị giới hạn xe trong ngày không hợp lệ. Vui lòng kiểm tra cấu hình hệ thống.");
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Handles the "Làm mới" button action. Clears all input fields.
+     */
+    @FXML
+    private void handleLamMoi() {
+        txtTenChuXe.clear();
+        txtBienSoXe.clear();
+        txtDienThoai.clear();
+        txtDiaChi.clear();
+        cbHieuXe.getSelectionModel().clearSelection();
+        dpNgayTiepNhan.setValue(LocalDate.now()); // Reset to current date
+    }
+}
