@@ -16,7 +16,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.control.TableColumn?>
 
-<VBox alignment="TOP_CENTER" prefHeight="750.0" prefWidth="1050.0" spacing="20.0" style="-fx-background-color: #f5f7f9;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.TiepNhanController">
+<VBox alignment="TOP_CENTER" spacing="20.0" style="-fx-background-color: #f5f7f9;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.TiepNhanController">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
@@ -32,7 +32,7 @@
         </Label>
 
         <!-- Input Form Section -->
-        <GridPane hgap="20.0" vgap="15.0" style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8;">
+        <GridPane hgap="20.0" vgap="15.0" styleClass="form-container">
             <padding>
                 <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
             </padding>
@@ -98,12 +98,8 @@
                 <Insets top="10.0" />
             </VBox.margin>
             <children>
-                <Button fx:id="btnTiepNhanXe" mnemonicParsing="false" onAction="#handleTiepNhanXe" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: #28a745; -fx-text-fill: #ffffff; -fx-font-size: 15px; -fx-background-radius: 5;" text="Tiếp nhận xe">
-                    <font><Font name="System Bold" size="14.0" /></font>
-                </Button>
-                <Button fx:id="btnLamMoi" mnemonicParsing="false" onAction="#handleLamMoi" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: #6c757d; -fx-text-fill: #ffffff; -fx-font-size: 15px; -fx-background-radius: 5;" text="Làm mới">
-                    <font><Font name="System Bold" size="14.0" /></font>
-                </Button>
+                <Button fx:id="btnTiepNhanXe" mnemonicParsing="false" onAction="#handleTiepNhanXe" prefWidth="150.0" styleClass="button-primary" text="Tiếp nhận xe" />
+                <Button fx:id="btnLamMoi" mnemonicParsing="false" onAction="#handleLamMoi" prefWidth="150.0" styleClass="button-secondary" text="Làm mới" />
             </children>
         </HBox>
 
@@ -114,7 +110,7 @@
         </Separator>
 
         <!-- Daily Acceptance Summary and Table -->
-        <VBox alignment="TOP_LEFT" spacing="10.0">
+        <VBox alignment="TOP_LEFT" spacing="10.0" VBox.vgrow="ALWAYS">
             <children>
                 <HBox alignment="CENTER_LEFT" spacing="10.0">
                     <children>
@@ -130,7 +126,7 @@
                         </Label>
                     </children>
                 </HBox>
-                <TableView fx:id="tblXeTiepNhanTrongNgay" prefHeight="250.0" prefWidth="1000.0" style="-fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8;">
+                <TableView fx:id="tblXeTiepNhanTrongNgay" prefWidth="1000.0" VBox.vgrow="ALWAYS">
                     <columns>
                         <TableColumn fx:id="colBienSo" prefWidth="120.0" text="Biển số xe" />
                         <TableColumn fx:id="colTenChuXe" prefWidth="180.0" text="Tên chủ xe" />

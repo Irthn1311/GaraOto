@@ -2,12 +2,14 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
@@ -15,7 +17,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="TOP_CENTER" prefHeight="700.0" prefWidth="1050.0" spacing="20.0" style="-fx-background-color: #f5f7f9;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ThuTienController">
+<VBox alignment="TOP_CENTER" spacing="20.0" style="-fx-background-color: #f5f7f9;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ThuTienController" AnchorPane.topAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
@@ -31,7 +33,7 @@
         </Label>
 
         <!-- Vehicle Search and Info Section -->
-        <VBox spacing="10.0" style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8;">
+        <VBox spacing="10.0" styleClass="form-container">
             <padding>
                 <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
             </padding>
@@ -56,15 +58,15 @@
                         <Label text="Biển số xe:" GridPane.columnIndex="0" GridPane.rowIndex="0">
                             <font><Font size="14.0" /></font>
                         </Label>
-                        <TextField fx:id="txtBienSoXeSearch" promptText="Nhập biển số xe" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                        <Button fx:id="btnTimKiemHoSo" mnemonicParsing="false" onAction="#handleTimKiemHoSo" prefHeight="30.0" prefWidth="120.0" style="-fx-background-color: #007bff; -fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-background-radius: 5;" text="Tìm kiếm" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                        <ComboBox fx:id="cbBienSoXeSearch" editable="true" prefWidth="250.0" promptText="Nhập hoặc chọn biển số xe" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                        <Button fx:id="btnTimKiemHoSo" mnemonicParsing="false" onAction="#handleTimKiemHoSo" prefWidth="120.0" styleClass="button-info" text="Tìm kiếm" GridPane.columnIndex="2" GridPane.rowIndex="0">
                             <GridPane.margin>
                                 <Insets left="10.0" />
                             </GridPane.margin>
                         </Button>
                     </children>
                 </GridPane>
-                <TableView fx:id="tblHoSoCanThanhToan" prefHeight="150.0" prefWidth="1000.0" style="-fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8;">
+                <TableView fx:id="tblHoSoCanThanhToan" VBox.vgrow="ALWAYS">
                     <columns>
                         <TableColumn fx:id="colMaTiepNhan" prefWidth="80.0" text="Mã TN" />
                         <TableColumn fx:id="colBienSo" prefWidth="120.0" text="Biển số xe" />
@@ -87,7 +89,7 @@
         </Separator>
 
         <!-- Selected TiepNhan Info and Payment Details Section -->
-        <VBox spacing="10.0" style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8;">
+        <VBox spacing="10.0" styleClass="form-container">
             <padding>
                 <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
             </padding>
@@ -174,12 +176,8 @@
                 <Insets top="10.0" />
             </VBox.margin>
             <children>
-                <Button fx:id="btnLapPhieuThu" mnemonicParsing="false" onAction="#handleLapPhieuThu" prefHeight="40.0" prefWidth="180.0" style="-fx-background-color: #28a745; -fx-text-fill: #ffffff; -fx-font-size: 15px; -fx-background-radius: 5;" text="Lập phiếu thu">
-                    <font><Font name="System Bold" size="14.0" /></font>
-                </Button>
-                <Button fx:id="btnLamMoi" mnemonicParsing="false" onAction="#handleLamMoi" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: #6c757d; -fx-text-fill: #ffffff; -fx-font-size: 15px; -fx-background-radius: 5;" text="Làm mới">
-                    <font><Font name="System Bold" size="14.0" /></font>
-                </Button>
+                <Button fx:id="btnLapPhieuThu" mnemonicParsing="false" onAction="#handleLapPhieuThu" prefWidth="180.0" styleClass="button-primary" text="Lập phiếu thu" />
+                <Button fx:id="btnLamMoi" mnemonicParsing="false" onAction="#handleLamMoi" prefWidth="150.0" styleClass="button-secondary" text="Làm mới" />
             </children>
         </HBox>
     </children>

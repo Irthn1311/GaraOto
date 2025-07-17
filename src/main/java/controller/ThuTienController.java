@@ -20,7 +20,7 @@ public class ThuTienController {
 
     // FXML elements from ThuTienView.fxml
     @FXML
-    private TextField txtBienSoXeSearch;
+    private ComboBox<String> cbBienSoXeSearch;
     @FXML
     private Button btnTimKiemHoSo;
 
@@ -83,6 +83,9 @@ public class ThuTienController {
         tiepNhanDAO = new TiepNhanDAO();
         phieuThuTienDAO = new PhieuThuTienDAO();
 
+        // Load initial data
+        loadAllBienSoXe();
+
         // Set default date for DatePicker
         dpNgayThu.setValue(LocalDate.now());
 
@@ -140,6 +143,18 @@ public class ThuTienController {
     }
 
     /**
+     * Loads all license plates into the search ComboBox.
+     */
+    private void loadAllBienSoXe() {
+        try {
+            cbBienSoXeSearch.setItems(tiepNhanDAO.getAllBienSoXe());
+        } catch (SQLException e) {
+            AlertUtils.showErrorAlert("Lỗi tải dữ liệu", "Không thể tải danh sách biển số xe.");
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Enables or disables input fields and buttons related to payment.
      * @param enable true to enable, false to disable.
      */
@@ -154,9 +169,9 @@ public class ThuTienController {
      */
     @FXML
     private void handleTimKiemHoSo() {
-        String bienSoXe = txtBienSoXeSearch.getText().trim();
-        if (bienSoXe.isEmpty()) {
-            AlertUtils.showWarningAlert("Thiếu thông tin", "Vui lòng nhập biển số xe để tìm kiếm.");
+        String bienSoXe = cbBienSoXeSearch.getValue();
+        if (bienSoXe == null || bienSoXe.trim().isEmpty()) {
+            AlertUtils.showWarningAlert("Thiếu thông tin", "Vui lòng nhập hoặc chọn biển số xe để tìm kiếm.");
             return;
         }
 
@@ -318,11 +333,11 @@ public class ThuTienController {
      */
     @FXML
     private void handleLamMoi() {
-        txtBienSoXeSearch.clear();
+        cbBienSoXeSearch.getSelectionModel().clearSelection();
+        cbBienSoXeSearch.setValue(null);
         danhSachHoSoCanThanhToan.clear();
         clearSelectedTiepNhanInfo();
-        dpNgayThu.setValue(LocalDate.now());
         setPaymentFormEnabled(false);
-        selectedTiepNhan = null;
+        dpNgayThu.setValue(LocalDate.now());
     }
 }

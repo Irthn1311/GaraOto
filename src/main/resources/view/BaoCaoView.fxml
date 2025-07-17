@@ -9,6 +9,7 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
@@ -16,7 +17,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="TOP_CENTER" prefHeight="750.0" prefWidth="1050.0" spacing="20.0" style="-fx-background-color: #f5f7f9;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.BaoCaoController">
+<VBox alignment="TOP_CENTER" spacing="20.0" style="-fx-background-color: #f5f7f9;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.BaoCaoController" AnchorPane.topAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
@@ -32,7 +33,7 @@
         </Label>
 
         <!-- Tab Pane for different reports -->
-        <TabPane prefHeight="650.0" prefWidth="1000.0" tabClosingPolicy="UNAVAILABLE" style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8;">
+        <TabPane tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
             <tabs>
                 <!-- Doanh thu Tab -->
                 <Tab text="Báo cáo doanh thu">
@@ -64,7 +65,7 @@
                                             <font><Font size="14.0" /></font>
                                         </Label>
                                         <DatePicker fx:id="dpDoanhThuTo" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="0" />
-                                        <Button fx:id="btnXemDoanhThu" mnemonicParsing="false" onAction="#handleXemDoanhThu" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #28a745; -fx-text-fill: #ffffff; -fx-font-size: 15px; -fx-background-radius: 5;" text="Xem báo cáo" GridPane.columnIndex="4" GridPane.rowIndex="0">
+                                        <Button fx:id="btnXemDoanhThu" mnemonicParsing="false" onAction="#handleXemDoanhThu" prefWidth="120.0" styleClass="button-primary" text="Xem báo cáo" GridPane.columnIndex="4" GridPane.rowIndex="0">
                                             <GridPane.margin>
                                                 <Insets left="10.0" />
                                             </GridPane.margin>
@@ -79,7 +80,7 @@
                                         <Font name="System Bold" size="16.0" />
                                     </font>
                                 </Label>
-                                <TableView fx:id="tblDoanhThu" prefHeight="300.0" prefWidth="950.0" style="-fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8;">
+                                <TableView fx:id="tblDoanhThu" VBox.vgrow="ALWAYS">
                                     <columns>
                                         <TableColumn fx:id="colNgayDoanhThu" prefWidth="120.0" text="Ngày" />
                                         <TableColumn fx:id="colSoPhieuSuaChua" prefWidth="120.0" text="Số phiếu SC" />
@@ -122,13 +123,13 @@
                                                 <Font name="System Bold" size="16.0" />
                                             </font>
                                         </Label>
-                                        <Button fx:id="btnXemTonKho" mnemonicParsing="false" onAction="#handleXemTonKho" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #007bff; -fx-text-fill: #ffffff; -fx-font-size: 15px; -fx-background-radius: 5;" text="Xem tồn kho" />
+                                        <Button fx:id="btnXemTonKho" mnemonicParsing="false" onAction="#handleXemTonKho" prefWidth="120.0" styleClass="button-info" text="Xem tồn kho" />
                                     </children>
                                 </HBox>
 
                                 <Separator prefWidth="200.0" />
 
-                                <TableView fx:id="tblTonKhoVatTu" prefHeight="400.0" prefWidth="950.0" style="-fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8;">
+                                <TableView fx:id="tblTonKhoVatTu" VBox.vgrow="ALWAYS">
                                     <columns>
                                         <TableColumn fx:id="colMaVatTu" prefWidth="80.0" text="Mã VT" />
                                         <TableColumn fx:id="colTenVatTu" prefWidth="250.0" text="Tên vật tư" />
@@ -171,13 +172,13 @@
                                                 <Font name="System Bold" size="16.0" />
                                             </font>
                                         </Label>
-                                        <Button fx:id="btnXemCongNo" mnemonicParsing="false" onAction="#handleXemCongNo" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #007bff; -fx-text-fill: #ffffff; -fx-font-size: 15px; -fx-background-radius: 5;" text="Xem công nợ" />
+                                        <Button fx:id="btnXemCongNo" mnemonicParsing="false" onAction="#handleXemCongNo" prefWidth="120.0" styleClass="button-info" text="Xem công nợ" />
                                     </children>
                                 </HBox>
 
                                 <Separator prefWidth="200.0" />
 
-                                <TableView fx:id="tblCongNoKhachHang" prefHeight="400.0" prefWidth="950.0" style="-fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8;">
+                                <TableView fx:id="tblCongNoKhachHang" VBox.vgrow="ALWAYS">
                                     <columns>
                                         <TableColumn fx:id="colMaTiepNhanCN" prefWidth="80.0" text="Mã TN" />
                                         <TableColumn fx:id="colBienSoCN" prefWidth="120.0" text="Biển số xe" />
@@ -239,7 +240,7 @@
                                             <font><Font size="14.0" /></font>
                                         </Label>
                                         <DatePicker fx:id="dpLuotTo" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="0" />
-                                        <Button fx:id="btnXemLuot" mnemonicParsing="false" onAction="#handleXemLuot" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #28a745; -fx-text-fill: #ffffff; -fx-font-size: 15px; -fx-background-radius: 5;" text="Xem báo cáo" GridPane.columnIndex="4" GridPane.rowIndex="0">
+                                        <Button fx:id="btnXemLuot" mnemonicParsing="false" onAction="#handleXemLuot" prefWidth="120.0" styleClass="button-primary" text="Xem báo cáo" GridPane.columnIndex="4" GridPane.rowIndex="0">
                                             <GridPane.margin>
                                                 <Insets left="10.0" />
                                             </GridPane.margin>
@@ -254,10 +255,10 @@
                                         <Font name="System Bold" size="16.0" />
                                     </font>
                                 </Label>
-                                <TableView fx:id="tblLuotTiepNhanSuaChua" prefHeight="300.0" prefWidth="950.0" style="-fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8;">
+                                <TableView fx:id="tblLuotTiepNhanSuaChua" VBox.vgrow="ALWAYS">
                                     <columns>
                                         <TableColumn fx:id="colNgayLuot" prefWidth="150.0" text="Ngày" />
-                                        <TableColumn fx:id="colSoLuotTiepNhan" prefWidth="200.0" text="Số lượt tiếp nhận" />
+                                        <TableColumn fx:id="colSoLuotTiepNhan" prefWidth="150.0" text="Số lượt tiếp nhận" />
                                         <TableColumn fx:id="colSoPhieuSuaChuaLuot" prefWidth="200.0" text="Số phiếu sửa chữa" />
                                     </columns>
                                     <columnResizePolicy>
@@ -299,7 +300,7 @@
                                             <font><Font size="14.0" /></font>
                                         </Label>
                                         <DatePicker fx:id="dpTieuHaoTo" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="0" />
-                                        <Button fx:id="btnXemTieuHao" mnemonicParsing="false" onAction="#handleXemTieuHao" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #28a745; -fx-text-fill: #ffffff; -fx-font-size: 15px; -fx-background-radius: 5;" text="Xem báo cáo" GridPane.columnIndex="4" GridPane.rowIndex="0">
+                                        <Button fx:id="btnXemTieuHao" mnemonicParsing="false" onAction="#handleXemTieuHao" prefWidth="120.0" styleClass="button-primary" text="Xem báo cáo" GridPane.columnIndex="4" GridPane.rowIndex="0">
                                             <GridPane.margin>
                                                 <Insets left="10.0" />
                                             </GridPane.margin>
@@ -314,7 +315,7 @@
                                         <Font name="System Bold" size="16.0" />
                                     </font>
                                 </Label>
-                                <TableView fx:id="tblTieuHaoVatTu" prefHeight="300.0" prefWidth="950.0" style="-fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8;">
+                                <TableView fx:id="tblTieuHaoVatTu" VBox.vgrow="ALWAYS">
                                     <columns>
                                         <TableColumn fx:id="colMaVatTuTH" prefWidth="80.0" text="Mã VT" />
                                         <TableColumn fx:id="colTenVatTuTH" prefWidth="250.0" text="Tên vật tư" />
@@ -375,7 +376,7 @@
                                             <font><Font size="14.0" /></font>
                                         </Label>
                                         <DatePicker fx:id="dpLoiNhuanTo" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="0" />
-                                        <Button fx:id="btnXemLoiNhuan" mnemonicParsing="false" onAction="#handleXemLoiNhuan" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #28a745; -fx-text-fill: #ffffff; -fx-font-size: 15px; -fx-background-radius: 5;" text="Xem báo cáo" GridPane.columnIndex="4" GridPane.rowIndex="0">
+                                        <Button fx:id="btnXemLoiNhuan" mnemonicParsing="false" onAction="#handleXemLoiNhuan" prefWidth="120.0" styleClass="button-primary" text="Xem báo cáo" GridPane.columnIndex="4" GridPane.rowIndex="0">
                                             <GridPane.margin>
                                                 <Insets left="10.0" />
                                             </GridPane.margin>
@@ -390,10 +391,10 @@
                                         <Font name="System Bold" size="16.0" />
                                     </font>
                                 </Label>
-                                <TableView fx:id="tblLoiNhuan" prefHeight="300.0" prefWidth="950.0" style="-fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8;">
+                                <TableView fx:id="tblLoiNhuan" VBox.vgrow="ALWAYS">
                                     <columns>
-                                        <TableColumn fx:id="colNgayLoiNhuan" prefWidth="120.0" text="Ngày" />
-                                        <TableColumn fx:id="colTongDoanhThuBanHangLN" prefWidth="180.0" text="Tổng doanh thu bán hàng" />
+                                        <TableColumn fx:id="colNgayLoiNhuan" prefWidth="150.0" text="Ngày" />
+                                        <TableColumn fx:id="colDoanhThuLoiNhuan" prefWidth="200.0" text="Doanh thu" />
                                         <TableColumn fx:id="colTongChiPhiVatTuLN" prefWidth="180.0" text="Tổng chi phí vật tư" />
                                         <TableColumn fx:id="colTongChiPhiTienCongLN" prefWidth="180.0" text="Tổng chi phí tiền công" />
                                         <TableColumn fx:id="colLoiNhuanRongLN" prefWidth="180.0" text="Lợi nhuận ròng" />

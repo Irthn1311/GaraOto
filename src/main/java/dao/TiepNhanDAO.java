@@ -321,4 +321,17 @@ public class TiepNhanDAO {
         }
         return tiepNhanList;
     }
+
+    public ObservableList<String> getAllBienSoXe() throws SQLException {
+        ObservableList<String> bienSoList = FXCollections.observableArrayList();
+        String query = "SELECT DISTINCT BienSo FROM XE"; // Lấy tất cả biển số xe không trùng lặp
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query);
+             ResultSet rs = preparedStatement.executeQuery()) {
+            while (rs.next()) {
+                bienSoList.add(rs.getString("BienSo"));
+            }
+        }
+        return bienSoList;
+    }
 }

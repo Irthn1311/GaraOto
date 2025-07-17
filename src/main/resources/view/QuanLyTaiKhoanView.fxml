@@ -10,6 +10,7 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
@@ -17,7 +18,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="TOP_CENTER" prefHeight="750.0" prefWidth="1050.0" spacing="20.0" style="-fx-background-color: #f5f7f9;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.QuanLyTaiKhoanController">
+<VBox alignment="TOP_CENTER" spacing="20.0" style="-fx-background-color: #f5f7f9;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.QuanLyTaiKhoanController" AnchorPane.topAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
@@ -33,7 +34,7 @@
         </Label>
 
         <!-- User Account Form Section -->
-        <VBox spacing="10.0" style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8;">
+        <VBox spacing="10.0" styleClass="form-container">
             <padding>
                 <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
             </padding>
@@ -84,11 +85,11 @@
                 </GridPane>
                 <HBox alignment="CENTER_LEFT" spacing="10.0">
                     <children>
-                        <Button fx:id="btnThem" mnemonicParsing="false" onAction="#handleThemTaiKhoan" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #28a745; -fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-background-radius: 5;" text="Thêm" />
-                        <Button fx:id="btnSua" mnemonicParsing="false" onAction="#handleSuaTaiKhoan" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #007bff; -fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-background-radius: 5;" text="Sửa" />
-                        <Button fx:id="btnXoa" mnemonicParsing="false" onAction="#handleXoaTaiKhoan" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #dc3545; -fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-background-radius: 5;" text="Xóa" />
-                        <Button fx:id="btnLamMoi" mnemonicParsing="false" onAction="#handleLamMoi" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #6c757d; -fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-background-radius: 5;" text="Làm mới" />
-                        <Button fx:id="btnResetPassword" mnemonicParsing="false" onAction="#handleResetPassword" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #ffc107; -fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-background-radius: 5;" text="Reset Mật khẩu" />
+                        <Button fx:id="btnThem" mnemonicParsing="false" onAction="#handleThemTaiKhoan" prefWidth="100.0" styleClass="button-primary" text="Thêm" />
+                        <Button fx:id="btnSua" mnemonicParsing="false" onAction="#handleSuaTaiKhoan" prefWidth="100.0" styleClass="button-info" text="Sửa" />
+                        <Button fx:id="btnXoa" mnemonicParsing="false" onAction="#handleXoaTaiKhoan" prefWidth="100.0" styleClass="button-danger" text="Xóa" />
+                        <Button fx:id="btnLamMoi" mnemonicParsing="false" onAction="#handleLamMoi" prefWidth="100.0" styleClass="button-secondary" text="Làm mới" />
+                        <Button fx:id="btnResetPassword" mnemonicParsing="false" onAction="#handleResetPassword" prefWidth="100.0" styleClass="button-warning" text="Reset Mật khẩu" />
                     </children>
                 </HBox>
             </children>
@@ -101,7 +102,7 @@
         </Separator>
 
         <!-- User Account Table Section -->
-        <VBox spacing="10.0" style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8;">
+        <VBox spacing="10.0" styleClass="form-container" VBox.vgrow="ALWAYS">
             <padding>
                 <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
             </padding>
@@ -111,7 +112,7 @@
                         <Font name="System Bold" size="16.0" />
                     </font>
                 </Label>
-                <TableView fx:id="tblTaiKhoan" prefHeight="300.0" prefWidth="950.0" style="-fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8;">
+                <TableView fx:id="tblTaiKhoan" VBox.vgrow="ALWAYS">
                     <columns>
                         <TableColumn fx:id="colMaTK" prefWidth="80.0" text="Mã TK" />
                         <TableColumn fx:id="colTenDangNhap" prefWidth="150.0" text="Tên đăng nhập" />

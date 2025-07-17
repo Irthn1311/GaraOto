@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
@@ -10,7 +11,6 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
@@ -18,12 +18,11 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="TOP_CENTER" prefHeight="700.0" prefWidth="1050.0" spacing="20.0" style="-fx-background-color: #f5f7f9;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.SuaChuaController">
+<VBox alignment="TOP_CENTER" spacing="20.0" style="-fx-background-color: #f5f7f9;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.SuaChuaController">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
     <children>
-        <!-- Title Section -->
         <Label text="Lập phiếu sửa chữa" textFill="#2c3e50">
             <font>
                 <Font name="System Bold" size="30.0" />
@@ -32,9 +31,7 @@
                 <Insets bottom="10.0" />
             </VBox.margin>
         </Label>
-
-        <!-- Vehicle Search and Info Section -->
-        <VBox spacing="10.0" style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8;">
+        <VBox spacing="10.0" styleClass="form-container">
             <padding>
                 <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
             </padding>
@@ -59,73 +56,91 @@
                     </rowConstraints>
                     <children>
                         <Label text="Biển số xe:" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                            <font><Font size="14.0" /></font>
+                            <font>
+                                <Font size="14.0" />
+                            </font>
                         </Label>
-                        <TextField fx:id="txtBienSoXeSearch" promptText="Nhập biển số xe cần sửa chữa" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                        <Button fx:id="btnTimKiemXe" mnemonicParsing="false" onAction="#handleTimKiemXe" prefHeight="30.0" prefWidth="120.0" style="-fx-background-color: #007bff; -fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-background-radius: 5;" text="Tìm kiếm" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                        <ComboBox fx:id="cbBienSoXeSearch" editable="true" prefWidth="250.0" promptText="Nhập hoặc chọn biển số xe" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                        <Button fx:id="btnTimKiemXe" mnemonicParsing="false" onAction="#handleTimKiemXe" prefWidth="120.0" styleClass="button-info" text="Tìm kiếm" GridPane.columnIndex="2" GridPane.rowIndex="0">
                             <GridPane.margin>
                                 <Insets left="10.0" />
                             </GridPane.margin>
                         </Button>
-                        <Button fx:id="btnChonHoSo" mnemonicParsing="false" onAction="#handleChonHoSo" prefHeight="30.0" prefWidth="120.0" style="-fx-background-color: #17a2b8; -fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-background-radius: 5;" text="Chọn hồ sơ" GridPane.columnIndex="3" GridPane.rowIndex="0">
+                        <Button fx:id="btnChonHoSo" mnemonicParsing="false" onAction="#handleChonHoSo" prefWidth="120.0" styleClass="button-info" text="Chọn hồ sơ" GridPane.columnIndex="3" GridPane.rowIndex="0">
                             <GridPane.margin>
                                 <Insets left="10.0" />
                             </GridPane.margin>
                         </Button>
-
                         <Label text="Tên chủ xe:" GridPane.columnIndex="0" GridPane.rowIndex="1">
-                            <font><Font size="14.0" /></font>
+                            <font>
+                                <Font size="14.0" />
+                            </font>
                         </Label>
                         <Label fx:id="lblTenChuXe" text="[Chưa chọn]" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                            <font><Font name="System Bold" size="14.0" /></font>
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
                         </Label>
-
                         <Label text="Hiệu xe:" GridPane.columnIndex="2" GridPane.rowIndex="1">
-                            <font><Font size="14.0" /></font>
+                            <font>
+                                <Font size="14.0" />
+                            </font>
                         </Label>
                         <Label fx:id="lblHieuXe" text="[Chưa chọn]" GridPane.columnIndex="3" GridPane.rowIndex="1">
-                            <font><Font name="System Bold" size="14.0" /></font>
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
                         </Label>
-
                         <Label text="Điện thoại:" GridPane.columnIndex="0" GridPane.rowIndex="2">
-                            <font><Font size="14.0" /></font>
+                            <font>
+                                <Font size="14.0" />
+                            </font>
                         </Label>
                         <Label fx:id="lblDienThoai" text="[Chưa chọn]" GridPane.columnIndex="1" GridPane.rowIndex="2">
-                            <font><Font name="System Bold" size="14.0" /></font>
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
                         </Label>
-
                         <Label text="Địa chỉ:" GridPane.columnIndex="2" GridPane.rowIndex="2">
-                            <font><Font size="14.0" /></font>
+                            <font>
+                                <Font size="14.0" />
+                            </font>
                         </Label>
                         <Label fx:id="lblDiaChi" text="[Chưa chọn]" GridPane.columnIndex="3" GridPane.rowIndex="2">
-                            <font><Font name="System Bold" size="14.0" /></font>
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
                         </Label>
-
                         <Label text="Ngày tiếp nhận:" GridPane.columnIndex="0" GridPane.rowIndex="3">
-                            <font><Font size="14.0" /></font>
+                            <font>
+                                <Font size="14.0" />
+                            </font>
                         </Label>
                         <Label fx:id="lblNgayTiepNhan" text="[Chưa chọn]" GridPane.columnIndex="1" GridPane.rowIndex="3">
-                            <font><Font name="System Bold" size="14.0" /></font>
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
                         </Label>
                         <Label text="Tiền nợ hiện tại:" GridPane.columnIndex="2" GridPane.rowIndex="3">
-                            <font><Font size="14.0" /></font>
+                            <font>
+                                <Font size="14.0" />
+                            </font>
                         </Label>
                         <Label fx:id="lblTienNoHienTai" text="0.00 VNĐ" textFill="#e74c3c" GridPane.columnIndex="3" GridPane.rowIndex="3">
-                            <font><Font name="System Bold" size="14.0" /></font>
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
                         </Label>
                     </children>
                 </GridPane>
             </children>
         </VBox>
-
         <Separator prefWidth="200.0">
             <VBox.margin>
-                <Insets top="10.0" bottom="10.0" />
+                <Insets bottom="10.0" top="10.0" />
             </VBox.margin>
         </Separator>
-
-        <!-- Repair Details Section -->
-        <VBox spacing="10.0" style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8;">
+        <VBox spacing="10.0" styleClass="form-container">
             <padding>
                 <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
             </padding>
@@ -137,32 +152,34 @@
                 </Label>
                 <HBox alignment="CENTER_LEFT" spacing="10.0">
                     <children>
+                        <Label text="Nội dung:" />
+                        <TextField fx:id="txtNoiDungSuaChua" promptText="Nội dung sửa chữa" HBox.hgrow="ALWAYS" />
                         <Label text="Vật tư:" />
-                        <ComboBox fx:id="cbVatTu" prefWidth="200.0" promptText="Chọn vật tư" />
+                        <ComboBox fx:id="cbVatTu" prefWidth="150.0" promptText="Chọn vật tư" />
                         <Label text="Số lượng:" />
-                        <TextField fx:id="txtSoLuongVatTu" prefWidth="80.0" promptText="SL" />
+                        <TextField fx:id="txtSoLuongVatTu" prefWidth="60.0" promptText="SL" />
                         <Label text="Tiền công:" />
-                        <ComboBox fx:id="cbTienCong" prefWidth="200.0" promptText="Chọn tiền công" />
-                        <Button fx:id="btnThemChiTiet" mnemonicParsing="false" onAction="#handleThemChiTiet" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #007bff; -fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-background-radius: 5;" text="Thêm" />
+                        <ComboBox fx:id="cbTienCong" prefWidth="150.0" promptText="Chọn tiền công" />
+                        <Button fx:id="btnThemChiTiet" mnemonicParsing="false" onAction="#handleThemChiTiet" prefWidth="100.0" styleClass="button-info" text="Thêm" />
                     </children>
                 </HBox>
-                <TableView fx:id="tblChiTietSuaChua" prefHeight="200.0" prefWidth="1000.0" style="-fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8;">
+                <TableView fx:id="tblChiTietSuaChua" prefHeight="200.0" VBox.vgrow="ALWAYS">
                     <columns>
-                        <TableColumn fx:id="colSTT" prefWidth="50.0" text="STT" />
-                        <TableColumn fx:id="colNoiDung" prefWidth="250.0" text="Nội dung" />
-                        <TableColumn fx:id="colLoai" prefWidth="100.0" text="Loại" />
-                        <TableColumn fx:id="colSoLuong" prefWidth="80.0" text="Số lượng" />
-                        <TableColumn fx:id="colDonGia" prefWidth="120.0" text="Đơn giá/Mức công" />
-                        <TableColumn fx:id="colThanhTienChiTiet" prefWidth="150.0" text="Thành tiền" />
+                        <TableColumn fx:id="colSTT" prefWidth="40.0" text="STT" />
+                        <TableColumn fx:id="colNoiDung" prefWidth="200.0" text="Nội Dung" />
+                        <TableColumn fx:id="colVatTu" prefWidth="200.0" text="Vật Tư Phụ Tùng" />
+                        <TableColumn fx:id="colSoLuong" prefWidth="80.0" text="Số Lượng" />
+                        <TableColumn fx:id="colDonGia" prefWidth="120.0" text="Đơn Giá" />
+                        <TableColumn fx:id="colTienCong" prefWidth="120.0" text="Tiền Công" />
+                        <TableColumn fx:id="colThanhTienChiTiet" prefWidth="150.0" text="Thành Tiền" />
                     </columns>
                     <columnResizePolicy>
-                        <!-- Fix: Use CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS -->
-                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS" />
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                     </columnResizePolicy>
                 </TableView>
                 <HBox alignment="CENTER_RIGHT" spacing="10.0">
                     <children>
-                        <Button fx:id="btnXoaChiTiet" mnemonicParsing="false" onAction="#handleXoaChiTiet" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #dc3545; -fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-background-radius: 5;" text="Xóa mục" />
+                        <Button fx:id="btnXoaChiTiet" mnemonicParsing="false" onAction="#handleXoaChiTiet" prefWidth="100.0" styleClass="button-danger" text="Xóa mục" />
                     </children>
                 </HBox>
                 <HBox alignment="CENTER_RIGHT" spacing="10.0">
@@ -181,15 +198,12 @@
                 </HBox>
             </children>
         </VBox>
-
         <Separator prefWidth="200.0">
             <VBox.margin>
-                <Insets top="10.0" bottom="10.0" />
+                <Insets bottom="10.0" top="10.0" />
             </VBox.margin>
         </Separator>
-
-        <!-- Repair Slip General Info -->
-        <VBox spacing="10.0" style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8;">
+        <VBox spacing="10.0" styleClass="form-container">
             <padding>
                 <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
             </padding>
@@ -209,44 +223,47 @@
                     <rowConstraints>
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="60.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                     <children>
                         <Label text="Ngày sửa chữa:" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                            <font><Font size="14.0" /></font>
+                            <font>
+                                <Font size="14.0" />
+                            </font>
                         </Label>
                         <DatePicker fx:id="dpNgaySuaChua" prefWidth="250.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-
                         <Label text="Thợ sửa chữa:" GridPane.columnIndex="2" GridPane.rowIndex="0">
-                            <font><Font size="14.0" /></font>
+                            <font>
+                                <Font size="14.0" />
+                            </font>
                         </Label>
                         <ComboBox fx:id="cbThoPhanCong" prefWidth="250.0" promptText="Chọn thợ sửa chữa" GridPane.columnIndex="3" GridPane.rowIndex="0" />
-
-                        <Label text="Ghi chú:" GridPane.columnIndex="0" GridPane.rowIndex="1">
-                            <font><Font size="14.0" /></font>
+                        <Label text="Ghi chú:" GridPane.valignment="TOP" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                            <GridPane.margin>
+                                <Insets top="5.0" />
+                            </GridPane.margin>
                         </Label>
-                        <TextArea fx:id="txtGhiChu" prefHeight="50.0" prefWidth="200.0" promptText="Ghi chú thêm về sửa chữa" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.columnSpan="3" />
-
+                        <TextArea fx:id="txtGhiChu" prefHeight="50.0" promptText="Ghi chú thêm về sửa chữa" GridPane.columnSpan="3" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <Label text="Hoàn tất sửa chữa:" GridPane.columnIndex="0" GridPane.rowIndex="2">
-                            <font><Font size="14.0" /></font>
+                            <font>
+                                <Font size="14.0" />
+                            </font>
                         </Label>
-                        <CheckBox fx:id="chkHoanTatSuaChua" mnemonicParsing="false" text="Phiếu sửa chữa đã hoàn tất" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.columnSpan="3" />
+                        <CheckBox fx:id="chkHoanTatSuaChua" mnemonicParsing="false" text="Phiếu sửa chữa đã hoàn tất" GridPane.columnSpan="3" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                     </children>
                 </GridPane>
             </children>
         </VBox>
-
-        <!-- Action Buttons -->
         <HBox alignment="CENTER" spacing="15.0">
             <VBox.margin>
                 <Insets top="10.0" />
             </VBox.margin>
             <children>
-                <Button fx:id="btnLapPhieuSuaChua" mnemonicParsing="false" onAction="#handleLapPhieuSuaChua" prefHeight="40.0" prefWidth="180.0" style="-fx-background-color: #28a745; -fx-text-fill: #ffffff; -fx-font-size: 15px; -fx-background-radius: 5;" text="Lập phiếu sửa chữa">
-                    <font><Font name="System Bold" size="14.0" /></font>
-                </Button>
-                <Button fx:id="btnLamMoiPhieu" mnemonicParsing="false" onAction="#handleLamMoiPhieu" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: #6c757d; -fx-text-fill: #ffffff; -fx-font-size: 15px; -fx-background-radius: 5;" text="Làm mới">
-                    <font><Font name="System Bold" size="14.0" /></font>
-                </Button>
+                <Button fx:id="btnLapPhieuSuaChua" mnemonicParsing="false" onAction="#handleLapPhieuSuaChua" prefWidth="180.0" styleClass="button-primary" text="Lập phiếu sửa chữa" />
+                <Button fx:id="btnLamMoiPhieu" mnemonicParsing="false" onAction="#handleLamMoiPhieu" prefWidth="150.0" styleClass="button-secondary" text="Làm mới" />
             </children>
         </HBox>
     </children>

@@ -6,6 +6,7 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
@@ -13,7 +14,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="TOP_CENTER" prefHeight="600.0" prefWidth="1050.0" spacing="20.0" style="-fx-background-color: #f5f7f9;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.QuanLyTienCongController">
+<VBox alignment="TOP_CENTER" spacing="20.0" style="-fx-background-color: #f5f7f9;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.QuanLyTienCongController" AnchorPane.topAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
@@ -29,7 +30,7 @@
         </Label>
 
         <!-- Input Form Section -->
-        <VBox spacing="15.0" style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8;">
+        <VBox spacing="15.0" styleClass="form-container">
             <padding>
                 <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
             </padding>
@@ -53,25 +54,25 @@
                         <Label text="Mã Loại TC:" GridPane.rowIndex="0">
                             <font><Font size="14.0" /></font>
                         </Label>
-                        <TextField fx:id="txtMaLoaiTienCong" editable="false" promptText="Tự động tạo" style="-fx-background-color: #f0f0f0; -fx-border-color: #d0d0d0; -fx-border-radius: 5; -fx-padding: 8;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                        <TextField fx:id="txtMaLoaiTienCong" editable="false" promptText="Tự động tạo" style="-fx-background-color: #f0f0f0;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
                         <Label text="Nội dung:" GridPane.rowIndex="1">
                             <font><Font size="14.0" /></font>
                         </Label>
-                        <TextField fx:id="txtNoiDungLoaiTienCong" promptText="Nhập nội dung loại tiền công" style="-fx-background-color: #f9f9f9; -fx-border-color: #d0d0d0; -fx-border-radius: 5; -fx-padding: 8;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <TextField fx:id="txtNoiDungLoaiTienCong" promptText="Nhập nội dung loại tiền công" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
                         <Label text="Đơn giá:" GridPane.rowIndex="2">
                             <font><Font size="14.0" /></font>
                         </Label>
-                        <TextField fx:id="txtDonGiaLoaiTienCong" promptText="Nhập đơn giá (VD: 150000)" style="-fx-background-color: #f9f9f9; -fx-border-color: #d0d0d0; -fx-border-radius: 5; -fx-padding: 8;" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <TextField fx:id="txtDonGiaLoaiTienCong" promptText="Nhập đơn giá (VD: 150000)" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                     </children>
                 </GridPane>
                 <HBox alignment="CENTER_RIGHT" spacing="10.0">
                     <children>
-                        <Button fx:id="btnThem" mnemonicParsing="false" onAction="#handleThemLoaiTienCong" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #28a745; -fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-background-radius: 5;" text="Thêm" />
-                        <Button fx:id="btnSua" mnemonicParsing="false" onAction="#handleSuaLoaiTienCong" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #007bff; -fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-background-radius: 5;" text="Sửa" />
-                        <Button fx:id="btnXoa" mnemonicParsing="false" onAction="#handleXoaLoaiTienCong" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #dc3545; -fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-background-radius: 5;" text="Xóa" />
-                        <Button fx:id="btnLamMoi" mnemonicParsing="false" onAction="#handleLamMoi" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #6c757d; -fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-background-radius: 5;" text="Làm mới" />
+                        <Button fx:id="btnThem" mnemonicParsing="false" onAction="#handleThemLoaiTienCong" prefWidth="100.0" styleClass="button-primary" text="Thêm" />
+                        <Button fx:id="btnSua" mnemonicParsing="false" onAction="#handleSuaLoaiTienCong" prefWidth="100.0" styleClass="button-info" text="Sửa" />
+                        <Button fx:id="btnXoa" mnemonicParsing="false" onAction="#handleXoaLoaiTienCong" prefWidth="100.0" styleClass="button-danger" text="Xóa" />
+                        <Button fx:id="btnLamMoi" mnemonicParsing="false" onAction="#handleLamMoi" prefWidth="100.0" styleClass="button-secondary" text="Làm mới" />
                     </children>
                     <VBox.margin>
                         <Insets top="10.0" />

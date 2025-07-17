@@ -1,5 +1,11 @@
 /* style.css */
 
+/* General Styles */
+.root {
+    -fx-font-family: 'System';
+}
+
+/* Sidebar Styles */
 .sidebar-button {
     -fx-background-color: #34495e;
     -fx-text-fill: #ecf0f1;
@@ -17,4 +23,83 @@
 .sidebar-button:pressed {
     -fx-background-color: #2c3e50; /* Darker shade on press */
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 2, 0, 0, 0);
+}
+
+/* --- Added Styles --- */
+
+/* Container for forms and sections */
+.form-container {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 20px 30px;
+}
+
+/* Button Styles */
+.button {
+    -fx-font-size: 14px;
+    -fx-background-radius: 5;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-pref-height: 35px;
+    -fx-padding: 0 15px;
+}
+
+.button-primary {
+    -fx-background-color: #28a745; /* Green */
+}
+.button-primary:hover {
+    -fx-background-color: #218838;
+}
+
+.button-info {
+    -fx-background-color: #007bff; /* Blue */
+}
+.button-info:hover {
+    -fx-background-color: #0069d9;
+}
+
+.button-danger {
+    -fx-background-color: #dc3545; /* Red */
+}
+.button-danger:hover {
+    -fx-background-color: #c82333;
+}
+
+.button-secondary {
+    -fx-background-color: #6c757d; /* Gray */
+}
+.button-secondary:hover {
+    -fx-background-color: #5a6268;
+}
+
+.button-warning {
+    -fx-background-color: #ffc107; /* Yellow */
+    -fx-text-fill: #212529; /* Dark text for yellow bg */
+}
+.button-warning:hover {
+    -fx-background-color: #e0a800;
+}
+
+
+/* TableView Style */
+.table-view {
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+/* Input Fields */
+.text-field, .combo-box, .date-picker {
+    -fx-background-color: #f9f9f9;
+    -fx-border-color: #d0d0d0;
+    -fx-border-radius: 5;
+    -fx-padding: 5px 8px;
+    -fx-font-size: 14px;
+}
+
+.text-field:focused, .combo-box:focused, .date-picker:focused {
+    -fx-border-color: #007bff;
+    -fx-background-color: #ffffff;
 }

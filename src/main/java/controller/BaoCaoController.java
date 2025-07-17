@@ -146,7 +146,7 @@ public class BaoCaoController {
     @FXML
     private TableColumn<LoiNhuanEntry, LocalDate> colNgayLoiNhuan;
     @FXML
-    private TableColumn<LoiNhuanEntry, Double> colTongDoanhThuBanHangLN;
+    private TableColumn<LoiNhuanEntry, Double> colDoanhThuLoiNhuan;
     @FXML
     private TableColumn<LoiNhuanEntry, Double> colTongChiPhiVatTuLN;
     @FXML
@@ -247,12 +247,12 @@ public class BaoCaoController {
 
         // Configure TableView columns for Lợi nhuận tổng thể
         colNgayLoiNhuan.setCellValueFactory(cellData -> cellData.getValue().ngayProperty());
-        colTongDoanhThuBanHangLN.setCellValueFactory(cellData -> cellData.getValue().tongDoanhThuBanHangProperty().asObject());
+        colDoanhThuLoiNhuan.setCellValueFactory(cellData -> cellData.getValue().tongDoanhThuBanHangProperty().asObject());
         colTongChiPhiVatTuLN.setCellValueFactory(cellData -> cellData.getValue().tongChiPhiVatTuProperty().asObject());
         colTongChiPhiTienCongLN.setCellValueFactory(cellData -> cellData.getValue().tongChiPhiTienCongProperty().asObject());
         colLoiNhuanRongLN.setCellValueFactory(cellData -> cellData.getValue().loiNhuanRongProperty().asObject());
         // Custom cell factories for currency formatting
-        setupCurrencyColumn(colTongDoanhThuBanHangLN);
+        setupCurrencyColumn(colDoanhThuLoiNhuan);
         setupCurrencyColumn(colTongChiPhiVatTuLN);
         setupCurrencyColumn(colTongChiPhiTienCongLN);
         setupCurrencyColumn(colLoiNhuanRongLN);
@@ -458,6 +458,8 @@ public class BaoCaoController {
 
         try {
             List<PhieuSuaChua> phieuSuaChuaList = phieuSuaChuaDAO.getPhieuSuaChuaDetailsByDateRange(fromDate, toDate);
+            Map<Integer, VatTu> vatTuMap = vatTuDAO.getAllVatTu().stream()
+                    .collect(Collectors.toMap(VatTu::getMaVatTu, vt -> vt));
 
             // Flatten the list of ChiTietSuaChua from all PhieuSuaChua
             Map<Integer, TieuHaoVatTuEntry> tieuHaoMap = phieuSuaChuaList.stream()
@@ -469,8 +471,10 @@ public class BaoCaoController {
                                 int totalSoLuong = list.stream().mapToInt(ChiTietPhieuSuaChua_VatTu::getSoLuong).sum();
                                 // Correctly calculate cost based on DonGiaNhap
                                 double totalGiaTri = list.stream().mapToDouble(vt -> vt.getSoLuong() * vt.getDonGiaNhap()).sum();
-                                // Assuming TenVatTu and DonViTinh are the same for the same MaVatTu. A better approach might be to query VatTu table for latest info.
-                                return new TieuHaoVatTuEntry(first.getMaVatTu(), first.getTenVatTu(), "", totalSoLuong, totalGiaTri);
+                                // Get DonViTinh from the pre-fetched map
+                                VatTu vt = vatTuMap.get(first.getMaVatTu());
+                                String donViTinh = (vt != null) ? vt.getDonViTinh() : "";
+                                return new TieuHaoVatTuEntry(first.getMaVatTu(), first.getTenVatTu(), donViTinh, totalSoLuong, totalGiaTri);
                             })
                     ));
 
