@@ -126,4 +126,18 @@ public class XeDAO {
             pstmt.executeUpdate();
         }
     }
+    
+    public boolean isHieuXeUsed(int maHieuXe) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Xe WHERE MaHieuXe = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, maHieuXe);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
 }

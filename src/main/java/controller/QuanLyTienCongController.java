@@ -6,6 +6,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import model.TienCong;
 import dao.TienCongDAO;
+import dao.ChiTietPhieuSuaChua_TienCongDAO; // Import the new DAO
 import utils.AlertUtils;
 
 import java.sql.SQLException;
@@ -36,11 +37,13 @@ public class QuanLyTienCongController {
     private Button btnLamMoi;
 
     private TienCongDAO tienCongDAO;
+    private ChiTietPhieuSuaChua_TienCongDAO chiTietTienCongDAO; // Add the new DAO
     private ObservableList<TienCong> tienCongList;
 
     @FXML
     public void initialize() {
         tienCongDAO = new TienCongDAO();
+        chiTietTienCongDAO = new ChiTietPhieuSuaChua_TienCongDAO(); // Initialize the new DAO
         tienCongList = FXCollections.observableArrayList();
 
         // Configure table columns
@@ -78,11 +81,17 @@ public class QuanLyTienCongController {
     @FXML
     private void handleThemLoaiTienCong() {
         if (isInputValid()) {
-            String noiDung = txtNoiDungLoaiTienCong.getText();
-            double donGia = Double.parseDouble(txtDonGiaLoaiTienCong.getText());
+            String noiDung = txtNoiDungLoaiTienCong.getText().trim();
+            double donGia = Double.parseDouble(txtDonGiaLoaiTienCong.getText().trim());
 
-            TienCong newTienCong = new TienCong(0, noiDung, donGia);
             try {
+                // Check for duplicate content
+                if (tienCongDAO.getTienCongByNoiDung(noiDung) != null) {
+                    AlertUtils.showErrorAlert("Lỗi trùng lặp", "Nội dung tiền công này đã tồn tại.");
+                    return;
+                }
+
+                TienCong newTienCong = new TienCong(0, noiDung, donGia);
                 int id = tienCongDAO.addTienCong(newTienCong);
                 if (id != -1) {
                     newTienCong.setMaTienCong(id);
@@ -104,13 +113,20 @@ public class QuanLyTienCongController {
         TienCong selectedTienCong = tblLoaiTienCong.getSelectionModel().getSelectedItem();
         if (selectedTienCong != null) {
             if (isInputValid()) {
-                String noiDung = txtNoiDungLoaiTienCong.getText();
-                double donGia = Double.parseDouble(txtDonGiaLoaiTienCong.getText());
-
-                selectedTienCong.setNoiDung(noiDung);
-                selectedTienCong.setDonGia(donGia);
+                String noiDung = txtNoiDungLoaiTienCong.getText().trim();
+                double donGia = Double.parseDouble(txtDonGiaLoaiTienCong.getText().trim());
 
                 try {
+                    // Check if new content duplicates another existing entry
+                    TienCong existingTienCong = tienCongDAO.getTienCongByNoiDung(noiDung);
+                    if (existingTienCong != null && existingTienCong.getMaTienCong() != selectedTienCong.getMaTienCong()) {
+                        AlertUtils.showErrorAlert("Lỗi trùng lặp", "Nội dung tiền công này đã tồn tại ở một mục khác.");
+                        return;
+                    }
+
+                    selectedTienCong.setNoiDung(noiDung);
+                    selectedTienCong.setDonGia(donGia);
+
                     if (tienCongDAO.updateTienCong(selectedTienCong)) {
                         tblLoaiTienCong.refresh();
                         AlertUtils.showInformationAlert("Thành công", "Cập nhật loại tiền công thành công!");
@@ -132,8 +148,15 @@ public class QuanLyTienCongController {
     private void handleXoaLoaiTienCong() {
         TienCong selectedTienCong = tblLoaiTienCong.getSelectionModel().getSelectedItem();
         if (selectedTienCong != null) {
-            if (AlertUtils.showConfirmationAlert("Xác nhận xóa", "Bạn có chắc chắn muốn xóa loại tiền công này không?")) {
-                try {
+            try {
+                // Check if the TienCong is used in any repair slips
+                boolean isUsed = chiTietTienCongDAO.isTienCongUsed(selectedTienCong.getMaTienCong());
+                if (isUsed) {
+                    AlertUtils.showErrorAlert("Không thể xóa", "Loại tiền công này đã được sử dụng trong phiếu sửa chữa và không thể xóa.");
+                    return;
+                }
+
+                if (AlertUtils.showConfirmationAlert("Xác nhận xóa", "Bạn có chắc chắn muốn xóa loại tiền công này không?")) {
                     if (tienCongDAO.deleteTienCong(selectedTienCong.getMaTienCong())) {
                         tienCongList.remove(selectedTienCong);
                         AlertUtils.showInformationAlert("Thành công", "Xóa loại tiền công thành công!");
@@ -141,10 +164,10 @@ public class QuanLyTienCongController {
                     } else {
                         AlertUtils.showErrorAlert("Lỗi", "Không thể xóa loại tiền công.");
                     }
-                } catch (SQLException e) {
-                    AlertUtils.showErrorAlert("Lỗi cơ sở dữ liệu", "Lỗi khi xóa loại tiền công: " + e.getMessage());
-                    e.printStackTrace();
                 }
+            } catch (SQLException e) {
+                AlertUtils.showErrorAlert("Lỗi cơ sở dữ liệu", "Lỗi khi xóa loại tiền công: " + e.getMessage());
+                e.printStackTrace();
             }
         } else {
             AlertUtils.showWarningAlert("Chưa chọn", "Vui lòng chọn loại tiền công để xóa.");

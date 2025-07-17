@@ -8,17 +8,21 @@ import model.DoanhThuEntry; // Model for revenue report
 import model.VatTu;
 import model.TiepNhan;
 import model.PhieuSuaChua; // Import PhieuSuaChua
-import model.ChiTietSuaChua; // Import ChiTietSuaChua
+import model.ChiTietPhieuSuaChua_VatTu;
+import model.ChiTietPhieuSuaChua_TienCong;
 import model.LuotTiepNhanSuaChuaEntry; // Model for acceptance/repair count report
 import model.TieuHaoVatTuEntry; // Model for material consumption report
 import model.LoiNhuanEntry; // Model for overall profit report
+import model.TonKhoEntry; // Model for inventory report
 import model.TienCong;
 
 import dao.PhieuSuaChuaDAO;
 import dao.PhieuThuTienDAO;
 import dao.VatTuDAO;
 import dao.TiepNhanDAO;
-import dao.ChiTietSuaChuaDAO; // Import ChiTietSuaChuaDAO
+import dao.ChiTietPhieuSuaChua_VatTuDAO;
+import dao.ChiTietPhieuSuaChua_TienCongDAO;
+import dao.ChiTietPhieuNhapKhoVatTuDAO; // Added for inventory report
 import utils.AlertUtils;
 
 import java.sql.SQLException;
@@ -58,17 +62,17 @@ public class BaoCaoController {
     @FXML
     private Button btnXemTonKho;
     @FXML
-    private TableView<VatTu> tblTonKhoVatTu;
+    private TableView<TonKhoEntry> tblTonKhoVatTu;
     @FXML
-    private TableColumn<VatTu, Integer> colMaVatTu;
+    private TableColumn<TonKhoEntry, Integer> colMaVatTu;
     @FXML
-    private TableColumn<VatTu, String> colTenVatTu;
+    private TableColumn<TonKhoEntry, String> colTenVatTu;
     @FXML
-    private TableColumn<VatTu, Double> colDonGiaTon;
+    private TableColumn<TonKhoEntry, Double> colDonGiaTon;
     @FXML
-    private TableColumn<VatTu, Integer> colSoLuongTon;
+    private TableColumn<TonKhoEntry, Integer> colSoLuongTon;
     @FXML
-    private TableColumn<VatTu, Double> colTongGiaTriTon;
+    private TableColumn<TonKhoEntry, Double> colTongGiaTriTon;
     @FXML
     private Label lblTongGiaTriTonKho;
 
@@ -158,7 +162,10 @@ public class BaoCaoController {
     private PhieuThuTienDAO phieuThuTienDAO;
     private VatTuDAO vatTuDAO;
     private TiepNhanDAO tiepNhanDAO;
-    private ChiTietSuaChuaDAO chiTietSuaChuaDAO; // New DAO for ChiTietSuaChua
+    private ChiTietPhieuSuaChua_VatTuDAO chiTietVatTuDAO;
+    private ChiTietPhieuSuaChua_TienCongDAO chiTietTienCongDAO;
+    private ChiTietPhieuNhapKhoVatTuDAO chiTietNhapKhoDAO; // Added for inventory report
+
 
     private NumberFormat currencyFormat; // For currency formatting
 
@@ -172,7 +179,10 @@ public class BaoCaoController {
         phieuThuTienDAO = new PhieuThuTienDAO();
         vatTuDAO = new VatTuDAO();
         tiepNhanDAO = new TiepNhanDAO();
-        chiTietSuaChuaDAO = new ChiTietSuaChuaDAO(); // Initialize new DAO
+        chiTietVatTuDAO = new ChiTietPhieuSuaChua_VatTuDAO();
+        chiTietTienCongDAO = new ChiTietPhieuSuaChua_TienCongDAO();
+        chiTietNhapKhoDAO = new ChiTietPhieuNhapKhoVatTuDAO(); // Initialize for inventory report
+
 
         // Initialize currency formatter
         currencyFormat = NumberFormat.getCurrencyInstance(Locale.of("vi", "VN"));
@@ -203,9 +213,9 @@ public class BaoCaoController {
         // Configure TableView columns for Tồn kho vật tư
         colMaVatTu.setCellValueFactory(cellData -> cellData.getValue().maVatTuProperty().asObject());
         colTenVatTu.setCellValueFactory(cellData -> cellData.getValue().tenVatTuProperty());
-        colDonGiaTon.setCellValueFactory(cellData -> cellData.getValue().donGiaBanProperty().asObject()); // Use DonGiaBan for inventory value
+        colDonGiaTon.setCellValueFactory(cellData -> cellData.getValue().donGiaVonProperty().asObject()); // Use DonGiaVon for inventory value
         colSoLuongTon.setCellValueFactory(cellData -> cellData.getValue().soLuongTonProperty().asObject());
-        colTongGiaTriTon.setCellValueFactory(cellData -> cellData.getValue().donGiaBanProperty().multiply(cellData.getValue().soLuongTonProperty()).asObject());
+        colTongGiaTriTon.setCellValueFactory(cellData -> cellData.getValue().tongGiaTriTonProperty().asObject());
         // Custom cell factories for currency formatting
         setupCurrencyColumn(colDonGiaTon);
         setupCurrencyColumn(colTongGiaTriTon);
@@ -334,11 +344,18 @@ public class BaoCaoController {
     @FXML
     private void handleXemTonKho() {
         try {
-            ObservableList<VatTu> vatTuList = FXCollections.observableArrayList(vatTuDAO.getAllVatTu());
-            tblTonKhoVatTu.setItems(vatTuList);
+            List<VatTu> vatTuList = vatTuDAO.getAllVatTu();
+            ObservableList<TonKhoEntry> reportData = FXCollections.observableArrayList();
+            
+            for (VatTu vt : vatTuList) {
+                double donGiaVon = chiTietNhapKhoDAO.getLatestDonGiaNhapByMaVatTu(vt.getMaVatTu());
+                reportData.add(new TonKhoEntry(vt.getMaVatTu(), vt.getTenVatTu(), donGiaVon, vt.getSoLuongTon()));
+            }
 
-            double totalInventoryValue = vatTuList.stream()
-                    .mapToDouble(vt -> vt.getDonGiaBan() * vt.getSoLuongTon()) // Use DonGiaBan
+            tblTonKhoVatTu.setItems(reportData);
+
+            double totalInventoryValue = reportData.stream()
+                    .mapToDouble(TonKhoEntry::getTongGiaTriTon)
                     .sum();
             lblTongGiaTriTonKho.setText(currencyFormat.format(totalInventoryValue));
 
@@ -355,21 +372,12 @@ public class BaoCaoController {
     @FXML
     private void handleXemCongNo() {
         try {
-            // Get all TiepNhan records and filter for outstanding debt
-            // Assuming TiepNhanDAO.getAllTiepNhan() fetches all necessary join data
-            ObservableList<TiepNhan> allTiepNhanRecords = tiepNhanDAO.getAllTiepNhan();
-            ObservableList<TiepNhan> outstandingDebtRecords = FXCollections.observableArrayList();
-
-            double totalOutstandingDebt = 0.0;
-
-            for (TiepNhan tn : allTiepNhanRecords) {
-                if (tn.getTongTienNo() > 0) {
-                    outstandingDebtRecords.add(tn);
-                    totalOutstandingDebt += tn.getTongTienNo();
-                }
-            }
-
-            // Sort outstandingDebtRecords by MaTiepNhan
+            ObservableList<TiepNhan> outstandingDebtRecords = tiepNhanDAO.getAllTiepNhanCoNo();
+            
+            double totalOutstandingDebt = outstandingDebtRecords.stream()
+                                    .mapToDouble(TiepNhan::getTongTienNo)
+                                    .sum();
+            
             outstandingDebtRecords.sort(Comparator.comparing(TiepNhan::getMaTiepNhan));
 
             tblCongNoKhachHang.setItems(outstandingDebtRecords);
@@ -449,36 +457,25 @@ public class BaoCaoController {
         }
 
         try {
-            // Get all ChiTietSuaChua within the date range, including VatTu details
-            List<ChiTietSuaChua> chiTietList = chiTietSuaChuaDAO.getChiTietSuaChuaByDateRange(fromDate, toDate);
+            List<PhieuSuaChua> phieuSuaChuaList = phieuSuaChuaDAO.getPhieuSuaChuaDetailsByDateRange(fromDate, toDate);
 
-            // Aggregate material consumption
-            Map<Integer, TieuHaoVatTuEntry> aggregatedTieuHao = new java.util.HashMap<>();
+            // Flatten the list of ChiTietSuaChua from all PhieuSuaChua
+            Map<Integer, TieuHaoVatTuEntry> tieuHaoMap = phieuSuaChuaList.stream()
+                    .flatMap(psc -> psc.getChiTietVatTuList().stream())
+                    .collect(Collectors.groupingBy(
+                            ChiTietPhieuSuaChua_VatTu::getMaVatTu,
+                            Collectors.collectingAndThen(Collectors.toList(), list -> {
+                                ChiTietPhieuSuaChua_VatTu first = list.get(0);
+                                int totalSoLuong = list.stream().mapToInt(ChiTietPhieuSuaChua_VatTu::getSoLuong).sum();
+                                // Correctly calculate cost based on DonGiaNhap
+                                double totalGiaTri = list.stream().mapToDouble(vt -> vt.getSoLuong() * vt.getDonGiaNhap()).sum();
+                                // Assuming TenVatTu and DonViTinh are the same for the same MaVatTu. A better approach might be to query VatTu table for latest info.
+                                return new TieuHaoVatTuEntry(first.getMaVatTu(), first.getTenVatTu(), "", totalSoLuong, totalGiaTri);
+                            })
+                    ));
 
-            for (ChiTietSuaChua chiTiet : chiTietList) {
-                if (chiTiet.getVatTu() != null) { // Only process if it's a material
-                    VatTu vatTu = chiTiet.getVatTu(); // This vatTu object might not have DonGiaNhap directly
-                    int maVatTu = vatTu.getMaVatTu();
-                    int soLuongTieuHao = chiTiet.getSoLuong();
-                    // Use donGiaNhapThoiDiemSuaChua directly from ChiTietSuaChua, which was set in SuaChuaController
-                    double donGiaNhapChoChiPhi = chiTiet.getDonGiaNhapThoiDiemSuaChua();
-
-                    aggregatedTieuHao.compute(maVatTu, (key, existingEntry) -> {
-                        if (existingEntry == null) {
-                            return new TieuHaoVatTuEntry(maVatTu, vatTu.getTenVatTu(), vatTu.getDonViTinh(), soLuongTieuHao, soLuongTieuHao * donGiaNhapChoChiPhi); // Use donGiaNhapChoChiPhi
-                        } else {
-                            existingEntry.setSoLuongTieuHao(existingEntry.getSoLuongTieuHao() + soLuongTieuHao);
-                            existingEntry.setTongGiaTriTieuHao(existingEntry.getTongGiaTriTieuHao() + (soLuongTieuHao * donGiaNhapChoChiPhi)); // Use donGiaNhapChoChiPhi
-                            return existingEntry;
-                        }
-                    });
-                }
-            }
-
-            ObservableList<TieuHaoVatTuEntry> reportData = FXCollections.observableArrayList(aggregatedTieuHao.values());
-
-            // Sort reportData by TenVatTu
-            reportData.sort(Comparator.comparing(TieuHaoVatTuEntry::getTenVatTu));
+            ObservableList<TieuHaoVatTuEntry> reportData = FXCollections.observableArrayList(tieuHaoMap.values());
+            reportData.sort(Comparator.comparingInt(TieuHaoVatTuEntry::getSoLuongTieuHao).reversed());
 
             tblTieuHaoVatTu.setItems(reportData);
 
@@ -512,48 +509,31 @@ public class BaoCaoController {
         }
 
         try {
-            // Get all detailed repair slips within the date range
-            List<PhieuSuaChua> phieuSuaChuaDetailsList = phieuSuaChuaDAO.getPhieuSuaChuaDetailsByDateRange(fromDate, toDate);
+            List<PhieuSuaChua> phieuSuaChuaList = phieuSuaChuaDAO.getPhieuSuaChuaDetailsByDateRange(fromDate, toDate);
 
-            // Group by date
-            Map<LocalDate, LoiNhuanEntry> aggregatedLoiNhuan = new java.util.HashMap<>();
+            Map<LocalDate, List<PhieuSuaChua>> groupedByDate = phieuSuaChuaList.stream()
+                    .collect(Collectors.groupingBy(PhieuSuaChua::getNgaySuaChua));
 
-            for (PhieuSuaChua ps : phieuSuaChuaDetailsList) {
-                LocalDate ngay = ps.getNgaySuaChua();
-                double doanhThuBanHang = ps.getTongTien(); // Total selling price from repair slip
-                final double[] chiPhiVatTu = {0.0};
-                final double[] chiPhiTienCong = {0.0};
+            ObservableList<LoiNhuanEntry> reportData = FXCollections.observableArrayList();
+            for (Map.Entry<LocalDate, List<PhieuSuaChua>> entry : groupedByDate.entrySet()) {
+                LocalDate ngay = entry.getKey();
+                List<PhieuSuaChua> phieuTrongNgay = entry.getValue();
 
-                for (ChiTietSuaChua cts : ps.getChiTietSuaChuaList()) {
-                    if (cts.getVatTu() != null) {
-                        // Cost of material is SoLuong * DonGiaNhap (from ChiTietPhieuSuaChua_VatTu)
-                        // Now using donGiaNhapThoiDiemSuaChua from ChiTietSuaChua model
-                        chiPhiVatTu[0] += cts.getSoLuong() * cts.getDonGiaNhapThoiDiemSuaChua();
-                    }
-                    if (cts.getTienCong() != null) {
-                        // Cost of labor is DonGia (from ChiTietPhieuSuaChua_TienCong)
-                        chiPhiTienCong[0] += cts.getTienCong().getDonGia(); // Changed from getLoaiTienCong().getDonGiaTienCong()
-                    }
-                }
+                double tongDoanhThu = phieuTrongNgay.stream().mapToDouble(PhieuSuaChua::getTongTien).sum();
+                
+                // Correctly calculate total material cost using DonGiaNhap
+                double tongChiPhiVatTu = phieuTrongNgay.stream()
+                        .flatMap(psc -> psc.getChiTietVatTuList().stream())
+                        .mapToDouble(ct -> ct.getSoLuong() * ct.getDonGiaNhap())
+                        .sum();
 
-                aggregatedLoiNhuan.compute(ngay, (key, existingEntry) -> {
-                    if (existingEntry == null) {
-                        return new LoiNhuanEntry(ngay, doanhThuBanHang, chiPhiVatTu[0], chiPhiTienCong[0], doanhThuBanHang - chiPhiVatTu[0] - chiPhiTienCong[0]);
-                    } else {
-                        existingEntry.setTongDoanhThuBanHang(existingEntry.getTongDoanhThuBanHang() + doanhThuBanHang);
-                        existingEntry.setTongChiPhiVatTu(existingEntry.getTongChiPhiVatTu() + chiPhiVatTu[0]);
-                        existingEntry.setTongChiPhiTienCong(existingEntry.getTongChiPhiTienCong() + chiPhiTienCong[0]);
-                        existingEntry.setLoiNhuanRong(existingEntry.getTongDoanhThuBanHang() - existingEntry.getTongChiPhiVatTu() - existingEntry.getTongChiPhiTienCong());
-                        return existingEntry;
-                    }
-                });
+                double tongChiPhiTienCong = phieuTrongNgay.stream()
+                        .flatMap(psc -> psc.getChiTietTienCongList().stream())
+                        .mapToDouble(ChiTietPhieuSuaChua_TienCong::getThanhTien)
+                        .sum();
+
+                reportData.add(new LoiNhuanEntry(ngay, tongDoanhThu, tongChiPhiVatTu, tongChiPhiTienCong));
             }
-
-            ObservableList<LoiNhuanEntry> reportData = FXCollections.observableArrayList(aggregatedLoiNhuan.values());
-
-            // Sort reportData by date
-            reportData.sort(Comparator.comparing(LoiNhuanEntry::getNgay));
-
 
             tblLoiNhuan.setItems(reportData);
 

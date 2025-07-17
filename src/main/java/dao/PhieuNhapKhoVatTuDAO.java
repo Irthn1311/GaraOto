@@ -124,4 +124,18 @@ public class PhieuNhapKhoVatTuDAO {
             pstmt.executeUpdate();
         }
     }
+    
+    public boolean isNhaCungCapUsed(int maNhaCungCap) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM PhieuNhapKhoVatTu WHERE MaNhaCungCap = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, maNhaCungCap);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
 }

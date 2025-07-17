@@ -1,9 +1,8 @@
 package dao;
 
 import model.PhieuSuaChua;
-import model.ChiTietSuaChua; // Import ChiTietSuaChua
-import model.VatTu; // Import VatTu
-import model.TienCong; // Changed from LoaiTienCong
+import model.ChiTietPhieuSuaChua_VatTu;
+import model.ChiTietPhieuSuaChua_TienCong;
 import database.DBConnection;
 import java.sql.*;
 import java.time.LocalDate;
@@ -89,97 +88,33 @@ public class PhieuSuaChuaDAO {
      * @throws SQLException if a database access error occurs.
      */
     public List<PhieuSuaChua> getPhieuSuaChuaDetailsByDateRange(LocalDate fromDate, LocalDate toDate) throws SQLException {
-        List<PhieuSuaChua> phieuSuaChuaList = new ArrayList<>();
-        String sqlPhieuSuaChua = "SELECT MaPhieuSC, MaTiepNhan, NgaySuaChua, GhiChu, TongTien, MaTho, TrangThaiHoanTat FROM PhieuSuaChua WHERE NgaySuaChua BETWEEN ? AND ?";
+        List<PhieuSuaChua> phieuSuaChuaList = getPhieuSuaChuaByDateRange(fromDate, toDate);
+        
+        ChiTietPhieuSuaChua_VatTuDAO vatTuDAO = new ChiTietPhieuSuaChua_VatTuDAO();
+        ChiTietPhieuSuaChua_TienCongDAO tienCongDAO = new ChiTietPhieuSuaChua_TienCongDAO();
 
-        // SQL for fetching material details
-        String sqlVatTuDetails = "SELECT ct.MaChiTietVatTu, ct.MaVatTu, ct.SoLuong, ct.DonGiaNhap, ct.ThanhTien, vt.TenVatTu, vt.DonViTinh " +
-                "FROM ChiTietPhieuSuaChua_VatTu ct " +
-                "JOIN VatTu vt ON ct.MaVatTu = vt.MaVatTu " +
-                "WHERE ct.MaPhieuSC = ?";
+        for (PhieuSuaChua psc : phieuSuaChuaList) {
+            List<ChiTietPhieuSuaChua_VatTu> vatTuList = vatTuDAO.getChiTietVatTuByMaPhieuSC(psc.getMaPhieuSC());
+            psc.setChiTietVatTuList(vatTuList);
 
-        // SQL for fetching labor details
-        String sqlTienCongDetails = "SELECT ct.MaChiTietTienCong, ct.MaTienCong, ct.DonGia, ct.ThanhTien, tc.NoiDung " +
-                "FROM ChiTietPhieuSuaChua_TienCong ct " +
-                "JOIN TienCong tc ON ct.MaTienCong = tc.MaTienCong " +
-                "WHERE ct.MaPhieuSC = ?";
-
-        try (Connection conn = DBConnection.getConnection()) {
-            // First, get all PhieuSuaChua records
-            try (PreparedStatement pstmtPhieuSC = conn.prepareStatement(sqlPhieuSuaChua)) {
-                pstmtPhieuSC.setDate(1, Date.valueOf(fromDate));
-                pstmtPhieuSC.setDate(2, Date.valueOf(toDate));
-
-                try (ResultSet rsPhieuSuaSC = pstmtPhieuSC.executeQuery()) {
-                    while (rsPhieuSuaSC.next()) {
-                        PhieuSuaChua phieuSuaChua = new PhieuSuaChua();
-                        phieuSuaChua.setMaPhieuSC(rsPhieuSuaSC.getInt("MaPhieuSC"));
-                        phieuSuaChua.setMaTiepNhan(rsPhieuSuaSC.getInt("MaTiepNhan"));
-                        phieuSuaChua.setNgaySuaChua(rsPhieuSuaSC.getDate("NgaySuaChua").toLocalDate());
-                        phieuSuaChua.setGhiChu(rsPhieuSuaSC.getString("GhiChu"));
-                        phieuSuaChua.setTongTien(rsPhieuSuaSC.getDouble("TongTien"));
-                        phieuSuaChua.setTrangThaiHoanTat(rsPhieuSuaSC.getBoolean("TrangThaiHoanTat"));
-                        // Handle MaTho being NULL
-                        int maTho = rsPhieuSuaSC.getInt("MaTho");
-                        if (!rsPhieuSuaSC.wasNull()) {
-                            phieuSuaChua.setMaTho(maTho);
-                        } else {
-                            phieuSuaChua.setMaTho(0); // Or some default indicating no mechanic
-                        }
-
-                        List<ChiTietSuaChua> chiTietList = new ArrayList<>();
-
-                        // Get material details for this PhieuSuaChua
-                        try (PreparedStatement pstmtVatTu = conn.prepareStatement(sqlVatTuDetails)) {
-                            pstmtVatTu.setInt(1, phieuSuaChua.getMaPhieuSC());
-                            try (ResultSet rsVatTu = pstmtVatTu.executeQuery()) {
-                                while (rsVatTu.next()) {
-                                    ChiTietSuaChua chiTiet = new ChiTietSuaChua();
-                                    chiTiet.setMaPhieuSC(phieuSuaChua.getMaPhieuSC());
-                                    chiTiet.setMaVatTu(rsVatTu.getInt("MaVatTu"));
-                                    chiTiet.setSoLuong(rsVatTu.getInt("SoLuong"));
-                                    chiTiet.setThanhTien(rsVatTu.getDouble("ThanhTien"));
-
-                                    // Populate VatTu object for detailed cost (DonGiaNhap)
-                                    VatTu vatTu = new VatTu();
-                                    vatTu.setMaVatTu(rsVatTu.getInt("MaVatTu"));
-                                    vatTu.setTenVatTu(rsVatTu.getString("TenVatTu"));
-                                    vatTu.setDonGiaBan(rsVatTu.getDouble("DonGiaNhap")); // Use DonGiaNhap for cost from ChiTiet table
-                                    vatTu.setDonViTinh(rsVatTu.getString("DonViTinh"));
-                                    chiTiet.setVatTu(vatTu);
-
-                                    chiTietList.add(chiTiet);
-                                }
-                            }
-                        }
-
-                        // Get labor details for this PhieuSuaChua
-                        try (PreparedStatement pstmtTienCong = conn.prepareStatement(sqlTienCongDetails)) {
-                            pstmtTienCong.setInt(1, phieuSuaChua.getMaPhieuSC());
-                            try (ResultSet rsTienCong = pstmtTienCong.executeQuery()) {
-                                while (rsTienCong.next()) {
-                                    ChiTietSuaChua chiTiet = new ChiTietSuaChua();
-                                    chiTiet.setMaPhieuSC(phieuSuaChua.getMaPhieuSC());
-                                    chiTiet.setMaTienCong(rsTienCong.getInt("MaTienCong")); // Changed from setMaLoaiTienCong
-                                    chiTiet.setThanhTien(rsTienCong.getDouble("ThanhTien"));
-
-                                    // Populate TienCong object for detailed cost (DonGia)
-                                    TienCong tienCong = new TienCong(); // Changed from LoaiTienCong
-                                    tienCong.setMaTienCong(rsTienCong.getInt("MaTienCong"));
-                                    tienCong.setNoiDung(rsTienCong.getString("NoiDung")); // Changed from TenLoaiTienCong
-                                    tienCong.setDonGia(rsTienCong.getDouble("DonGia")); // Changed from DonGiaTienCong
-                                    chiTiet.setTienCong(tienCong); // Changed from setLoaiTienCong
-
-                                    chiTietList.add(chiTiet);
-                                }
-                            }
-                        }
-                        phieuSuaChua.setChiTietSuaChuaList(chiTietList);
-                        phieuSuaChuaList.add(phieuSuaChua);
-                    }
+            List<ChiTietPhieuSuaChua_TienCong> tienCongList = tienCongDAO.getChiTietTienCongByMaPhieuSC(psc.getMaPhieuSC());
+            psc.setChiTietTienCongList(tienCongList);
+        }
+        
+        return phieuSuaChuaList;
+    }
+    
+    public boolean isThoUsed(int maTho) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM PhieuSuaChua WHERE MaTho = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, maTho);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
                 }
             }
         }
-        return phieuSuaChuaList;
+        return false;
     }
 }

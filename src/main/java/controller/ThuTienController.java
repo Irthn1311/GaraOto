@@ -161,17 +161,7 @@ public class ThuTienController {
         }
 
         try {
-            // Get all TiepNhan records for the given BienSo
-            // Note: TiepNhanDAO.getTiepNhanByBienSo should return all records,
-            // then we filter for outstanding ones.
-            ObservableList<TiepNhan> allTiepNhanRecords = tiepNhanDAO.getTiepNhanByBienSo(bienSoXe);
-            ObservableList<TiepNhan> outstandingTiepNhanRecords = FXCollections.observableArrayList();
-
-            for (TiepNhan tn : allTiepNhanRecords) {
-                if (tn.getTongTienNo() > 0) { // Filter for records with outstanding debt
-                    outstandingTiepNhanRecords.add(tn);
-                }
-            }
+            ObservableList<TiepNhan> outstandingTiepNhanRecords = tiepNhanDAO.getOustandingTiepNhanByBienSo(bienSoXe);
 
             if (outstandingTiepNhanRecords.isEmpty()) {
                 AlertUtils.showInformationAlert("Không tìm thấy", "Không tìm thấy hồ sơ tiếp nhận nào còn nợ cho biển số xe: " + bienSoXe);
@@ -179,9 +169,7 @@ public class ThuTienController {
                 clearSelectedTiepNhanInfo();
                 setPaymentFormEnabled(false);
             } else {
-                danhSachHoSoCanThanhToan.clear();
-                danhSachHoSoCanThanhToan.addAll(outstandingTiepNhanRecords);
-                // Automatically select the first item if only one, or for convenience
+                danhSachHoSoCanThanhToan.setAll(outstandingTiepNhanRecords);
                 if (!outstandingTiepNhanRecords.isEmpty()) {
                     tblHoSoCanThanhToan.getSelectionModel().selectFirst();
                 }
@@ -250,18 +238,48 @@ public class ThuTienController {
         } else if (conNo == 0) {
             lblSoTienConNo.setStyle("-fx-text-fill: green; -fx-font-weight: bold;"); // Fully paid
         } else {
-            lblSoTienConNo.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold;"); // Still debt
+            lblSoTienConNo.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold;"); // Default debt color
         }
     }
 
     /**
-     * Handles the "Lập phiếu thu" button action. Creates and saves a new payment receipt.
+     * Handles the "Lập phiếu thu" button action.
+     * Validates input, creates a payment receipt, and updates the debt status.
      */
     @FXML
     private void handleLapPhieuThu() {
         if (selectedTiepNhan == null) {
-            AlertUtils.showWarningAlert("Thiếu thông tin", "Vui lòng chọn một hồ sơ tiếp nhận để lập phiếu thu.");
+            AlertUtils.showWarningAlert("Chưa chọn hồ sơ", "Vui lòng chọn một hồ sơ để lập phiếu thu.");
             return;
+        }
+
+        String soTienThuStr = txtSoTienThu.getText().trim();
+        if (soTienThuStr.isEmpty()) {
+            AlertUtils.showWarningAlert("Thiếu thông tin", "Vui lòng nhập số tiền thu.");
+            return;
+        }
+
+        double soTienThu;
+        try {
+            soTienThu = Double.parseDouble(soTienThuStr);
+            if (soTienThu <= 0) {
+                AlertUtils.showWarningAlert("Số tiền không hợp lệ", "Số tiền thu phải là một số dương.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            AlertUtils.showWarningAlert("Định dạng không hợp lệ", "Số tiền thu phải là một con số.");
+            return;
+        }
+
+        double tongTienNo = selectedTiepNhan.getTongTienNo();
+        if (soTienThu > tongTienNo) {
+            boolean confirmOverpayment = AlertUtils.showConfirmationAlert(
+                "Xác nhận thanh toán thừa",
+                "Số tiền thu lớn hơn số tiền nợ. Bạn có muốn tiếp tục không?"
+            );
+            if (!confirmOverpayment) {
+                return;
+            }
         }
 
         LocalDate ngayThu = dpNgayThu.getValue();
@@ -270,54 +288,27 @@ public class ThuTienController {
             return;
         }
 
-        double soTienThu;
         try {
-            soTienThu = Double.parseDouble(txtSoTienThu.getText().trim());
-            if (soTienThu <= 0) {
-                AlertUtils.showWarningAlert("Lỗi nhập liệu", "Số tiền thu phải lớn hơn 0.");
-                return;
-            }
-        } catch (NumberFormatException e) {
-            AlertUtils.showWarningAlert("Lỗi nhập liệu", "Số tiền thu không hợp lệ. Vui lòng nhập một số.");
-            return;
-        }
-
-        double tongTienNoHienTai = selectedTiepNhan.getTongTienNo();
-        if (soTienThu > tongTienNoHienTai && tongTienNoHienTai > 0) {
-            AlertUtils.showWarningAlert("Cảnh báo", "Số tiền thu vượt quá số tiền nợ hiện tại. Vui lòng kiểm tra lại.");
-            // Optionally, you could ask for confirmation to accept overpayment
-            // For now, we'll just warn and let them proceed if they insist
-        }
-
-        if (tongTienNoHienTai == 0 && soTienThu > 0) {
-            AlertUtils.showWarningAlert("Cảnh báo", "Hồ sơ này không còn nợ. Không thể lập phiếu thu tiền.");
-            return;
-        }
-
-
-        try {
-            // 1. Create PhieuThuTien
+            // Create PhieuThuTien
             PhieuThuTien phieuThuTien = new PhieuThuTien();
             phieuThuTien.setMaTiepNhan(selectedTiepNhan.getMaTiepNhan());
             phieuThuTien.setNgayThu(ngayThu);
             phieuThuTien.setSoTienThu(soTienThu);
-
             phieuThuTienDAO.addPhieuThuTien(phieuThuTien);
 
-            // 2. Update TongTienNo for the selected TiepNhan record
-            double newTongTienNo = tongTienNoHienTai - soTienThu;
-            boolean trangThaiHoanTat = (newTongTienNo <= 0); // Mark as complete if debt is zero or less
-
-            selectedTiepNhan.setTongTienNo(newTongTienNo); // Update local object
-            selectedTiepNhan.setTrangThaiHoanTat(trangThaiHoanTat); // Update local object
-
-            tiepNhanDAO.updateTongTienNoAndTrangThai(selectedTiepNhan.getMaTiepNhan(), newTongTienNo, trangThaiHoanTat);
+            // Update TongTienNo and TrangThai in TiepNhan table
+            tiepNhanDAO.updatePaymentStatus(selectedTiepNhan.getMaTiepNhan(), soTienThu);
 
             AlertUtils.showInformationAlert("Thành công", "Lập phiếu thu tiền thành công!");
-            handleLamMoi(); // Clear form and refresh table
+            
+            // Refresh the view
+            handleTimKiemHoSo(); 
+            clearSelectedTiepNhanInfo();
+            setPaymentFormEnabled(false);
+
 
         } catch (SQLException e) {
-            AlertUtils.showErrorAlert("Lỗi cơ sở dữ liệu", "Đã xảy ra lỗi khi lập phiếu thu tiền: " + e.getMessage());
+            AlertUtils.showErrorAlert("Lỗi cơ sở dữ liệu", "Đã xảy ra lỗi khi lưu phiếu thu tiền: " + e.getMessage());
             e.printStackTrace();
         }
     }

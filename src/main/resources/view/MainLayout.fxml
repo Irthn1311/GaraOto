@@ -64,37 +64,42 @@
                         <Insets bottom="10.0" />
                     </VBox.margin>
                 </Button>
-                <Button fx:id="btnCauHinh" mnemonicParsing="false" onAction="#handleCauHinh" prefHeight="50.0" prefWidth="220.0" styleClass="sidebar-button" text="  &#xf013; Cấu hình">
+                                <Button fx:id="btnQuanLyHieuXe" mnemonicParsing="false" onAction="#handleQuanLyHieuXe" prefHeight="50.0" prefWidth="220.0" styleClass="sidebar-button" text="  &#xf1b9; Quản lý Hiệu xe">
                     <VBox.margin>
                         <Insets bottom="10.0" />
                     </VBox.margin>
                 </Button>
-                <!-- Button for QuanLyHieuXe -->
-                <Button fx:id="btnQuanLyHieuXe" mnemonicParsing="false" onAction="#handleQuanLyHieuXe" prefHeight="50.0" prefWidth="220.0" styleClass="sidebar-button" text="  &#xf1b9; Quản lý Hiệu xe">
-                    <VBox.margin>
-                        <Insets bottom="10.0" />
-                    </VBox.margin>
-                </Button>
-                <!-- Button for QuanLyTienCong -->
                 <Button fx:id="btnQuanLyTienCong" mnemonicParsing="false" onAction="#handleQuanLyTienCong" prefHeight="50.0" prefWidth="220.0" styleClass="sidebar-button" text="  &#xf155; Quản lý Tiền công">
                     <VBox.margin>
                         <Insets bottom="10.0" />
                     </VBox.margin>
                 </Button>
-                <!-- Button for QuanLyTho -->
                 <Button fx:id="btnQuanLyTho" mnemonicParsing="false" onAction="#handleQuanLyTho" prefHeight="50.0" prefWidth="220.0" styleClass="sidebar-button" text="  &#xf0ad; Quản lý Thợ">
                     <VBox.margin>
                         <Insets bottom="10.0" />
                     </VBox.margin>
                 </Button>
-                <!-- Button for QuanLyNhaCungCap -->
                 <Button fx:id="btnQuanLyNhaCungCap" mnemonicParsing="false" onAction="#handleQuanLyNhaCungCap" prefHeight="50.0" prefWidth="220.0" styleClass="sidebar-button" text="  &#xf0d1; Quản lý NCC">
                     <VBox.margin>
                         <Insets bottom="10.0" />
                     </VBox.margin>
                 </Button>
-                <!-- New button for QuanLyVatTu -->
                 <Button fx:id="btnQuanLyVatTu" mnemonicParsing="false" onAction="#handleQuanLyVatTu" prefHeight="50.0" prefWidth="220.0" styleClass="sidebar-button" text="  &#xf02d; Quản lý Vật tư">
+                    <VBox.margin>
+                        <Insets bottom="10.0" />
+                    </VBox.margin>
+                </Button>
+                <Button fx:id="btnQuanLyTaiKhoan" mnemonicParsing="false" onAction="#handleQuanLyTaiKhoan" prefHeight="50.0" prefWidth="220.0" styleClass="sidebar-button" text="  &#xf007; Quản lý Tài khoản">
+                    <VBox.margin>
+                        <Insets bottom="10.0" />
+                    </VBox.margin>
+                </Button>
+                <Button fx:id="btnQuanLyPhanQuyen" mnemonicParsing="false" onAction="#handleQuanLyPhanQuyen" prefHeight="50.0" prefWidth="220.0" styleClass="sidebar-button" text="  &#xf0c0; Quản lý Phân quyền">
+                    <VBox.margin>
+                        <Insets bottom="10.0" />
+                    </VBox.margin>
+                </Button>
+                 <Button fx:id="btnCauHinh" mnemonicParsing="false" onAction="#handleCauHinh" prefHeight="50.0" prefWidth="220.0" styleClass="sidebar-button" text="  &#xf013; Cấu hình">
                     <VBox.margin>
                         <Insets bottom="10.0" />
                     </VBox.margin>

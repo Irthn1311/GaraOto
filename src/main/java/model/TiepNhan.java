@@ -25,6 +25,9 @@ public class TiepNhan {
     private StringProperty diaChiChuXe;
     private StringProperty tenHieuXe;
 
+    private StringProperty tinhTrangXe;
+    private StringProperty trangThai;
+
     public TiepNhan() {
         this.maTiepNhan = new SimpleIntegerProperty();
         this.bienSo = new SimpleStringProperty();
@@ -36,14 +39,18 @@ public class TiepNhan {
         this.dienThoaiChuXe = new SimpleStringProperty();
         this.diaChiChuXe = new SimpleStringProperty();
         this.tenHieuXe = new SimpleStringProperty();
+        this.tinhTrangXe = new SimpleStringProperty();
+        this.trangThai = new SimpleStringProperty();
     }
 
-    public TiepNhan(int maTiepNhan, String bienSo, LocalDate ngayTiepNhan, double tongTienNo, boolean trangThaiHoanTat) {
+    public TiepNhan(int maTiepNhan, String bienSo, LocalDate ngayTiepNhan, double tongTienNo, boolean trangThaiHoanTat, String tinhTrangXe, String trangThai) {
         this.maTiepNhan = new SimpleIntegerProperty(maTiepNhan);
         this.bienSo = new SimpleStringProperty(bienSo);
         this.ngayTiepNhan = new SimpleObjectProperty<>(ngayTiepNhan);
         this.tongTienNo = new SimpleDoubleProperty(tongTienNo);
         this.trangThaiHoanTat = new SimpleBooleanProperty(trangThaiHoanTat);
+        this.tinhTrangXe = new SimpleStringProperty(tinhTrangXe);
+        this.trangThai = new SimpleStringProperty(trangThai);
 
         this.tenChuXe = new SimpleStringProperty(); // Initialize derived properties
         this.dienThoaiChuXe = new SimpleStringProperty();
@@ -63,6 +70,9 @@ public class TiepNhan {
     public String getDiaChiChuXe() { return diaChiChuXe.get(); }
     public String getTenHieuXe() { return tenHieuXe.get(); }
 
+    public String getTinhTrangXe() { return tinhTrangXe.get(); }
+    public String getTrangThai() { return trangThai.get(); }
+
     // Setters
     public void setMaTiepNhan(int maTiepNhan) { this.maTiepNhan.set(maTiepNhan); }
     public void setBienSo(String bienSo) { this.bienSo.set(bienSo); }
@@ -75,6 +85,9 @@ public class TiepNhan {
     public void setDiaChiChuXe(String diaChiChuXe) { this.diaChiChuXe.set(diaChiChuXe); }
     public void setTenHieuXe(String tenHieuXe) { this.tenHieuXe.set(tenHieuXe); }
 
+    public void setTinhTrangXe(String tinhTrangXe) { this.tinhTrangXe.set(tinhTrangXe); }
+    public void setTrangThai(String trangThai) { this.trangThai.set(trangThai); }
+
     // Properties for JavaFX binding
     public IntegerProperty maTiepNhanProperty() { return maTiepNhan; }
     public StringProperty bienSoProperty() { return bienSo; }
@@ -86,4 +99,6 @@ public class TiepNhan {
     public StringProperty dienThoaiChuXeProperty() { return dienThoaiChuXe; }
     public StringProperty diaChiChuXeProperty() { return diaChiChuXe; }
     public StringProperty tenHieuXeProperty() { return tenHieuXe; }
+    public StringProperty tinhTrangXeProperty() { return tinhTrangXe; }
+    public StringProperty trangThaiProperty() { return trangThai; }
 }

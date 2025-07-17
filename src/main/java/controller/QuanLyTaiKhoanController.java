@@ -1,275 +1,253 @@
 package controller;
 
+import dao.PhanQuyenDAO;
+import dao.PhanQuyenDAOImpl;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.util.StringConverter;
+import model.PhanQuyen;
 import model.TaiKhoanNguoiDung;
 import dao.TaiKhoanNguoiDungDAO;
 import utils.AlertUtils;
-import utils.PasswordHasher; // Utility for hashing passwords
+import utils.PasswordHasher;
 
 import java.sql.SQLException;
 import java.util.Optional;
-import java.util.Comparator;
-import java.util.Base64; // Add this import for Base64 if it's used directly in the file for hashing
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.TextInputDialog;
 
 public class QuanLyTaiKhoanController {
 
-    @FXML
-    private TextField txtTenDangNhap;
-    @FXML
-    private PasswordField txtMatKhau;
-    @FXML
-    private TextField txtHoTen;
-    @FXML
-    private ComboBox<String> cbLoaiTaiKhoan;
-    @FXML
-    private CheckBox chkTrangThai;
-    @FXML
-    private Button btnThem;
-    @FXML
-    private Button btnSua;
-    @FXML
-    private Button btnXoa;
-    @FXML
-    private Button btnLamMoi;
+    @FXML private TextField txtTenDangNhap;
+    @FXML private PasswordField txtMatKhau;
+    @FXML private ComboBox<PhanQuyen> cmbPhanQuyen;
+    @FXML private TextField txtHoTen;
+    @FXML private CheckBox chkTrangThai;
+    @FXML private TableView<TaiKhoanNguoiDung> tblTaiKhoan;
+    @FXML private TableColumn<TaiKhoanNguoiDung, Integer> colMaTK;
+    @FXML private TableColumn<TaiKhoanNguoiDung, String> colTenDangNhap;
+    @FXML private TableColumn<TaiKhoanNguoiDung, String> colPhanQuyen;
+    @FXML private TableColumn<TaiKhoanNguoiDung, String> colHoTen;
+    @FXML private TableColumn<TaiKhoanNguoiDung, Boolean> colTrangThai;
+    
+    private TaiKhoanNguoiDungDAO taiKhoanDAO;
+    private PhanQuyenDAO phanQuyenDAO;
+    private ObservableList<PhanQuyen> phanQuyenList = FXCollections.observableArrayList();
 
-    @FXML
-    private TableView<TaiKhoanNguoiDung> tblTaiKhoan;
-    @FXML
-    private TableColumn<TaiKhoanNguoiDung, Integer> colMaTK;
-    @FXML
-    private TableColumn<TaiKhoanNguoiDung, String> colTenDangNhap;
-    @FXML
-    private TableColumn<TaiKhoanNguoiDung, String> colHoTen;
-    @FXML
-    private TableColumn<TaiKhoanNguoiDung, String> colLoaiTaiKhoan;
-    @FXML
-    private TableColumn<TaiKhoanNguoiDung, Boolean> colTrangThai;
-
-    private TaiKhoanNguoiDungDAO taiKhoanNguoiDungDAO;
-    private ObservableList<TaiKhoanNguoiDung> danhSachTaiKhoan;
-
-    private TaiKhoanNguoiDung selectedAccount; // Currently selected account for editing
-
-    /**
-     * Initializes the controller. This method is automatically called after the FXML file has been loaded.
-     */
     @FXML
     public void initialize() {
-        taiKhoanNguoiDungDAO = new TaiKhoanNguoiDungDAO();
-        danhSachTaiKhoan = FXCollections.observableArrayList();
-        tblTaiKhoan.setItems(danhSachTaiKhoan);
-
-        // Configure TableView columns
-        colMaTK.setCellValueFactory(cellData -> cellData.getValue().maTKProperty().asObject());
-        colTenDangNhap.setCellValueFactory(cellData -> cellData.getValue().tenDangNhapProperty());
-        colHoTen.setCellValueFactory(cellData -> cellData.getValue().hoTenProperty());
-        colLoaiTaiKhoan.setCellValueFactory(cellData -> cellData.getValue().loaiTaiKhoanProperty());
-        colTrangThai.setCellValueFactory(cellData -> cellData.getValue().trangThaiProperty());
-
-        // Populate ComboBox for LoaiTaiKhoan
-        cbLoaiTaiKhoan.setItems(FXCollections.observableArrayList("NhanVien", "QuanLy", "GiamDoc"));
-
-        // Listener for table selection to populate text fields for editing
-        tblTaiKhoan.getSelectionModel().selectedItemProperty().addListener(
-                (observable, oldValue, newValue) -> showTaiKhoanDetails(newValue));
-
-        loadTaiKhoanData();
-        btnSua.setDisable(true); // Disable Edit/Delete initially
-        btnXoa.setDisable(true);
+        taiKhoanDAO = new TaiKhoanNguoiDungDAO();
+        phanQuyenDAO = new PhanQuyenDAOImpl();
+        
+        setupTableColumns();
+        loadPhanQuyen();
+        loadTaiKhoan();
+        
+        tblTaiKhoan.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                populateFields(newSelection);
+            }
+        });
     }
 
-    /**
-     * Loads account data from the database into the TableView.
-     */
-    private void loadTaiKhoanData() {
+    private void setupTableColumns() {
+        colMaTK.setCellValueFactory(new PropertyValueFactory<>("maTK"));
+        colTenDangNhap.setCellValueFactory(new PropertyValueFactory<>("tenDangNhap"));
+        colHoTen.setCellValueFactory(new PropertyValueFactory<>("hoTen"));
+        colTrangThai.setCellValueFactory(new PropertyValueFactory<>("trangThai"));
+        colPhanQuyen.setCellValueFactory(new PropertyValueFactory<>("maPhanQuyen"));
+    }
+    
+    private void loadPhanQuyen() {
         try {
-            danhSachTaiKhoan.clear();
-            danhSachTaiKhoan.addAll(taiKhoanNguoiDungDAO.getAllTaiKhoanNguoiDung());
+            phanQuyenList.setAll(phanQuyenDAO.getAllPhanQuyen());
+            cmbPhanQuyen.setItems(phanQuyenList);
+            cmbPhanQuyen.setConverter(new StringConverter<PhanQuyen>() {
+                @Override
+                public String toString(PhanQuyen object) {
+                    return object == null ? "" : object.getTenPhanQuyen();
+                }
+
+                @Override
+                public PhanQuyen fromString(String string) {
+                    return cmbPhanQuyen.getItems().stream().filter(pq -> 
+                        pq.getTenPhanQuyen().equals(string)).findFirst().orElse(null);
+                }
+            });
         } catch (SQLException e) {
-            AlertUtils.showErrorAlert("Lỗi tải dữ liệu", "Không thể tải danh sách tài khoản: " + e.getMessage());
+            AlertUtils.showErrorAlert("Lỗi tải dữ liệu", "Không thể tải danh sách phân quyền.");
             e.printStackTrace();
         }
     }
 
-    /**
-     * Displays the details of a selected account in the input fields.
-     * @param taiKhoan The TaiKhoanNguoiDung object to display.
-     */
-    private void showTaiKhoanDetails(TaiKhoanNguoiDung taiKhoan) {
-        if (taiKhoan != null) {
-            selectedAccount = taiKhoan;
-            txtTenDangNhap.setText(taiKhoan.getTenDangNhap());
-            txtMatKhau.setText(""); // Never display password
-            txtHoTen.setText(taiKhoan.getHoTen());
-            cbLoaiTaiKhoan.getSelectionModel().select(taiKhoan.getLoaiTaiKhoan());
-            chkTrangThai.setSelected(taiKhoan.isTrangThai());
-
-            btnThem.setDisable(true); // Disable Add when an item is selected for editing
-            btnSua.setDisable(false);
-            btnXoa.setDisable(false);
-        } else {
-            selectedAccount = null;
-            clearForm();
+    private void loadTaiKhoan() {
+        try {
+            tblTaiKhoan.getItems().setAll(taiKhoanDAO.getAllTaiKhoanNguoiDung());
+        } catch (SQLException e) {
+            AlertUtils.showErrorAlert("Lỗi tải dữ liệu", "Không thể tải danh sách tài khoản.");
+            e.printStackTrace();
         }
     }
 
-    /**
-     * Clears all input fields in the form.
-     */
-    private void clearForm() {
-        txtTenDangNhap.clear();
+    private void populateFields(TaiKhoanNguoiDung user) {
+        txtTenDangNhap.setText(user.getTenDangNhap());
+        txtHoTen.setText(user.getHoTen());
+        chkTrangThai.setSelected(user.isTrangThai());
         txtMatKhau.clear();
-        txtHoTen.clear();
-        cbLoaiTaiKhoan.getSelectionModel().clearSelection();
-        chkTrangThai.setSelected(true); // Default to active
-        tblTaiKhoan.getSelectionModel().clearSelection();
+
+        // Find and set the correct PhanQuyen object in the ComboBox
+        phanQuyenList.stream()
+            .filter(pq -> pq.getMaPhanQuyen().equals(user.getMaPhanQuyen()))
+            .findFirst()
+            .ifPresent(cmbPhanQuyen::setValue);
     }
 
-    /**
-     * Handles the "Thêm" button action. Adds a new user account.
-     */
     @FXML
     private void handleThemTaiKhoan() {
         String tenDangNhap = txtTenDangNhap.getText().trim();
-        String matKhau = txtMatKhau.getText().trim();
+        String matKhau = txtMatKhau.getText();
+        PhanQuyen phanQuyen = cmbPhanQuyen.getValue();
         String hoTen = txtHoTen.getText().trim();
-        String loaiTaiKhoan = cbLoaiTaiKhoan.getSelectionModel().getSelectedItem();
-        boolean trangThai = chkTrangThai.isSelected();
 
-        if (tenDangNhap.isEmpty() || matKhau.isEmpty() || hoTen.isEmpty() || loaiTaiKhoan == null) {
-            AlertUtils.showWarningAlert("Thiếu thông tin", "Vui lòng điền đầy đủ các trường bắt buộc (Tên đăng nhập, Mật khẩu, Họ tên, Loại tài khoản).");
+        if (tenDangNhap.isEmpty() || matKhau.isEmpty() || phanQuyen == null || hoTen.isEmpty()) {
+            AlertUtils.showWarningAlert("Thiếu thông tin", "Vui lòng điền đầy đủ thông tin.");
             return;
         }
 
         try {
-            // Check if username already exists
-            if (taiKhoanNguoiDungDAO.getTaiKhoanNguoiDungByTenDangNhap(tenDangNhap) != null) {
-                AlertUtils.showWarningAlert("Tên đăng nhập đã tồn tại", "Tên đăng nhập này đã được sử dụng. Vui lòng chọn tên khác.");
+            if (taiKhoanDAO.checkUsernameExists(tenDangNhap)) {
+                AlertUtils.showErrorAlert("Lỗi", "Tên đăng nhập đã tồn tại.");
                 return;
             }
 
             String matKhauHash = PasswordHasher.hashPassword(matKhau);
-            TaiKhoanNguoiDung newAccount = new TaiKhoanNguoiDung(0, tenDangNhap, matKhauHash, loaiTaiKhoan, hoTen, trangThai);
-            int generatedId = taiKhoanNguoiDungDAO.addTaiKhoanNguoiDung(newAccount);
-
-            if (generatedId != -1) {
-                AlertUtils.showInformationAlert("Thành công", "Thêm tài khoản thành công!");
-                loadTaiKhoanData();
-                clearForm();
-            } else {
-                AlertUtils.showErrorAlert("Lỗi", "Không thể thêm tài khoản. Vui lòng thử lại.");
+            TaiKhoanNguoiDung newUser = new TaiKhoanNguoiDung(0, tenDangNhap, matKhauHash, phanQuyen.getMaPhanQuyen(), hoTen, chkTrangThai.isSelected());
+            if (taiKhoanDAO.addTaiKhoanNguoiDung(newUser)) {
+                AlertUtils.showSuccessAlert("Thành công", "Thêm tài khoản thành công.");
+                loadTaiKhoan();
+                handleLamMoi();
             }
         } catch (SQLException e) {
-            AlertUtils.showErrorAlert("Lỗi cơ sở dữ liệu", "Đã xảy ra lỗi khi thêm tài khoản: " + e.getMessage());
+            AlertUtils.showErrorAlert("Lỗi cơ sở dữ liệu", "Không thể thêm tài khoản.");
             e.printStackTrace();
         }
     }
 
-    /**
-     * Handles the "Sửa" button action. Updates an existing user account.
-     */
     @FXML
     private void handleSuaTaiKhoan() {
-        if (selectedAccount == null) {
+        TaiKhoanNguoiDung selectedUser = tblTaiKhoan.getSelectionModel().getSelectedItem();
+        if (selectedUser == null) {
             AlertUtils.showWarningAlert("Chưa chọn tài khoản", "Vui lòng chọn một tài khoản để sửa.");
             return;
         }
 
-        String tenDangNhap = txtTenDangNhap.getText().trim();
-        String matKhau = txtMatKhau.getText().trim(); // New password (can be empty)
-        String hoTen = txtHoTen.getText().trim();
-        String loaiTaiKhoan = cbLoaiTaiKhoan.getSelectionModel().getSelectedItem();
-        boolean trangThai = chkTrangThai.isSelected();
+        if ("admin".equalsIgnoreCase(selectedUser.getTenDangNhap())) {
+            AlertUtils.showWarningAlert("Không được phép", "Không thể chỉnh sửa tài khoản 'admin'.");
+            return;
+        }
 
-        if (tenDangNhap.isEmpty() || hoTen.isEmpty() || loaiTaiKhoan == null) {
-            AlertUtils.showWarningAlert("Thiếu thông tin", "Vui lòng điền đầy đủ các trường bắt buộc (Tên đăng nhập, Họ tên, Loại tài khoản).");
+        String tenDangNhap = txtTenDangNhap.getText().trim();
+        PhanQuyen phanQuyen = cmbPhanQuyen.getValue();
+        String hoTen = txtHoTen.getText().trim();
+
+        if (tenDangNhap.isEmpty() || phanQuyen == null || hoTen.isEmpty()) {
+            AlertUtils.showWarningAlert("Thiếu thông tin", "Vui lòng điền đầy đủ thông tin.");
             return;
         }
 
         try {
-            // Check if username changed and if new username already exists
-            if (!tenDangNhap.equals(selectedAccount.getTenDangNhap())) {
-                if (taiKhoanNguoiDungDAO.getTaiKhoanNguoiDungByTenDangNhap(tenDangNhap) != null) {
-                    AlertUtils.showWarningAlert("Tên đăng nhập đã tồn tại", "Tên đăng nhập này đã được sử dụng bởi tài khoản khác.");
-                    return;
-                }
+            TaiKhoanNguoiDung existingUser = taiKhoanDAO.getTaiKhoanByTenDangNhap(tenDangNhap);
+            if (existingUser != null && existingUser.getMaTK() != selectedUser.getMaTK()) {
+                AlertUtils.showErrorAlert("Lỗi", "Tên đăng nhập đã tồn tại.");
+                return;
             }
 
-            selectedAccount.setTenDangNhap(tenDangNhap);
-            selectedAccount.setHoTen(hoTen);
-            selectedAccount.setLoaiTaiKhoan(loaiTaiKhoan);
-            selectedAccount.setTrangThai(trangThai);
+            selectedUser.setTenDangNhap(tenDangNhap);
+            selectedUser.setHoTen(hoTen);
+            selectedUser.setMaPhanQuyen(phanQuyen.getMaPhanQuyen());
+            selectedUser.setTrangThai(chkTrangThai.isSelected());
 
-            // Only update password if a new password is provided
-            if (!matKhau.isEmpty()) {
-                selectedAccount.setMatKhauHash(PasswordHasher.hashPassword(matKhau));
-            } else {
-                // If password is empty, ensure the hash is not accidentally cleared
-                // (TaiKhoanNguoiDungDAO.updateTaiKhoanNguoiDung handles this by checking for null/empty hash)
-                selectedAccount.setMatKhauHash(null);
-            }
-
-            boolean success = taiKhoanNguoiDungDAO.updateTaiKhoanNguoiDung(selectedAccount);
-
-            if (success) {
-                AlertUtils.showInformationAlert("Thành công", "Cập nhật tài khoản thành công!");
-                loadTaiKhoanData();
-                clearForm();
-            } else {
-                AlertUtils.showErrorAlert("Lỗi", "Không thể cập nhật tài khoản. Vui lòng thử lại.");
+            if (taiKhoanDAO.updateTaiKhoanNguoiDung(selectedUser)) {
+                AlertUtils.showSuccessAlert("Thành công", "Cập nhật tài khoản thành công.");
+                loadTaiKhoan();
+                handleLamMoi();
             }
         } catch (SQLException e) {
-            AlertUtils.showErrorAlert("Lỗi cơ sở dữ liệu", "Đã xảy ra lỗi khi cập nhật tài khoản: " + e.getMessage());
+            AlertUtils.showErrorAlert("Lỗi cơ sở dữ liệu", "Không thể cập nhật tài khoản.");
             e.printStackTrace();
         }
     }
 
-    /**
-     * Handles the "Xóa" button action. Deletes the selected user account.
-     */
     @FXML
     private void handleXoaTaiKhoan() {
-        if (selectedAccount == null) {
+        TaiKhoanNguoiDung selectedUser = tblTaiKhoan.getSelectionModel().getSelectedItem();
+        if (selectedUser == null) {
             AlertUtils.showWarningAlert("Chưa chọn tài khoản", "Vui lòng chọn một tài khoản để xóa.");
             return;
         }
 
-        Alert confirmationAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmationAlert.setTitle("Xác nhận xóa");
-        confirmationAlert.setHeaderText(null);
-        confirmationAlert.setContentText("Bạn có chắc chắn muốn xóa tài khoản '" + selectedAccount.getTenDangNhap() + "' không?");
-
-        Optional<ButtonType> result = confirmationAlert.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK) {
-            try {
-                boolean success = taiKhoanNguoiDungDAO.deleteTaiKhoanNguoiDung(selectedAccount.getMaTK());
-                if (success) {
-                    AlertUtils.showInformationAlert("Thành công", "Xóa tài khoản thành công!");
-                    loadTaiKhoanData();
-                    clearForm();
-                } else {
-                    AlertUtils.showErrorAlert("Lỗi", "Không thể xóa tài khoản. Vui lòng thử lại.");
-                }
-            } catch (SQLException e) {
-                AlertUtils.showErrorAlert("Lỗi cơ sở dữ liệu", "Đã xảy ra lỗi khi xóa tài khoản: " + e.getMessage());
-                e.printStackTrace();
-            }
+        if ("admin".equalsIgnoreCase(selectedUser.getTenDangNhap())) {
+            AlertUtils.showErrorAlert("Không thể xóa", "Không được phép xóa tài khoản 'admin'.");
+            return;
         }
+        
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION, "Bạn có chắc chắn muốn xóa tài khoản '" + selectedUser.getTenDangNhap() + "' không?", ButtonType.YES, ButtonType.NO);
+        confirmation.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.YES) {
+                try {
+                    if(taiKhoanDAO.deleteTaiKhoanNguoiDung(selectedUser.getMaTK())) {
+                        AlertUtils.showSuccessAlert("Thành công", "Xóa tài khoản thành công.");
+                        loadTaiKhoan();
+                        handleLamMoi();
+                    }
+                } catch (SQLException e) {
+                    AlertUtils.showErrorAlert("Lỗi SQL", "Không thể xóa tài khoản.");
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
-    /**
-     * Handles the "Làm mới" button action. Clears the form and table selection.
-     */
     @FXML
     private void handleLamMoi() {
-        clearForm();
+        txtTenDangNhap.clear();
+        txtMatKhau.clear();
+        txtHoTen.clear();
+        cmbPhanQuyen.setValue(null);
+        chkTrangThai.setSelected(true);
         tblTaiKhoan.getSelectionModel().clearSelection();
-        btnThem.setDisable(false);
-        btnSua.setDisable(true);
-        btnXoa.setDisable(true);
+    }
+    
+    @FXML
+    private void handleResetPassword() {
+        TaiKhoanNguoiDung selectedUser = tblTaiKhoan.getSelectionModel().getSelectedItem();
+        if (selectedUser == null) {
+            AlertUtils.showWarningAlert("Chưa chọn tài khoản", "Vui lòng chọn tài khoản cần reset mật khẩu.");
+            return;
+        }
+
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Reset Mật khẩu");
+        dialog.setHeaderText("Reset mật khẩu cho: " + selectedUser.getTenDangNhap());
+        dialog.setContentText("Nhập mật khẩu mới:");
+
+        Optional<String> result = dialog.showAndWait();
+        result.ifPresent(newPassword -> {
+            if (newPassword.trim().isEmpty()) {
+                AlertUtils.showWarningAlert("Lỗi", "Mật khẩu không được để trống.");
+                return;
+            }
+            try {
+                String newHashedPassword = PasswordHasher.hashPassword(newPassword);
+                if(taiKhoanDAO.updateUserPassword(selectedUser.getMaTK(), newHashedPassword)) {
+                    AlertUtils.showSuccessAlert("Thành công", "Reset mật khẩu thành công.");
+                }
+            } catch (SQLException e) {
+                AlertUtils.showErrorAlert("Lỗi cơ sở dữ liệu", "Không thể cập nhật mật khẩu.");
+                e.printStackTrace();
+            }
+        });
     }
 }

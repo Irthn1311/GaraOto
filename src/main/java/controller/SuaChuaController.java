@@ -4,18 +4,28 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.StringProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.scene.control.cell.PropertyValueFactory;
+
 import model.TiepNhan; // Import TiepNhan entity
 import model.VatTu;    // New entity for VatTu
 import model.TienCong; // Import TienCong
 import model.PhieuSuaChua; // New entity for PhieuSuaChua
-import model.ChiTietSuaChua; // New entity for ChiTietSuaChua
+import model.ChiTietPhieuSuaChua_VatTu; // New model for part details
+import model.ChiTietPhieuSuaChua_TienCong; // New model for labor details
 import model.Tho; // Import Tho entity
 
 import dao.TiepNhanDAO; // DAO for TiepNhan
 import dao.VatTuDAO;    // New DAO for VatTu
 import dao.TienCongDAO; // New DAO for TienCong
 import dao.PhieuSuaChuaDAO; // New DAO for PhieuSuaChua
-import dao.ChiTietSuaChuaDAO; // New DAO for ChiTietSuaChua
+import dao.ChiTietPhieuSuaChua_VatTuDAO; // New DAO for part details
+import dao.ChiTietPhieuSuaChua_TienCongDAO; // New DAO for labor details
 import dao.ThoDAO; // New DAO for Tho
 import dao.ChiTietPhieuNhapKhoVatTuDAO; // New DAO for getting DonGiaNhap
 
@@ -25,6 +35,36 @@ import java.time.LocalDate;
 import java.util.Optional; // For confirmation dialogs
 
 public class SuaChuaController {
+    
+    // A simple class to display repair details in a unified TableView
+    public static class ChiTietSuaChuaDisplay {
+        private final IntegerProperty stt;
+        private final StringProperty noiDung;
+        private final StringProperty loai;
+        private final IntegerProperty soLuong;
+        private final DoubleProperty donGia;
+        private final DoubleProperty thanhTien;
+        private final Object originalObject; // To hold the original VatTu or TienCong detail object
+
+        public ChiTietSuaChuaDisplay(int stt, String noiDung, String loai, int soLuong, double donGia, double thanhTien, Object originalObject) {
+            this.stt = new SimpleIntegerProperty(stt);
+            this.noiDung = new SimpleStringProperty(noiDung);
+            this.loai = new SimpleStringProperty(loai);
+            this.soLuong = new SimpleIntegerProperty(soLuong);
+            this.donGia = new SimpleDoubleProperty(donGia);
+            this.thanhTien = new SimpleDoubleProperty(thanhTien);
+            this.originalObject = originalObject;
+        }
+
+        public IntegerProperty sttProperty() { return stt; }
+        public StringProperty noiDungProperty() { return noiDung; }
+        public StringProperty loaiProperty() { return loai; }
+        public IntegerProperty soLuongProperty() { return soLuong; }
+        public DoubleProperty donGiaProperty() { return donGia; }
+        public DoubleProperty thanhTienProperty() { return thanhTien; }
+        public Object getOriginalObject() { return originalObject; }
+    }
+
 
     // FXML elements from SuaChuaView.fxml
     @FXML
@@ -56,19 +96,19 @@ public class SuaChuaController {
     @FXML
     private Button btnThemChiTiet;
     @FXML
-    private TableView<ChiTietSuaChua> tblChiTietSuaChua;
+    private TableView<ChiTietSuaChuaDisplay> tblChiTietSuaChua;
     @FXML
-    private TableColumn<ChiTietSuaChua, Integer> colSTT;
+    private TableColumn<ChiTietSuaChuaDisplay, Integer> colSTT;
     @FXML
-    private TableColumn<ChiTietSuaChua, String> colNoiDung;
+    private TableColumn<ChiTietSuaChuaDisplay, String> colNoiDung;
     @FXML
-    private TableColumn<ChiTietSuaChua, String> colLoai;
+    private TableColumn<ChiTietSuaChuaDisplay, String> colLoai;
     @FXML
-    private TableColumn<ChiTietSuaChua, Integer> colSoLuong;
+    private TableColumn<ChiTietSuaChuaDisplay, Integer> colSoLuong;
     @FXML
-    private TableColumn<ChiTietSuaChua, Double> colDonGia;
+    private TableColumn<ChiTietSuaChuaDisplay, Double> colDonGia;
     @FXML
-    private TableColumn<ChiTietSuaChua, Double> colThanhTienChiTiet;
+    private TableColumn<ChiTietSuaChuaDisplay, Double> colThanhTienChiTiet;
     @FXML
     private Button btnXoaChiTiet;
     @FXML
@@ -90,12 +130,16 @@ public class SuaChuaController {
     private VatTuDAO vatTuDAO;
     private TienCongDAO tienCongDAO; // Changed to TienCongDAO
     private PhieuSuaChuaDAO phieuSuaChuaDAO;
-    private ChiTietSuaChuaDAO chiTietSuaChuaDAO;
+    private ChiTietPhieuSuaChua_VatTuDAO chiTietVatTuDAO; // New DAO
+    private ChiTietPhieuSuaChua_TienCongDAO chiTietTienCongDAO; // New DAO
     private ThoDAO thoDAO; // New DAO for Tho
     private ChiTietPhieuNhapKhoVatTuDAO chiTietPhieuNhapKhoVatTuDAO; // New DAO for getting DonGiaNhap
 
-    // Data for the TableView
-    private ObservableList<ChiTietSuaChua> danhSachChiTietSuaChua;
+    // Data lists for the repair slip
+    private ObservableList<ChiTietPhieuSuaChua_VatTu> danhSachVatTu;
+    private ObservableList<ChiTietPhieuSuaChua_TienCong> danhSachTienCong;
+    private ObservableList<ChiTietSuaChuaDisplay> danhSachChiTietDisplay;
+
 
     // Currently selected TiepNhan record
     private TiepNhan selectedTiepNhan;
@@ -110,18 +154,21 @@ public class SuaChuaController {
         vatTuDAO = new VatTuDAO();
         tienCongDAO = new TienCongDAO(); // Changed to TienCongDAO
         phieuSuaChuaDAO = new PhieuSuaChuaDAO();
-        chiTietSuaChuaDAO = new ChiTietSuaChuaDAO();
+        chiTietVatTuDAO = new ChiTietPhieuSuaChua_VatTuDAO(); // Initialize new DAO
+        chiTietTienCongDAO = new ChiTietPhieuSuaChua_TienCongDAO(); // Initialize new DAO
         thoDAO = new ThoDAO(); // Initialize ThoDAO
         chiTietPhieuNhapKhoVatTuDAO = new ChiTietPhieuNhapKhoVatTuDAO(); // Initialize new DAO
 
         // Set default date for DatePicker
         dpNgaySuaChua.setValue(LocalDate.now());
 
-        // Initialize ObservableList for table
-        danhSachChiTietSuaChua = FXCollections.observableArrayList();
-        tblChiTietSuaChua.setItems(danhSachChiTietSuaChua);
+        // Initialize ObservableLists for data
+        danhSachVatTu = FXCollections.observableArrayList();
+        danhSachTienCong = FXCollections.observableArrayList();
+        danhSachChiTietDisplay = FXCollections.observableArrayList();
+        tblChiTietSuaChua.setItems(danhSachChiTietDisplay);
 
-        // Configure TableView columns
+        // Configure TableView columns for the display class
         colSTT.setCellValueFactory(cellData -> cellData.getValue().sttProperty().asObject());
         colNoiDung.setCellValueFactory(cellData -> cellData.getValue().noiDungProperty());
         colLoai.setCellValueFactory(cellData -> cellData.getValue().loaiProperty());
@@ -130,7 +177,7 @@ public class SuaChuaController {
         colThanhTienChiTiet.setCellValueFactory(cellData -> cellData.getValue().thanhTienProperty().asObject());
 
         // Add listener to update total when details change
-        danhSachChiTietSuaChua.addListener((javafx.collections.ListChangeListener.Change<? extends ChiTietSuaChua> c) -> {
+        danhSachChiTietDisplay.addListener((javafx.collections.ListChangeListener.Change<? extends ChiTietSuaChuaDisplay> c) -> {
             calculateAndDisplayTotal();
         });
 
@@ -330,7 +377,7 @@ public class SuaChuaController {
             selectedTiepNhan = tiepNhan;
             displayTiepNhanInfo(selectedTiepNhan);
             setFormEnabled(true);
-            danhSachChiTietSuaChua.clear(); // Clear previous details when new record is selected
+            danhSachChiTietDisplay.clear(); // Clear previous details when new record is selected
             calculateAndDisplayTotal(); // Recalculate total
         });
     }
@@ -353,236 +400,252 @@ public class SuaChuaController {
      * Clears all vehicle information labels.
      */
     private void clearVehicleInfoLabels() {
-        lblTenChuXe.setText("[Chưa chọn]");
-        lblHieuXe.setText("[Chưa chọn]");
-        lblDienThoai.setText("[Chưa chọn]");
-        lblDiaChi.setText("[Chưa chọn]");
-        lblNgayTiepNhan.setText("[Chưa chọn]");
-        lblTienNoHienTai.setText("0.00 VNĐ");
+        lblTenChuXe.setText("");
+        lblHieuXe.setText("");
+        lblDienThoai.setText("");
+        lblDiaChi.setText("");
+        lblNgayTiepNhan.setText("");
+        lblTienNoHienTai.setText("");
     }
 
     /**
-     * Handles the "Thêm" button action. Adds a new repair detail to the table.
+     * Handles the "Thêm chi tiết" button action.
+     * Adds either a part (VatTu) or a labor service (TienCong) to the repair details list.
      */
     @FXML
     private void handleThemChiTiet() {
-        String selectedVatTu = cbVatTu.getValue();
-        String soLuongText = txtSoLuongVatTu.getText().trim();
-        TienCong selectedTienCong = cbTienCong.getSelectionModel().getSelectedItem(); // Changed to TienCong
+        String selectedVatTuName = cbVatTu.getValue();
+        TienCong selectedTienCong = cbTienCong.getValue();
+        String soLuongStr = txtSoLuongVatTu.getText().trim();
 
-        // Validate inputs
-        if (selectedVatTu == null && selectedTienCong == null) {
-            AlertUtils.showWarningAlert("Thiếu thông tin", "Vui lòng chọn Vật tư hoặc Tiền công.");
+        if (selectedVatTuName == null && selectedTienCong == null) {
+            AlertUtils.showWarningAlert("Chưa chọn mục", "Vui lòng chọn một vật tư hoặc một loại tiền công để thêm.");
             return;
         }
 
-        int soLuong = 0;
-        if (selectedVatTu != null) {
-            if (soLuongText.isEmpty() || !soLuongText.matches("\\d+")) {
-                AlertUtils.showWarningAlert("Lỗi số lượng", "Vui lòng nhập số lượng vật tư hợp lệ.");
-                return;
-            }
-            soLuong = Integer.parseInt(soLuongText);
-            if (soLuong <= 0) {
-                AlertUtils.showWarningAlert("Lỗi số lượng", "Số lượng vật tư phải lớn hơn 0.");
-                return;
-            }
+        if (selectedVatTuName != null && selectedTienCong != null) {
+            AlertUtils.showWarningAlert("Chọn quá nhiều", "Vui lòng chỉ chọn vật tư hoặc tiền công, không chọn cả hai.");
+            return;
         }
 
         try {
-            ChiTietSuaChua chiTiet = new ChiTietSuaChua();
-            double donGiaHienThi = 0.0; // Price for display (DonGiaBan for materials)
-            double thanhTien = 0.0;
-            double donGiaNhapChoChiPhi = 0.0; // Cost price (DonGiaNhap for materials)
-
-            if (selectedVatTu != null) {
-                VatTu vatTu = vatTuDAO.getVatTuByName(selectedVatTu);
-                if (vatTu == null) {
-                    AlertUtils.showErrorAlert("Lỗi", "Vật tư không tồn tại.");
+            if (selectedVatTuName != null) {
+                // Handle adding VatTu
+                if (soLuongStr.isEmpty() || !soLuongStr.matches("\\d+") || Integer.parseInt(soLuongStr) <= 0) {
+                    AlertUtils.showWarningAlert("Số lượng không hợp lệ", "Vui lòng nhập số lượng là một số nguyên dương.");
                     return;
                 }
-                chiTiet.setMaVatTu(vatTu.getMaVatTu());
-                chiTiet.setNoiDung(vatTu.getTenVatTu());
-                chiTiet.setLoai("Vật tư");
-                chiTiet.setSoLuong(soLuong);
+                int soLuong = Integer.parseInt(soLuongStr);
+                VatTu vatTu = vatTuDAO.getVatTuByName(selectedVatTuName);
 
-                donGiaHienThi = vatTu.getDonGiaBan(); // Giá bán ra để hiển thị và tính tiền khách
-                thanhTien += vatTu.getDonGiaBan() * soLuong;
-
-                // Lấy DonGiaNhap từ ChiTietPhieuNhapKhoVatTuDAO để tính chi phí
-                donGiaNhapChoChiPhi = chiTietPhieuNhapKhoVatTuDAO.getLatestDonGiaNhapByMaVatTu(vatTu.getMaVatTu());
-                if (donGiaNhapChoChiPhi == 0.0) {
-                    AlertUtils.showWarningAlert("Cảnh báo", "Không tìm thấy giá vốn nhập kho cho vật tư \'" + vatTu.getTenVatTu() + "\'. Chi phí sẽ được tính là 0.");
+                if (vatTu.getSoLuongTon() < soLuong) {
+                    AlertUtils.showErrorAlert("Không đủ tồn kho", "Số lượng tồn kho của " + vatTu.getTenVatTu() + " không đủ (còn " + vatTu.getSoLuongTon() + ").");
+                    return;
                 }
-                chiTiet.setDonGiaNhapThoiDiemSuaChua(donGiaNhapChoChiPhi); // Set giá vốn vào model chi tiết
+                
+                // For simplicity, using DonGiaBan. A better approach would be to get DonGiaNhap from PhieuNhapKho.
+                double donGia = vatTu.getDonGiaBan(); 
+                double thanhTien = soLuong * donGia;
+
+                ChiTietPhieuSuaChua_VatTu chiTietVatTu = new ChiTietPhieuSuaChua_VatTu();
+                chiTietVatTu.setMaVatTu(vatTu.getMaVatTu());
+                chiTietVatTu.setTenVatTu(vatTu.getTenVatTu());
+                chiTietVatTu.setSoLuong(soLuong);
+                chiTietVatTu.setDonGiaNhap(donGia); // Using selling price as cost price for now
+                chiTietVatTu.setThanhTien(thanhTien);
+                
+                danhSachVatTu.add(chiTietVatTu);
+                updateDisplayList();
+
+
+            } else { // Handle adding TienCong
+                double donGia = selectedTienCong.getDonGia();
+                double thanhTien = donGia; // Quantity is always 1 for labor
+
+                ChiTietPhieuSuaChua_TienCong chiTietTienCong = new ChiTietPhieuSuaChua_TienCong();
+                chiTietTienCong.setMaTienCong(selectedTienCong.getMaTienCong());
+                chiTietTienCong.setNoiDungTienCong(selectedTienCong.getNoiDung());
+                chiTietTienCong.setDonGia(donGia);
+                chiTietTienCong.setThanhTien(thanhTien);
+
+                danhSachTienCong.add(chiTietTienCong);
+                updateDisplayList();
             }
-
-            if (selectedTienCong != null) {
-                // Get selected TienCong and quantity
-                double donGia = selectedTienCong.getDonGia(); // Directly get donGia from TienCong object
-                chiTiet.setMaTienCong(selectedTienCong.getMaTienCong());
-                chiTiet.setNoiDung(selectedTienCong.getNoiDung());
-                chiTiet.setLoai("Tiền công");
-                chiTiet.setSoLuong(1); // Labor is usually 1 unit
-                donGiaHienThi = donGia; // Giá tiền công để hiển thị và tính tiền khách
-                thanhTien += donGia;
-                // For labor, DonGiaNhapThoiDiemSuaChua is typically 0 or not applicable
-                chiTiet.setDonGiaNhapThoiDiemSuaChua(0.0); // No cost price for labor itself
-            }
-
-            // Set DonGia for display (this will be DonGiaBan for materials or DonGiaTienCong for labor)
-            chiTiet.setDonGia(donGiaHienThi);
-            chiTiet.setThanhTien(thanhTien);
-            chiTiet.setStt(danhSachChiTietSuaChua.size() + 1); // Set STT
-
-            danhSachChiTietSuaChua.add(chiTiet);
-
-            // Clear inputs after adding
-            cbVatTu.getSelectionModel().clearSelection();
-            txtSoLuongVatTu.clear();
-            cbTienCong.getSelectionModel().clearSelection();
-
         } catch (SQLException e) {
-            AlertUtils.showErrorAlert("Lỗi thêm chi tiết", "Đã xảy ra lỗi khi thêm chi tiết sửa chữa: " + e.getMessage());
-            e.printStackTrace();
+            AlertUtils.showErrorAlert("Lỗi cơ sở dữ liệu", "Lỗi khi truy xuất dữ liệu: " + e.getMessage());
+        }
+
+        // Clear inputs after adding
+        cbVatTu.getSelectionModel().clearSelection();
+        cbTienCong.getSelectionModel().clearSelection();
+        txtSoLuongVatTu.clear();
+    }
+
+
+    /**
+     * Refreshes the display TableView from the underlying data lists.
+     */
+    private void updateDisplayList() {
+        danhSachChiTietDisplay.clear();
+        int stt = 1;
+        for (ChiTietPhieuSuaChua_VatTu vt : danhSachVatTu) {
+            danhSachChiTietDisplay.add(new ChiTietSuaChuaDisplay(
+                    stt++,
+                    vt.getTenVatTu(),
+                    "Vật tư",
+                    vt.getSoLuong(),
+                    vt.getDonGiaNhap(),
+                    vt.getThanhTien(),
+                    vt
+            ));
+        }
+        for (ChiTietPhieuSuaChua_TienCong tc : danhSachTienCong) {
+            danhSachChiTietDisplay.add(new ChiTietSuaChuaDisplay(
+                    stt++,
+                    tc.getNoiDungTienCong(),
+                    "Tiền công",
+                    1,
+                    tc.getDonGia(),
+                    tc.getThanhTien(),
+                    tc
+            ));
         }
     }
 
+
     /**
-     * Handles the "Xóa mục" button action. Removes selected repair detail from the table.
+     * Handles the "Xóa chi tiết" button action.
+     * Removes the selected item from the details list.
      */
     @FXML
     private void handleXoaChiTiet() {
-        ChiTietSuaChua selectedItem = tblChiTietSuaChua.getSelectionModel().getSelectedItem();
-        if (selectedItem != null) {
-            Alert confirmationAlert = new Alert(Alert.AlertType.CONFIRMATION);
-            confirmationAlert.setTitle("Xác nhận xóa");
-            confirmationAlert.setHeaderText(null);
-            confirmationAlert.setContentText("Bạn có chắc chắn muốn xóa mục này?");
-
-            Optional<ButtonType> result = confirmationAlert.showAndWait();
-            if (result.isPresent() && result.get() == ButtonType.OK) {
-                danhSachChiTietSuaChua.remove(selectedItem);
-                // Re-index STT after removal
-                for (int i = 0; i < danhSachChiTietSuaChua.size(); i++) {
-                    danhSachChiTietSuaChua.get(i).setStt(i + 1);
-                }
-            }
-        } else {
-            AlertUtils.showWarningAlert("Chưa chọn mục", "Vui lòng chọn một mục để xóa.");
+        ChiTietSuaChuaDisplay selectedItem = tblChiTietSuaChua.getSelectionModel().getSelectedItem();
+        if (selectedItem == null) {
+            AlertUtils.showWarningAlert("Chưa chọn mục", "Vui lòng chọn một mục trong bảng để xóa.");
+            return;
         }
+
+        Object originalObject = selectedItem.getOriginalObject();
+        if (originalObject instanceof ChiTietPhieuSuaChua_VatTu) {
+            danhSachVatTu.remove((ChiTietPhieuSuaChua_VatTu) originalObject);
+        } else if (originalObject instanceof ChiTietPhieuSuaChua_TienCong) {
+            danhSachTienCong.remove((ChiTietPhieuSuaChua_TienCong) originalObject);
+        }
+        
+        updateDisplayList();
     }
 
     /**
-     * Calculates the total amount of the repair slip and updates the label.
+     * Calculates the total amount for the repair slip and displays it.
      */
     private void calculateAndDisplayTotal() {
-        double total = 0.0;
-        for (ChiTietSuaChua chiTiet : danhSachChiTietSuaChua) {
-            total += chiTiet.getThanhTien();
+        double total = 0;
+        for (ChiTietSuaChuaDisplay item : danhSachChiTietDisplay) {
+            total += item.thanhTien.get();
         }
-        lblTongTienPhieuSC.setText(String.format("%.2f VNĐ", total));
+        lblTongTienPhieuSC.setText(String.format("%,.0f VNĐ", total));
     }
 
     /**
-     * Handles the "Lập phiếu sửa chữa" button action. Saves the repair slip and its details to the database.
+     * Handles the "Lập phiếu sửa chữa" button action.
+     * Saves the repair slip and its details to the database.
      */
     @FXML
     private void handleLapPhieuSuaChua() {
+        // 1. Validate inputs
         if (selectedTiepNhan == null) {
-            AlertUtils.showWarningAlert("Thiếu thông tin", "Vui lòng chọn một hồ sơ tiếp nhận trước khi lập phiếu sửa chữa.");
+            AlertUtils.showWarningAlert("Chưa chọn xe", "Vui lòng tìm và chọn một hồ sơ xe để lập phiếu.");
             return;
         }
-        if (danhSachChiTietSuaChua.isEmpty()) {
-            AlertUtils.showWarningAlert("Thiếu chi tiết", "Vui lòng thêm ít nhất một chi tiết sửa chữa.");
+        if (danhSachChiTietDisplay.isEmpty()) {
+            AlertUtils.showWarningAlert("Phiếu trống", "Vui lòng thêm ít nhất một vật tư hoặc tiền công vào phiếu.");
             return;
         }
         LocalDate ngaySuaChua = dpNgaySuaChua.getValue();
         if (ngaySuaChua == null) {
-            AlertUtils.showWarningAlert("Thiếu thông tin", "Vui lòng chọn ngày sửa chữa.");
+            AlertUtils.showWarningAlert("Thiếu ngày sửa chữa", "Vui lòng chọn ngày sửa chữa.");
+            return;
+        }
+        String tenTho = cbThoPhanCong.getValue();
+        if (tenTho == null || tenTho.isEmpty()) {
+            AlertUtils.showWarningAlert("Thiếu thợ", "Vui lòng chọn một thợ để phân công.");
             return;
         }
 
-        String selectedThoName = cbThoPhanCong.getValue();
-        Integer maTho = null;
-        if (selectedThoName != null && !selectedThoName.isEmpty()) {
-            try {
-                Tho tho = thoDAO.getThoByName(selectedThoName); // Assuming you have getThoByName in ThoDAO
-                if (tho != null) {
-                    maTho = tho.getMaTho();
-                }
-            } catch (SQLException e) {
-                AlertUtils.showErrorAlert("Lỗi thợ", "Không thể lấy thông tin thợ: " + e.getMessage());
-                e.printStackTrace();
+        try {
+            // 2. Get the assigned mechanic's ID
+            Tho tho = thoDAO.getThoByName(tenTho);
+            if (tho == null) {
+                AlertUtils.showErrorAlert("Lỗi dữ liệu", "Không tìm thấy thợ được chọn trong cơ sở dữ liệu.");
                 return;
             }
-        }
 
-        try {
-            // 1. Create PhieuSuaChua
-            PhieuSuaChua phieuSuaChua = new PhieuSuaChua();
-            phieuSuaChua.setMaTiepNhan(selectedTiepNhan.getMaTiepNhan());
-            phieuSuaChua.setNgaySuaChua(ngaySuaChua);
-            phieuSuaChua.setGhiChu(txtGhiChu.getText().trim());
-            phieuSuaChua.setTongTien(Double.parseDouble(lblTongTienPhieuSC.getText().replace(" VNĐ", "").replace(",", ""))); // Get total from label
-            if (maTho != null) {
-                phieuSuaChua.setMaTho(maTho);
-            }
-            phieuSuaChua.setTrangThaiHoanTat(false); // Initially not completed
+            // 3. Create and save the PhieuSuaChua
+            PhieuSuaChua newPhieu = new PhieuSuaChua();
+            newPhieu.setMaTiepNhan(selectedTiepNhan.getMaTiepNhan());
+            newPhieu.setNgaySuaChua(ngaySuaChua);
+            newPhieu.setGhiChu(txtGhiChu.getText());
+            newPhieu.setMaTho(tho.getMaTho());
+            newPhieu.setTongTien(Double.parseDouble(lblTongTienPhieuSC.getText().replaceAll("[^\\d]", "")));
+            newPhieu.setTrangThaiHoanTat(false); // Default status
 
-            int maPhieuSC = phieuSuaChuaDAO.addPhieuSuaChua(phieuSuaChua);
+            int maPhieuSC = phieuSuaChuaDAO.addPhieuSuaChua(newPhieu);
 
-            // 2. Add ChiTietSuaChua
-            for (ChiTietSuaChua chiTiet : danhSachChiTietSuaChua) {
-                chiTiet.setMaPhieuSC(maPhieuSC);
-                chiTietSuaChuaDAO.addChiTietSuaChua(chiTiet);
-
-                // 3. Update SoLuongTon for VatTu
-                if (chiTiet.getMaVatTu() != 0) { // Assuming 0 means no MaVatTu
-                    VatTu vatTu = vatTuDAO.getVatTuById(chiTiet.getMaVatTu());
-                    if (vatTu != null) {
-                        vatTu.setSoLuongTon(vatTu.getSoLuongTon() - chiTiet.getSoLuong());
-                        vatTuDAO.updateVatTu(vatTu);
-                    }
-                }
+            // 4. Save the details (VatTu and TienCong)
+            for (ChiTietPhieuSuaChua_VatTu vtDetail : danhSachVatTu) {
+                vtDetail.setMaPhieuSC(maPhieuSC);
+                chiTietVatTuDAO.addChiTietVatTu(vtDetail);
+                
+                // Update stock quantity
+                VatTu vatTuToUpdate = vatTuDAO.getVatTuById(vtDetail.getMaVatTu());
+                int newQuantity = vatTuToUpdate.getSoLuongTon() - vtDetail.getSoLuong();
+                vatTuDAO.updateSoLuongTon(vatTuToUpdate.getMaVatTu(), newQuantity);
             }
 
-            // 4. Update TongTienNo for the selected TiepNhan record
-            double currentTongTienNo = selectedTiepNhan.getTongTienNo();
-            double newTongTienNo = currentTongTienNo + phieuSuaChua.getTongTien();
-            selectedTiepNhan.setTongTienNo(newTongTienNo);
-            // TrangThaiHoanTat for TiepNhan should only be true if TongTienNo is 0
-            // We don't set it to true here, only when payment is received and debt becomes 0
-            tiepNhanDAO.updateTongTienNoAndTrangThai(selectedTiepNhan.getMaTiepNhan(), newTongTienNo, selectedTiepNhan.isTrangThaiHoanTat());
+            for (ChiTietPhieuSuaChua_TienCong tcDetail : danhSachTienCong) {
+                tcDetail.setMaPhieuSC(maPhieuSC);
+                chiTietTienCongDAO.addChiTietTienCong(tcDetail);
+            }
+            
+            // 5. Update the car's debt and status in TiepNhan table
+            double themTienNo = newPhieu.getTongTien();
+            tiepNhanDAO.updateTienNoAndTrangThaiXe(selectedTiepNhan.getMaTiepNhan(), themTienNo, "Đang sửa");
+
 
             AlertUtils.showInformationAlert("Thành công", "Lập phiếu sửa chữa thành công!");
-            handleLamMoiPhieu(); // Clear form after successful submission
+            handleLamMoiPhieu(); // Clear the form for the next entry
 
         } catch (SQLException e) {
-            AlertUtils.showErrorAlert("Lỗi cơ sở dữ liệu", "Đã xảy ra lỗi khi lập phiếu sửa chữa: " + e.getMessage());
+            AlertUtils.showErrorAlert("Lỗi cơ sở dữ liệu", "Không thể lưu phiếu sửa chữa: " + e.getMessage());
             e.printStackTrace();
         } catch (NumberFormatException e) {
-            AlertUtils.showErrorAlert("Lỗi dữ liệu", "Tổng tiền không hợp lệ. Vui lòng kiểm tra lại.");
+            AlertUtils.showErrorAlert("Lỗi định dạng", "Lỗi khi đọc tổng tiền. Vui lòng kiểm tra lại.");
             e.printStackTrace();
         }
     }
 
     /**
-     * Handles the "Làm mới" button action. Clears all input fields and table.
+     * Handles the "Làm mới" button action. Clears all inputs and selections.
      */
     @FXML
     private void handleLamMoiPhieu() {
         txtBienSoXeSearch.clear();
         clearVehicleInfoLabels();
-        danhSachChiTietSuaChua.clear();
-        calculateAndDisplayTotal();
-        dpNgaySuaChua.setValue(LocalDate.now());
-        txtGhiChu.clear();
+        selectedTiepNhan = null;
+
+        danhSachVatTu.clear();
+        danhSachTienCong.clear();
+        danhSachChiTietDisplay.clear();
+
         cbVatTu.getSelectionModel().clearSelection();
         txtSoLuongVatTu.clear();
         cbTienCong.getSelectionModel().clearSelection();
-        cbThoPhanCong.getSelectionModel().clearSelection(); // Clear mechanic selection
-        selectedTiepNhan = null; // Clear selected TiepNhan
+        tblChiTietSuaChua.getSelectionModel().clearSelection();
+        lblTongTienPhieuSC.setText("0 VNĐ");
+        dpNgaySuaChua.setValue(LocalDate.now());
+        txtGhiChu.clear();
+        cbThoPhanCong.getSelectionModel().clearSelection();
+        
         setFormEnabled(false);
     }
 }

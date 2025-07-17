@@ -9,6 +9,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import model.Tho;
 import dao.ThoDAO;
+import dao.PhieuSuaChuaDAO; // Import the DAO
 import utils.AlertUtils;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -46,11 +47,13 @@ public class QuanLyThoController {
     private TableColumn<Tho, String> colChuyenMon;
 
     private ThoDAO thoDAO;
+    private PhieuSuaChuaDAO phieuSuaChuaDAO; // Add the DAO
     private ObservableList<Tho> thoList;
 
     @FXML
     public void initialize() {
         thoDAO = new ThoDAO();
+        phieuSuaChuaDAO = new PhieuSuaChuaDAO(); // Initialize the DAO
         thoList = FXCollections.observableArrayList();
 
         // Configure TableView columns
@@ -124,6 +127,12 @@ public class QuanLyThoController {
         }
 
         try {
+            // Check for duplicate phone number
+            if (thoDAO.getThoByDienThoai(dienThoai) != null) {
+                AlertUtils.showErrorAlert("Lỗi trùng lặp", "Số điện thoại này đã được sử dụng cho một thợ khác.");
+                return;
+            }
+
             Tho newTho = new Tho();
             newTho.setTenTho(hoTen);
             newTho.setSoDienThoai(dienThoai);
@@ -168,6 +177,13 @@ public class QuanLyThoController {
         }
 
         try {
+            // Check if the new phone number duplicates another existing entry
+            Tho existingTho = thoDAO.getThoByDienThoai(dienThoaiMoi);
+            if (existingTho != null && existingTho.getMaTho() != selectedTho.getMaTho()) {
+                AlertUtils.showErrorAlert("Lỗi trùng lặp", "Số điện thoại này đã được sử dụng cho một thợ khác.");
+                return;
+            }
+
             selectedTho.setTenTho(hoTenMoi);
             selectedTho.setSoDienThoai(dienThoaiMoi);
             selectedTho.setChuyenMon(chuyenMonMoi);
@@ -192,21 +208,23 @@ public class QuanLyThoController {
             return;
         }
 
-        if (AlertUtils.showConfirmationAlert("Xác nhận xóa", "Bạn có chắc chắn muốn xóa thợ \'" + selectedTho.getTenTho() + "\' không?")) {
-            try {
+        try {
+            // Check if the mechanic is used in any repair slips
+            boolean isUsed = phieuSuaChuaDAO.isThoUsed(selectedTho.getMaTho());
+            if (isUsed) {
+                AlertUtils.showErrorAlert("Không thể xóa", "Thợ này đã được phân công trong các phiếu sửa chữa và không thể xóa.");
+                return;
+            }
+
+            if (AlertUtils.showConfirmationAlert("Xác nhận xóa", "Bạn có chắc chắn muốn xóa thợ '" + selectedTho.getTenTho() + "' không?")) {
                 thoDAO.deleteTho(selectedTho.getMaTho());
                 AlertUtils.showInformationAlert("Thành công", "Xóa thợ thành công!");
                 loadThoData();
                 clearFields();
-            } catch (SQLException e) {
-                // Handle foreign key constraint violation (e.g., if there are assignments for this mechanic)
-                if (e.getMessage() != null && e.getMessage().contains("REFERENCE constraint")) {
-                    AlertUtils.showErrorAlert("Lỗi ràng buộc khóa ngoại", "Không thể xóa thợ này vì có dữ liệu liên quan trong các bảng khác (ví dụ: phân công thợ, sửa chữa).");
-                } else {
-                    AlertUtils.showErrorAlert("Lỗi cơ sở dữ liệu", "Lỗi khi xóa thợ: " + e.getMessage());
-                }
-                e.printStackTrace();
             }
+        } catch (SQLException e) {
+            AlertUtils.showErrorAlert("Lỗi cơ sở dữ liệu", "Lỗi khi xóa thợ: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

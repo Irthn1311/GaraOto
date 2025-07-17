@@ -110,6 +110,31 @@ public class ThoDAO {
     }
 
     /**
+     * Lấy một thợ theo số điện thoại.
+     * @param dienThoai Số điện thoại của thợ.
+     * @return Đối tượng Tho nếu tìm thấy, ngược lại là null.
+     * @throws SQLException nếu có lỗi truy cập cơ sở dữ liệu.
+     */
+    public Tho getThoByDienThoai(String dienThoai) throws SQLException {
+        String sql = "SELECT MaTho, TenTho, SoDienThoai, ChuyenMon FROM Tho WHERE SoDienThoai = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, dienThoai);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    Tho tho = new Tho();
+                    tho.setMaTho(rs.getInt("MaTho"));
+                    tho.setTenTho(rs.getString("TenTho"));
+                    tho.setSoDienThoai(rs.getString("SoDienThoai"));
+                    tho.setChuyenMon(rs.getString("ChuyenMon"));
+                    return tho;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Cập nhật thông tin thợ trong cơ sở dữ liệu.
      * @param tho Đối tượng Tho với thông tin đã cập nhật.
      * @throws SQLException nếu có lỗi truy cập cơ sở dữ liệu.

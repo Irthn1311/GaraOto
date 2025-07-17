@@ -71,10 +71,10 @@
                         </Label>
                         <TextField fx:id="txtHoTen" promptText="Nhập họ tên người dùng" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-                        <Label text="Loại tài khoản:" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                        <Label text="Phân quyền:" GridPane.columnIndex="2" GridPane.rowIndex="1">
                             <font><Font size="14.0" /></font>
                         </Label>
-                        <ComboBox fx:id="cbLoaiTaiKhoan" prefWidth="300.0" promptText="Chọn loại tài khoản" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                        <ComboBox fx:id="cmbPhanQuyen" prefWidth="300.0" promptText="Chọn nhóm quyền" GridPane.columnIndex="3" GridPane.rowIndex="1" />
 
                         <Label text="Trạng thái:" GridPane.columnIndex="0" GridPane.rowIndex="2">
                             <font><Font size="14.0" /></font>
@@ -88,6 +88,7 @@
                         <Button fx:id="btnSua" mnemonicParsing="false" onAction="#handleSuaTaiKhoan" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #007bff; -fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-background-radius: 5;" text="Sửa" />
                         <Button fx:id="btnXoa" mnemonicParsing="false" onAction="#handleXoaTaiKhoan" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #dc3545; -fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-background-radius: 5;" text="Xóa" />
                         <Button fx:id="btnLamMoi" mnemonicParsing="false" onAction="#handleLamMoi" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #6c757d; -fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-background-radius: 5;" text="Làm mới" />
+                        <Button fx:id="btnResetPassword" mnemonicParsing="false" onAction="#handleResetPassword" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #ffc107; -fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-background-radius: 5;" text="Reset Mật khẩu" />
                     </children>
                 </HBox>
             </children>
@@ -115,7 +116,7 @@
                         <TableColumn fx:id="colMaTK" prefWidth="80.0" text="Mã TK" />
                         <TableColumn fx:id="colTenDangNhap" prefWidth="150.0" text="Tên đăng nhập" />
                         <TableColumn fx:id="colHoTen" prefWidth="200.0" text="Họ tên" />
-                        <TableColumn fx:id="colLoaiTaiKhoan" prefWidth="150.0" text="Loại tài khoản" />
+                        <TableColumn fx:id="colPhanQuyen" prefWidth="150.0" text="Phân quyền" />
                         <TableColumn fx:id="colTrangThai" prefWidth="100.0" text="Trạng thái" />
                     </columns>
                     <columnResizePolicy>

@@ -45,6 +45,20 @@ public class AlertUtils {
         alert.showAndWait();
     }
 
+    /**
+     * Displays a success alert dialog.
+     * @param title The title of the alert dialog.
+     * @param message The content message of the alert dialog.
+     */
+    public static void showSuccessAlert(String title, String message) {
+        Alert alert = new Alert(AlertType.INFORMATION); // Often uses INFORMATION type
+        alert.setTitle(title);
+        alert.setHeaderText("Thành công");
+        alert.setContentText(message);
+        alert.getDialogPane().setStyle("-fx-border-color: green; -fx-border-width: 2px;");
+        alert.showAndWait();
+    }
+
     public static boolean showConfirmationAlert(String title, String message) {
         Alert alert = new Alert(AlertType.CONFIRMATION);
         alert.setTitle(title);

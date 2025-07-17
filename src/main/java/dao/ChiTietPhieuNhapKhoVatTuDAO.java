@@ -55,6 +55,20 @@ public class ChiTietPhieuNhapKhoVatTuDAO {
         return chiTietList;
     }
 
+    public boolean isVatTuUsedInAnyPhieuNhap(int maVatTu) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM ChiTietPhieuNhapKhoVatTu WHERE MaVatTu = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, maVatTu);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
+
     /**
      * Updates an existing detail for a parts receipt.
      * @param chiTiet The ChiTietPhieuNhapKhoVatTu object with updated information.
@@ -110,11 +124,7 @@ public class ChiTietPhieuNhapKhoVatTuDAO {
      * @throws SQLException if a database access error occurs.
      */
     public double getLatestDonGiaNhapByMaVatTu(int maVatTu) throws SQLException {
-        String sql = "SELECT TOP 1 ctpn.DonGiaNhap " +
-                     "FROM ChiTietPhieuNhapKhoVatTu ctpn " +
-                     "JOIN PhieuNhapKhoVatTu pnk ON ctpn.MaPhieuNhap = pnk.MaPhieuNhap " +
-                     "WHERE ctpn.MaVatTu = ? " +
-                     "ORDER BY pnk.NgayNhap DESC, ctpn.MaPhieuNhap DESC;";
+        String sql = "SELECT TOP 1 DonGiaNhap FROM ChiTietPhieuNhapKhoVatTu WHERE MaVatTu = ? ORDER BY MaPhieuNhap DESC, MaChiTietPhieuNhap DESC";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, maVatTu);
@@ -124,6 +134,6 @@ public class ChiTietPhieuNhapKhoVatTuDAO {
                 }
             }
         }
-        return 0.0; // Return 0.0 if no entry found
+        return 0.0; // Return 0 if no import record found
     }
 }

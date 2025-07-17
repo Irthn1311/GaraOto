@@ -62,7 +62,7 @@ public class RegisterController {
 
         try {
             // 2. Check if username already exists
-            if (taiKhoanNguoiDungDAO.getTaiKhoanNguoiDungByTenDangNhap(username) != null) { // Changed method name
+            if (taiKhoanNguoiDungDAO.checkUsernameExists(username)) {
                 AlertUtils.showErrorAlert("Lỗi đăng ký", "Tên đăng nhập đã tồn tại. Vui lòng chọn tên khác.");
                 return;
             }
@@ -70,19 +70,19 @@ public class RegisterController {
             // 3. Hash password
             String hashedPassword = PasswordHasher.hashPassword(password);
 
-            // 4. Create new user account (default to "NhanVienTiepNhan" for new registrations)
+            // 4. Create new user account. By default, they have no role (MaPhanQuyen is null).
+            // An admin must assign a role later.
             TaiKhoanNguoiDung newUser = new TaiKhoanNguoiDung();
             newUser.setHoTen(hoTen);
             newUser.setTenDangNhap(username);
             newUser.setMatKhauHash(hashedPassword);
-            newUser.setLoaiTaiKhoan("NhanVienTiepNhan"); // Default type for new registrations
-            newUser.setTrangThai(true); // New: Default to active
+            newUser.setMaPhanQuyen(null); // No role assigned upon registration
+            newUser.setTrangThai(true); 
 
-            int newAccountId = taiKhoanNguoiDungDAO.addTaiKhoanNguoiDung(newUser); // Changed method name
+            boolean success = taiKhoanNguoiDungDAO.addTaiKhoanNguoiDung(newUser);
 
-            if (newAccountId != -1) {
-                AlertUtils.showInformationAlert("Thành công", "Đăng ký tài khoản thành công! Bạn có thể đăng nhập ngay bây giờ.");
-                // Redirect back to login screen
+            if (success) {
+                AlertUtils.showSuccessAlert("Thành công", "Đăng ký tài khoản thành công! Vui lòng chờ quản trị viên cấp quyền để đăng nhập.");
                 handleBackToLogin();
             } else {
                 AlertUtils.showErrorAlert("Lỗi đăng ký", "Không thể đăng ký tài khoản. Vui lòng thử lại.");

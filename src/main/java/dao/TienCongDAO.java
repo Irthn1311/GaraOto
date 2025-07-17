@@ -134,4 +134,22 @@ public class TienCongDAO {
             return pstmt.executeUpdate() > 0;
         }
     }
+    
+    public TienCong getTienCongByNoiDung(String noiDung) throws SQLException {
+        String sql = "SELECT * FROM TienCong WHERE NoiDung = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, noiDung);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return new TienCong(
+                            rs.getInt("MaTienCong"),
+                            rs.getString("NoiDung"),
+                            rs.getDouble("DonGia")
+                    );
+                }
+            }
+        }
+        return null;
+    }
 }

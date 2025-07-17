@@ -10,6 +10,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import model.HieuXe;
 import dao.HieuXeDAO;
+import dao.XeDAO; // Import XeDAO
 import utils.AlertUtils;
 
 import java.sql.SQLException;
@@ -37,11 +38,13 @@ public class QuanLyHieuXeController {
     private TableColumn<HieuXe, String> colTenHieuXe;
 
     private HieuXeDAO hieuXeDAO;
+    private XeDAO xeDAO; // Add XeDAO
     private ObservableList<HieuXe> hieuXeList;
 
     @FXML
     public void initialize() {
         hieuXeDAO = new HieuXeDAO();
+        xeDAO = new XeDAO(); // Initialize XeDAO
         hieuXeList = FXCollections.observableArrayList();
 
         // Configure TableView columns
@@ -173,22 +176,24 @@ public class QuanLyHieuXeController {
             AlertUtils.showWarningAlert("Chưa chọn", "Vui lòng chọn một hiệu xe để xóa.");
             return;
         }
+        
+        try {
+            // Check if the car brand is being used by any car
+            boolean isUsed = xeDAO.isHieuXeUsed(selectedHieuXe.getMaHieuXe());
+            if (isUsed) {
+                AlertUtils.showErrorAlert("Không thể xóa", "Hiệu xe này đang được sử dụng bởi một hoặc nhiều xe và không thể xóa.");
+                return;
+            }
 
-        if (AlertUtils.showConfirmationAlert("Xác nhận xóa", "Bạn có chắc chắn muốn xóa hiệu xe '" + selectedHieuXe.getTenHieuXe() + "' không?")) {
-            try {
+            if (AlertUtils.showConfirmationAlert("Xác nhận xóa", "Bạn có chắc chắn muốn xóa hiệu xe '" + selectedHieuXe.getTenHieuXe() + "' không?")) {
                 hieuXeDAO.deleteHieuXe(selectedHieuXe.getMaHieuXe());
                 AlertUtils.showInformationAlert("Thành công", "Xóa hiệu xe thành công!");
                 loadHieuXeData();
                 clearFields();
-            } catch (SQLException e) {
-                // Handle foreign key constraint violation (e.g., if there are cars with this brand)
-                if (e.getSQLState().startsWith("23")) { // SQLSTATE for integrity constraint violation
-                    AlertUtils.showErrorAlert("Lỗi ràng buộc", "Không thể xóa hiệu xe này vì có xe đang sử dụng hiệu xe này. Vui lòng xóa các xe liên quan trước.");
-                } else {
-                    AlertUtils.showErrorAlert("Lỗi cơ sở dữ liệu", "Lỗi khi xóa hiệu xe: " + e.getMessage());
-                }
-                e.printStackTrace();
             }
+        } catch (SQLException e) {
+            AlertUtils.showErrorAlert("Lỗi cơ sở dữ liệu", "Lỗi khi xóa hiệu xe: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

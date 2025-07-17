@@ -23,8 +23,8 @@ public class PhieuSuaChua {
     private IntegerProperty maTho; // New: FK to Tho
     private BooleanProperty trangThaiHoanTat; // New: Status for this specific repair slip
 
-    // New property to hold a list of repair details
-    private List<ChiTietSuaChua> chiTietSuaChuaList;
+    private List<ChiTietPhieuSuaChua_VatTu> chiTietVatTuList;
+    private List<ChiTietPhieuSuaChua_TienCong> chiTietTienCongList;
 
     public PhieuSuaChua() {
         this.maPhieuSC = new SimpleIntegerProperty();
@@ -34,7 +34,8 @@ public class PhieuSuaChua {
         this.tongTien = new SimpleDoubleProperty();
         this.maTho = new SimpleIntegerProperty(0); // Initialize with default value
         this.trangThaiHoanTat = new SimpleBooleanProperty(false); // Initialize with default value
-        this.chiTietSuaChuaList = new ArrayList<>(); // Initialize the list
+        this.chiTietVatTuList = new ArrayList<>();
+        this.chiTietTienCongList = new ArrayList<>();
     }
 
     // Getters
@@ -45,7 +46,9 @@ public class PhieuSuaChua {
     public double getTongTien() { return tongTien.get(); }
     public int getMaTho() { return maTho.get(); } // New Getter
     public boolean isTrangThaiHoanTat() { return trangThaiHoanTat.get(); } // New Getter
-    public List<ChiTietSuaChua> getChiTietSuaChuaList() { return chiTietSuaChuaList; }
+    public List<ChiTietPhieuSuaChua_VatTu> getChiTietVatTuList() { return chiTietVatTuList; }
+    public List<ChiTietPhieuSuaChua_TienCong> getChiTietTienCongList() { return chiTietTienCongList; }
+
 
     // Setters
     public void setMaPhieuSC(int maPhieuSC) { this.maPhieuSC.set(maPhieuSC); }
@@ -55,7 +58,9 @@ public class PhieuSuaChua {
     public void setTongTien(double tongTien) { this.tongTien.set(tongTien); }
     public void setMaTho(int maTho) { this.maTho.set(maTho); } // New Setter
     public void setTrangThaiHoanTat(boolean trangThaiHoanTat) { this.trangThaiHoanTat.set(trangThaiHoanTat); } // New Setter
-    public void setChiTietSuaChuaList(List<ChiTietSuaChua> chiTietSuaChuaList) { this.chiTietSuaChuaList = chiTietSuaChuaList; }
+    public void setChiTietVatTuList(List<ChiTietPhieuSuaChua_VatTu> chiTietVatTuList) { this.chiTietVatTuList = chiTietVatTuList; }
+    public void setChiTietTienCongList(List<ChiTietPhieuSuaChua_TienCong> chiTietTienCongList) { this.chiTietTienCongList = chiTietTienCongList; }
+
 
 
     // Properties for JavaFX binding

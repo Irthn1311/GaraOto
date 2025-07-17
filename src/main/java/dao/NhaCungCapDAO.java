@@ -86,6 +86,26 @@ public class NhaCungCapDAO {
         }
         return null;
     }
+    
+    public NhaCungCap getNhaCungCapByTen(String tenNCC) throws SQLException {
+        String sql = "SELECT * FROM NhaCungCap WHERE TenNhaCungCap = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, tenNCC);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    NhaCungCap ncc = new NhaCungCap();
+                    ncc.setMaNhaCungCap(rs.getInt("MaNhaCungCap"));
+                    ncc.setTenNhaCungCap(rs.getString("TenNhaCungCap"));
+                    ncc.setDienThoai(rs.getString("DienThoai"));
+                    ncc.setDiaChi(rs.getString("DiaChi"));
+                    ncc.setEmail(rs.getString("Email"));
+                    return ncc;
+                }
+            }
+        }
+        return null;
+    }
 
     /**
      * Updates an existing supplier (NhaCungCap) in the database.

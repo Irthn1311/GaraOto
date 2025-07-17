@@ -18,7 +18,7 @@ public class TiepNhanDAO {
      * @throws SQLException if a database access error occurs.
      */
     public int addTiepNhan(TiepNhan tiepNhan) throws SQLException {
-        String sql = "INSERT INTO TiepNhan (BienSo, NgayTiepNhan, TongTienNo, TrangThaiHoanTat) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO TiepNhan (BienSo, NgayTiepNhan, TongTienNo, TrangThaiHoanTat, TinhTrangXe, TrangThai) VALUES (?, ?, ?, ?, ?, ?)";
         int generatedId = -1;
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -26,6 +26,8 @@ public class TiepNhanDAO {
             pstmt.setDate(2, Date.valueOf(tiepNhan.getNgayTiepNhan()));
             pstmt.setDouble(3, tiepNhan.getTongTienNo());
             pstmt.setBoolean(4, tiepNhan.isTrangThaiHoanTat());
+            pstmt.setString(5, tiepNhan.getTinhTrangXe());
+            pstmt.setString(6, tiepNhan.getTrangThai());
 
             int affectedRows = pstmt.executeUpdate();
 
@@ -49,7 +51,7 @@ public class TiepNhanDAO {
      */
     public ObservableList<TiepNhan> getTiepNhanByNgayTiepNhan(LocalDate ngayTiepNhan) throws SQLException {
         ObservableList<TiepNhan> tiepNhanList = FXCollections.observableArrayList();
-        String sql = "SELECT tn.MaTiepNhan, tn.BienSo, tn.NgayTiepNhan, tn.TongTienNo, tn.TrangThaiHoanTat, " +
+        String sql = "SELECT tn.MaTiepNhan, tn.BienSo, tn.NgayTiepNhan, tn.TongTienNo, tn.TrangThaiHoanTat, tn.TinhTrangXe, tn.TrangThai, " +
                 "x.MaHieuXe, x.MaChuXe, " +
                 "cx.TenChuXe, cx.DienThoai, cx.DiaChi, " +
                 "hx.TenHieuXe " +
@@ -69,6 +71,8 @@ public class TiepNhanDAO {
                     tiepNhan.setNgayTiepNhan(rs.getDate("NgayTiepNhan").toLocalDate());
                     tiepNhan.setTongTienNo(rs.getDouble("TongTienNo"));
                     tiepNhan.setTrangThaiHoanTat(rs.getBoolean("TrangThaiHoanTat"));
+                    tiepNhan.setTinhTrangXe(rs.getString("TinhTrangXe"));
+                    tiepNhan.setTrangThai(rs.getString("TrangThai"));
 
                     // Set derived properties for TableView display
                     tiepNhan.setTenChuXe(rs.getString("TenChuXe"));
@@ -93,7 +97,7 @@ public class TiepNhanDAO {
      */
     public ObservableList<TiepNhan> getTiepNhanByBienSo(String bienSo) throws SQLException {
         ObservableList<TiepNhan> tiepNhanList = FXCollections.observableArrayList();
-        String sql = "SELECT tn.MaTiepNhan, tn.BienSo, tn.NgayTiepNhan, tn.TongTienNo, tn.TrangThaiHoanTat, " +
+        String sql = "SELECT tn.MaTiepNhan, tn.BienSo, tn.NgayTiepNhan, tn.TongTienNo, tn.TrangThaiHoanTat, tn.TinhTrangXe, tn.TrangThai, " +
                 "x.MaHieuXe, x.MaChuXe, " +
                 "cx.TenChuXe, cx.DienThoai, cx.DiaChi, " +
                 "hx.TenHieuXe " +
@@ -113,6 +117,46 @@ public class TiepNhanDAO {
                     tiepNhan.setNgayTiepNhan(rs.getDate("NgayTiepNhan").toLocalDate());
                     tiepNhan.setTongTienNo(rs.getDouble("TongTienNo"));
                     tiepNhan.setTrangThaiHoanTat(rs.getBoolean("TrangThaiHoanTat"));
+                    tiepNhan.setTinhTrangXe(rs.getString("TinhTrangXe"));
+                    tiepNhan.setTrangThai(rs.getString("TrangThai"));
+
+                    // Set derived properties for TableView display
+                    tiepNhan.setTenChuXe(rs.getString("TenChuXe"));
+                    tiepNhan.setDienThoaiChuXe(rs.getString("DienThoai"));
+                    tiepNhan.setDiaChiChuXe(rs.getString("DiaChi"));
+                    tiepNhan.setTenHieuXe(rs.getString("TenHieuXe"));
+
+                    tiepNhanList.add(tiepNhan);
+                }
+            }
+        }
+        return tiepNhanList;
+    }
+
+    public ObservableList<TiepNhan> getOustandingTiepNhanByBienSo(String bienSo) throws SQLException {
+        ObservableList<TiepNhan> tiepNhanList = FXCollections.observableArrayList();
+        String sql = "SELECT tn.MaTiepNhan, tn.BienSo, tn.NgayTiepNhan, tn.TongTienNo, tn.TrangThaiHoanTat, tn.TinhTrangXe, tn.TrangThai, " +
+                "x.MaHieuXe, x.MaChuXe, " +
+                "cx.TenChuXe, cx.DienThoai, cx.DiaChi, " +
+                "hx.TenHieuXe " +
+                "FROM TiepNhan tn " +
+                "JOIN Xe x ON tn.BienSo = x.BienSo " +
+                "JOIN ChuXe cx ON x.MaChuXe = cx.MaChuXe " +
+                "JOIN HieuXe hx ON x.MaHieuXe = hx.MaHieuXe " +
+                "WHERE tn.BienSo = ? AND tn.TongTienNo > 0 ORDER BY tn.NgayTiepNhan DESC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, bienSo);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    TiepNhan tiepNhan = new TiepNhan();
+                    tiepNhan.setMaTiepNhan(rs.getInt("MaTiepNhan"));
+                    tiepNhan.setBienSo(rs.getString("BienSo"));
+                    tiepNhan.setNgayTiepNhan(rs.getDate("NgayTiepNhan").toLocalDate());
+                    tiepNhan.setTongTienNo(rs.getDouble("TongTienNo"));
+                    tiepNhan.setTrangThaiHoanTat(rs.getBoolean("TrangThaiHoanTat"));
+                    tiepNhan.setTinhTrangXe(rs.getString("TinhTrangXe"));
+                    tiepNhan.setTrangThai(rs.getString("TrangThai"));
 
                     // Set derived properties for TableView display
                     tiepNhan.setTenChuXe(rs.getString("TenChuXe"));
@@ -135,7 +179,7 @@ public class TiepNhanDAO {
      */
     public ObservableList<TiepNhan> getAllTiepNhan() throws SQLException {
         ObservableList<TiepNhan> tiepNhanList = FXCollections.observableArrayList();
-        String sql = "SELECT tn.MaTiepNhan, tn.BienSo, tn.NgayTiepNhan, tn.TongTienNo, tn.TrangThaiHoanTat, " +
+        String sql = "SELECT tn.MaTiepNhan, tn.BienSo, tn.NgayTiepNhan, tn.TongTienNo, tn.TrangThaiHoanTat, tn.TinhTrangXe, tn.TrangThai, " +
                 "x.MaHieuXe, x.MaChuXe, " +
                 "cx.TenChuXe, cx.DienThoai, cx.DiaChi, " +
                 "hx.TenHieuXe " +
@@ -153,6 +197,8 @@ public class TiepNhanDAO {
                 tiepNhan.setNgayTiepNhan(rs.getDate("NgayTiepNhan").toLocalDate());
                 tiepNhan.setTongTienNo(rs.getDouble("TongTienNo"));
                 tiepNhan.setTrangThaiHoanTat(rs.getBoolean("TrangThaiHoanTat"));
+                tiepNhan.setTinhTrangXe(rs.getString("TinhTrangXe"));
+                tiepNhan.setTrangThai(rs.getString("TrangThai"));
 
                 // Set derived properties for TableView display
                 tiepNhan.setTenChuXe(rs.getString("TenChuXe"));
@@ -176,7 +222,7 @@ public class TiepNhanDAO {
      */
     public List<TiepNhan> getTiepNhanByDateRange(LocalDate fromDate, LocalDate toDate) throws SQLException {
         List<TiepNhan> tiepNhanList = new ArrayList<>();
-        String sql = "SELECT MaTiepNhan, BienSo, NgayTiepNhan, TongTienNo, TrangThaiHoanTat FROM TiepNhan WHERE NgayTiepNhan BETWEEN ? AND ?";
+        String sql = "SELECT MaTiepNhan, BienSo, NgayTiepNhan, TongTienNo, TrangThaiHoanTat, TinhTrangXe, TrangThai FROM TiepNhan WHERE NgayTiepNhan BETWEEN ? AND ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setDate(1, Date.valueOf(fromDate));
@@ -189,6 +235,8 @@ public class TiepNhanDAO {
                     tiepNhan.setNgayTiepNhan(rs.getDate("NgayTiepNhan").toLocalDate());
                     tiepNhan.setTongTienNo(rs.getDouble("TongTienNo"));
                     tiepNhan.setTrangThaiHoanTat(rs.getBoolean("TrangThaiHoanTat"));
+                    tiepNhan.setTinhTrangXe(rs.getString("TinhTrangXe"));
+                    tiepNhan.setTrangThai(rs.getString("TrangThai"));
                     tiepNhanList.add(tiepNhan);
                 }
             }
@@ -212,5 +260,65 @@ public class TiepNhanDAO {
             pstmt.setInt(3, maTiepNhan);
             pstmt.executeUpdate();
         }
+    }
+    
+    public void updatePaymentStatus(int maTiepNhan, double tienDaTra) throws SQLException {
+        String sql = "UPDATE TiepNhan SET TongTienNo = TongTienNo - ?, TrangThai = CASE WHEN (TongTienNo - ?) <= 0 THEN N'Đã giao' ELSE TrangThai END, TrangThaiHoanTat = CASE WHEN (TongTienNo - ?) <= 0 THEN 1 ELSE 0 END WHERE MaTiepNhan = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setDouble(1, tienDaTra);
+            pstmt.setDouble(2, tienDaTra);
+            pstmt.setDouble(3, tienDaTra);
+            pstmt.setInt(4, maTiepNhan);
+            pstmt.executeUpdate();
+        }
+    }
+
+    public void updateTienNoAndTrangThaiXe(int maTiepNhan, double themTienNo, String trangThaiMoi) throws SQLException {
+        String sql = "UPDATE TiepNhan SET TongTienNo = TongTienNo + ?, TrangThai = ? WHERE MaTiepNhan = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setDouble(1, themTienNo);
+            pstmt.setString(2, trangThaiMoi);
+            pstmt.setInt(3, maTiepNhan);
+            pstmt.executeUpdate();
+        }
+    }
+    
+    public ObservableList<TiepNhan> getAllTiepNhanCoNo() throws SQLException {
+        ObservableList<TiepNhan> tiepNhanList = FXCollections.observableArrayList();
+        String sql = "SELECT tn.MaTiepNhan, tn.BienSo, tn.NgayTiepNhan, tn.TongTienNo, tn.TrangThaiHoanTat, tn.TinhTrangXe, tn.TrangThai, " +
+                "x.MaHieuXe, x.MaChuXe, " +
+                "cx.TenChuXe, cx.DienThoai, cx.DiaChi, " +
+                "hx.TenHieuXe " +
+                "FROM TiepNhan tn " +
+                "JOIN Xe x ON tn.BienSo = x.BienSo " +
+                "JOIN ChuXe cx ON x.MaChuXe = cx.MaChuXe " +
+                "JOIN HieuXe hx ON x.MaHieuXe = hx.MaHieuXe " +
+                "WHERE tn.TongTienNo > 0 ORDER BY tn.NgayTiepNhan DESC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    TiepNhan tiepNhan = new TiepNhan();
+                    tiepNhan.setMaTiepNhan(rs.getInt("MaTiepNhan"));
+                    tiepNhan.setBienSo(rs.getString("BienSo"));
+                    tiepNhan.setNgayTiepNhan(rs.getDate("NgayTiepNhan").toLocalDate());
+                    tiepNhan.setTongTienNo(rs.getDouble("TongTienNo"));
+                    tiepNhan.setTrangThaiHoanTat(rs.getBoolean("TrangThaiHoanTat"));
+                    tiepNhan.setTinhTrangXe(rs.getString("TinhTrangXe"));
+                    tiepNhan.setTrangThai(rs.getString("TrangThai"));
+
+                    // Set derived properties for TableView display
+                    tiepNhan.setTenChuXe(rs.getString("TenChuXe"));
+                    tiepNhan.setDienThoaiChuXe(rs.getString("DienThoai"));
+                    tiepNhan.setDiaChiChuXe(rs.getString("DiaChi"));
+                    tiepNhan.setTenHieuXe(rs.getString("TenHieuXe"));
+
+                    tiepNhanList.add(tiepNhan);
+                }
+            }
+        }
+        return tiepNhanList;
     }
 }

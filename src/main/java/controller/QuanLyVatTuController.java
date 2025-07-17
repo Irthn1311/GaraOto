@@ -13,6 +13,7 @@ import dao.VatTuDAO;
 import dao.NhaCungCapDAO;
 import dao.PhieuNhapKhoVatTuDAO;
 import dao.ChiTietPhieuNhapKhoVatTuDAO;
+import dao.ChiTietPhieuSuaChua_VatTuDAO; // Import the correct DAO
 import utils.AlertUtils;
 
 import java.sql.SQLException;
@@ -67,6 +68,7 @@ public class QuanLyVatTuController {
     private NhaCungCapDAO nhaCungCapDAO;
     private PhieuNhapKhoVatTuDAO phieuNhapKhoVatTuDAO;
     private ChiTietPhieuNhapKhoVatTuDAO chiTietPhieuNhapKhoVatTuDAO;
+    private ChiTietPhieuSuaChua_VatTuDAO chiTietSuaChuaVatTuDAO; // Add the new DAO
     // private ThamSoDAO thamSoDAO; // Removed: Not directly used here
 
     // --- Observable Lists ---
@@ -84,7 +86,7 @@ public class QuanLyVatTuController {
         nhaCungCapDAO = new NhaCungCapDAO();
         phieuNhapKhoVatTuDAO = new PhieuNhapKhoVatTuDAO();
         chiTietPhieuNhapKhoVatTuDAO = new ChiTietPhieuNhapKhoVatTuDAO();
-        // thamSoDAO = new ThamSoDAO(); // Removed: Not directly used here
+        chiTietSuaChuaVatTuDAO = new ChiTietPhieuSuaChua_VatTuDAO(); // Initialize the new DAO
 
         // Initialize Observable Lists
         vatTuList = FXCollections.observableArrayList();
@@ -209,6 +211,11 @@ public class QuanLyVatTuController {
             txtDonViTinh.setText(vatTu.getDonViTinh());
             txtDonGiaBan.setText(String.valueOf(vatTu.getDonGiaBan()));
             txtMucTonKhoToiThieu.setText(String.valueOf(vatTu.getMucTonKhoToiThieu()));
+            // Disable editing of fields that should not be changed directly
+            txtTenVatTu.setDisable(false);
+            txtDonViTinh.setDisable(false);
+            txtDonGiaBan.setDisable(false);
+            txtMucTonKhoToiThieu.setDisable(false);
         } else {
             clearVatTuFields();
         }
@@ -221,6 +228,11 @@ public class QuanLyVatTuController {
         txtDonGiaBan.setText("");
         txtMucTonKhoToiThieu.setText("");
         tblVatTu.getSelectionModel().clearSelection();
+        // Re-enable fields for adding new item
+        txtTenVatTu.setDisable(false);
+        txtDonViTinh.setDisable(false);
+        txtDonGiaBan.setDisable(false);
+        txtMucTonKhoToiThieu.setDisable(false);
     }
 
     @FXML
@@ -254,18 +266,15 @@ public class QuanLyVatTuController {
             newVatTu.setTenVatTu(tenVatTu);
             newVatTu.setDonViTinh(donViTinh);
             newVatTu.setDonGiaBan(donGiaBan);
-            newVatTu.setSoLuongTon(0); // New item, initial stock is 0
+            newVatTu.setSoLuongTon(0); // Initial stock is 0, must be updated via import
             newVatTu.setMucTonKhoToiThieu(mucTonKhoToiThieu);
 
-            int generatedId = vatTuDAO.addVatTu(newVatTu);
-            if (generatedId != -1) {
-                AlertUtils.showInformationAlert("Thành công", "Thêm vật tư thành công!");
-                loadVatTuData();
-                loadVatTuNhapComboBox(); // Refresh vật tư list for import
-                clearVatTuFields();
-            } else {
-                AlertUtils.showErrorAlert("Lỗi", "Không thể thêm vật tư.");
-            }
+            vatTuDAO.addVatTu(newVatTu);
+            AlertUtils.showInformationAlert("Thành công", "Đã thêm vật tư mới thành công.");
+            loadVatTuData(); // Refresh the table
+            loadVatTuNhapComboBox(); // Refresh the combo box
+            clearVatTuFields();
+
         } catch (NumberFormatException e) {
             AlertUtils.showErrorAlert("Lỗi định dạng", "Đơn giá bán và mức tồn kho tối thiểu phải là số hợp lệ.");
         } catch (SQLException e) {
@@ -329,25 +338,34 @@ public class QuanLyVatTuController {
     private void handleXoaVatTu() {
         VatTu selectedVatTu = tblVatTu.getSelectionModel().getSelectedItem();
         if (selectedVatTu == null) {
-            AlertUtils.showWarningAlert("Chưa chọn", "Vui lòng chọn một vật tư để xóa.");
+            AlertUtils.showWarningAlert("Chưa chọn vật tư", "Vui lòng chọn một vật tư để xóa.");
             return;
         }
 
-        if (AlertUtils.showConfirmationAlert("Xác nhận xóa", "Bạn có chắc chắn muốn xóa vật tư '" + selectedVatTu.getTenVatTu() + "' không?")) {
-            try {
-                vatTuDAO.deleteVatTu(selectedVatTu.getMaVatTu());
-                AlertUtils.showInformationAlert("Thành công", "Xóa vật tư thành công!");
-                loadVatTuData();
-                loadVatTuNhapComboBox(); // Refresh vật tư list for import
-                clearVatTuFields();
-            } catch (SQLException e) {
-                if (e.getSQLState().startsWith("23")) { // SQLSTATE for integrity constraint violation
-                    AlertUtils.showErrorAlert("Lỗi ràng buộc", "Không thể xóa vật tư này vì có phiếu nhập kho hoặc phiếu sửa chữa đang sử dụng. Vui lòng xóa các mục liên quan trước.");
-                } else {
-                    AlertUtils.showErrorAlert("Lỗi cơ sở dữ liệu", "Lỗi khi xóa vật tư: " + e.getMessage());
-                }
-                e.printStackTrace();
+        try {
+            // Check if the part is used in any repair slips
+            boolean isInPhieuSuaChua = chiTietSuaChuaVatTuDAO.isVatTuUsedInAnyPhieuSuaChua(selectedVatTu.getMaVatTu());
+            if (isInPhieuSuaChua) {
+                AlertUtils.showErrorAlert("Không thể xóa", "Vật tư này đã được sử dụng trong các phiếu sửa chữa và không thể xóa.");
+                return;
             }
+
+            // Optional: Check if the part exists in any import slips.
+            boolean isInPhieuNhap = chiTietPhieuNhapKhoVatTuDAO.isVatTuUsedInAnyPhieuNhap(selectedVatTu.getMaVatTu());
+            if (isInPhieuNhap) {
+                AlertUtils.showErrorAlert("Không thể xóa", "Vật tư này đã tồn tại trong các phiếu nhập kho và không thể xóa.");
+                return;
+            }
+
+            if (AlertUtils.showConfirmationAlert("Xác nhận xóa", "Bạn có chắc chắn muốn xóa vật tư '" + selectedVatTu.getTenVatTu() + "'?")) {
+                vatTuDAO.deleteVatTu(selectedVatTu.getMaVatTu());
+                AlertUtils.showInformationAlert("Thành công", "Đã xóa vật tư thành công.");
+                loadVatTuData();
+                clearVatTuFields();
+            }
+        } catch (SQLException e) {
+            AlertUtils.showErrorAlert("Lỗi cơ sở dữ liệu", "Không thể xóa vật tư: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

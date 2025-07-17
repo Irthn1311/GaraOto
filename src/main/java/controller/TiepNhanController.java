@@ -33,6 +33,8 @@ public class TiepNhanController {
     @FXML
     private DatePicker dpNgayTiepNhan;
     @FXML
+    private TextField txtTinhTrangXe; // New field for car condition
+    @FXML
     private Label lblSoXeTrongNgay;
     @FXML
     private TableView<TiepNhan> tblXeTiepNhanTrongNgay; // Changed to TiepNhan
@@ -46,6 +48,11 @@ public class TiepNhanController {
     private TableColumn<TiepNhan, String> colDienThoai; // Changed to TiepNhan
     @FXML
     private TableColumn<TiepNhan, String> colDiaChi; // Changed to TiepNhan
+    @FXML
+    private TableColumn<TiepNhan, String> colTinhTrangXe; // New column for car condition
+    @FXML
+    private TableColumn<TiepNhan, String> colTrangThai; // New column for status
+
 
     // Data Access Objects
     private HieuXeDAO hieuXeDAO;
@@ -83,6 +90,8 @@ public class TiepNhanController {
         colHieuXe.setCellValueFactory(cellData -> cellData.getValue().tenHieuXeProperty());
         colDienThoai.setCellValueFactory(cellData -> cellData.getValue().dienThoaiChuXeProperty());
         colDiaChi.setCellValueFactory(cellData -> cellData.getValue().diaChiChuXeProperty());
+        colTinhTrangXe.setCellValueFactory(cellData -> cellData.getValue().tinhTrangXeProperty());
+        colTrangThai.setCellValueFactory(cellData -> cellData.getValue().trangThaiProperty());
 
         // Load initial data
         loadHieuXeData();
@@ -153,6 +162,7 @@ public class TiepNhanController {
         String diaChi = txtDiaChi.getText().trim();
         String tenHieuXe = cbHieuXe.getValue();
         LocalDate ngayTiepNhan = dpNgayTiepNhan.getValue();
+        String tinhTrangXe = txtTinhTrangXe.getText().trim();
 
         // 2. Validate inputs
         if (tenChuXe.isEmpty() || bienSoXe.isEmpty() || tenHieuXe == null || ngayTiepNhan == null) {
@@ -167,6 +177,15 @@ public class TiepNhanController {
         }
 
         try {
+            // Check if the car is already being repaired
+            ObservableList<TiepNhan> existingRecords = tiepNhanDAO.getTiepNhanByBienSo(bienSoXe);
+            for (TiepNhan record : existingRecords) {
+                if (!record.isTrangThaiHoanTat()) {
+                    AlertUtils.showErrorAlert("Xe đang sửa chữa", "Xe này đã được tiếp nhận và đang trong quá trình sửa chữa.");
+                    return;
+                }
+            }
+
             // Check daily acceptance limit (QĐ1)
             int maxXeTrongNgay = thamSoDAO.getThamSoByName("SoXeToiDaMoiNgay").getGiaTri(); // Use new param name
             if (danhSachXeTiepNhanTrongNgay.size() >= maxXeTrongNgay) {
@@ -186,14 +205,17 @@ public class TiepNhanController {
                 // Email is optional, can be set if available in future
                 maChuXe = chuXeDAO.addChuXe(chuXe); // addChuXe returns int for generated ID
             } else {
-                // Use existing ChuXe's ID, update info if changed
+                // Use existing ChuXe's ID, ask before updating info
                 maChuXe = chuXe.getMaChuXe();
-                // Only update if changes are detected or if you want to force update
                 if (!chuXe.getTenChuXe().equals(tenChuXe) || !chuXe.getDiaChi().equals(diaChi) || !chuXe.getDienThoai().equals(dienThoai)) {
-                    chuXe.setTenChuXe(tenChuXe);
-                    chuXe.setDiaChi(diaChi);
-                    chuXe.setDienThoai(dienThoai); // Update phone if it was changed in UI
-                    chuXeDAO.updateChuXe(chuXe);
+                    boolean confirmUpdate = AlertUtils.showConfirmationAlert("Xác nhận cập nhật",
+                            "Thông tin chủ xe đã tồn tại nhưng có một vài điểm khác biệt. Bạn có muốn cập nhật không?");
+                    if (confirmUpdate) {
+                        chuXe.setTenChuXe(tenChuXe);
+                        chuXe.setDiaChi(diaChi);
+                        chuXe.setDienThoai(dienThoai);
+                        chuXeDAO.updateChuXe(chuXe);
+                    }
                 }
             }
 
@@ -230,6 +252,8 @@ public class TiepNhanController {
             newTiepNhan.setNgayTiepNhan(ngayTiepNhan);
             newTiepNhan.setTongTienNo(0.0); // Initially no debt
             newTiepNhan.setTrangThaiHoanTat(false); // Not completed yet
+            newTiepNhan.setTinhTrangXe(tinhTrangXe); // Set car condition
+            newTiepNhan.setTrangThai("Chờ sửa"); // Set initial status
 
             tiepNhanDAO.addTiepNhan(newTiepNhan); // Changed to tiepNhanDAO
 
@@ -258,6 +282,7 @@ public class TiepNhanController {
         txtDienThoai.clear();
         txtDiaChi.clear();
         cbHieuXe.getSelectionModel().clearSelection();
-        dpNgayTiepNhan.setValue(LocalDate.now()); // Reset to current date
+        dpNgayTiepNhan.setValue(LocalDate.now());
+        txtTinhTrangXe.clear();
     }
 }

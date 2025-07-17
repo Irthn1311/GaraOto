@@ -8,7 +8,7 @@ import java.sql.SQLException;
  * Lớp DBConnection quản lý kết nối đến cơ sở dữ liệu SQL Server.
  */
 public class DBConnection {
-    private static final String DB_URL = "jdbc:sqlserver://localhost:1433;databaseName=GaraOtoManagementDB3;encrypt=true;trustServerCertificate=true;";
+    private static final String DB_URL = "jdbc:sqlserver://localhost:1433;databaseName=GaraOtoManagementDB;encrypt=true;trustServerCertificate=true;";
     private static final String DB_USER = "sa"; // Thay đổi username của bạn
     private static final String DB_PASSWORD = "12345678";; // Thay đổi password của bạn
 

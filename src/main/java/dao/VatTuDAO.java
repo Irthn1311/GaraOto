@@ -63,6 +63,16 @@ public class VatTuDAO {
         return vatTuList;
     }
 
+    public void updateSoLuongTon(int maVatTu, int soLuongMoi) throws SQLException {
+        String sql = "UPDATE VatTu SET SoLuongTon = ? WHERE MaVatTu = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, soLuongMoi);
+            pstmt.setInt(2, maVatTu);
+            pstmt.executeUpdate();
+        }
+    }
+
     /**
      * Retrieves a material (VatTu) by its ID.
      * @param maVatTu The ID of the material.

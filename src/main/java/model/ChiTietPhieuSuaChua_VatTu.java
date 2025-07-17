@@ -1,61 +1,110 @@
 package model;
 
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 
 public class ChiTietPhieuSuaChua_VatTu {
+    private IntegerProperty maChiTietVatTu;
     private IntegerProperty maPhieuSC;
     private IntegerProperty maVatTu;
-    private IntegerProperty soLuong; // Renamed from soLuongSuDung
-    private DoubleProperty donGiaNhap; // Renamed from donGiaBanLucDo
+    private IntegerProperty soLuong;
+    private DoubleProperty donGiaNhap;
+    private DoubleProperty thanhTien;
 
-    // Derived properties for UI display (from VatTu table)
+    // For display purposes
     private StringProperty tenVatTu;
-    private StringProperty donViTinhVatTu;
 
     public ChiTietPhieuSuaChua_VatTu() {
+        this.maChiTietVatTu = new SimpleIntegerProperty();
         this.maPhieuSC = new SimpleIntegerProperty();
         this.maVatTu = new SimpleIntegerProperty();
-        this.soLuong = new SimpleIntegerProperty(); // Renamed
-        this.donGiaNhap = new SimpleDoubleProperty(); // Renamed
+        this.soLuong = new SimpleIntegerProperty();
+        this.donGiaNhap = new SimpleDoubleProperty();
+        this.thanhTien = new SimpleDoubleProperty();
         this.tenVatTu = new SimpleStringProperty();
-        this.donViTinhVatTu = new SimpleStringProperty();
     }
 
-    public ChiTietPhieuSuaChua_VatTu(int maPhieuSC, int maVatTu, int soLuong, double donGiaNhap) {
-        this.maPhieuSC = new SimpleIntegerProperty(maPhieuSC);
-        this.maVatTu = new SimpleIntegerProperty(maVatTu);
-        this.soLuong = new SimpleIntegerProperty(soLuong); // Renamed
-        this.donGiaNhap = new SimpleDoubleProperty(donGiaNhap); // Renamed
-        this.tenVatTu = new SimpleStringProperty();
-        this.donViTinhVatTu = new SimpleStringProperty();
+    // Getters and Setters
+    public int getMaChiTietVatTu() {
+        return maChiTietVatTu.get();
     }
 
-    // Getters
-    public int getMaPhieuSC() { return maPhieuSC.get(); }
-    public int getMaVatTu() { return maVatTu.get(); }
-    public int getSoLuong() { return soLuong.get(); } // Renamed from getSoLuongSuDung
-    public double getDonGiaNhap() { return donGiaNhap.get(); } // Renamed from getDonGiaBanLucDo
-    public String getTenVatTu() { return tenVatTu.get(); }
-    public String getDonViTinhVatTu() { return donViTinhVatTu.get(); }
+    public IntegerProperty maChiTietVatTuProperty() {
+        return maChiTietVatTu;
+    }
 
-    // Setters
-    public void setMaPhieuSC(int maPhieuSC) { this.maPhieuSC.set(maPhieuSC); }
-    public void setMaVatTu(int maVatTu) { this.maVatTu.set(maVatTu); }
-    public void setSoLuong(int soLuong) { this.soLuong.set(soLuong); } // Renamed from setSoLuongSuDung
-    public void setDonGiaNhap(double donGiaNhap) { this.donGiaNhap.set(donGiaNhap); } // Renamed from setDonGiaBanLucDo
-    public void setTenVatTu(String tenVatTu) { this.tenVatTu.set(tenVatTu); }
-    public void setDonViTinhVatTu(String donViTinhVatTu) { this.donViTinhVatTu.set(donViTinhVatTu); }
+    public void setMaChiTietVatTu(int maChiTietVatTu) {
+        this.maChiTietVatTu.set(maChiTietVatTu);
+    }
 
-    // Properties for JavaFX binding
-    public IntegerProperty maPhieuSCProperty() { return maPhieuSC; }
-    public IntegerProperty maVatTuProperty() { return maVatTu; }
-    public IntegerProperty soLuongProperty() { return soLuong; } // Renamed from soLuongSuDungProperty
-    public DoubleProperty donGiaNhapProperty() { return donGiaNhap; } // Renamed from donGiaBanLucDoProperty
-    public StringProperty tenVatTuProperty() { return tenVatTu; }
-    public StringProperty donViTinhVatTuProperty() { return donViTinhVatTu; }
+    public int getMaPhieuSC() {
+        return maPhieuSC.get();
+    }
+
+    public IntegerProperty maPhieuSCProperty() {
+        return maPhieuSC;
+    }
+
+    public void setMaPhieuSC(int maPhieuSC) {
+        this.maPhieuSC.set(maPhieuSC);
+    }
+
+    public int getMaVatTu() {
+        return maVatTu.get();
+    }
+
+    public IntegerProperty maVatTuProperty() {
+        return maVatTu;
+    }
+
+    public void setMaVatTu(int maVatTu) {
+        this.maVatTu.set(maVatTu);
+    }
+
+    public int getSoLuong() {
+        return soLuong.get();
+    }
+
+    public IntegerProperty soLuongProperty() {
+        return soLuong;
+    }
+
+    public void setSoLuong(int soLuong) {
+        this.soLuong.set(soLuong);
+    }
+
+    public double getDonGiaNhap() {
+        return donGiaNhap.get();
+    }
+
+    public DoubleProperty donGiaNhapProperty() {
+        return donGiaNhap;
+    }
+
+    public void setDonGiaNhap(double donGiaNhap) {
+        this.donGiaNhap.set(donGiaNhap);
+    }
+
+    public double getThanhTien() {
+        return thanhTien.get();
+    }
+
+    public DoubleProperty thanhTienProperty() {
+        return thanhTien;
+    }
+
+    public void setThanhTien(double thanhTien) {
+        this.thanhTien.set(thanhTien);
+    }
+
+    public String getTenVatTu() {
+        return tenVatTu.get();
+    }
+
+    public StringProperty tenVatTuProperty() {
+        return tenVatTu;
+    }
+
+    public void setTenVatTu(String tenVatTu) {
+        this.tenVatTu.set(tenVatTu);
+    }
 }

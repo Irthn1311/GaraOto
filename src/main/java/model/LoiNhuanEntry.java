@@ -19,14 +19,13 @@ public class LoiNhuanEntry {
      * @param tongDoanhThuBanHang Total revenue from sales (e.g., total from repair slips).
      * @param tongChiPhiVatTu Total cost of materials consumed.
      * @param tongChiPhiTienCong Total cost of labor.
-     * @param loiNhuanRong Net profit (tongDoanhThuBanHang - tongChiPhiVatTu - tongChiPhiTienCong).
      */
-    public LoiNhuanEntry(LocalDate ngay, double tongDoanhThuBanHang, double tongChiPhiVatTu, double tongChiPhiTienCong, double loiNhuanRong) {
+    public LoiNhuanEntry(LocalDate ngay, double tongDoanhThuBanHang, double tongChiPhiVatTu, double tongChiPhiTienCong) {
         this.ngay = new SimpleObjectProperty<>(ngay);
         this.tongDoanhThuBanHang = new SimpleDoubleProperty(tongDoanhThuBanHang);
         this.tongChiPhiVatTu = new SimpleDoubleProperty(tongChiPhiVatTu);
         this.tongChiPhiTienCong = new SimpleDoubleProperty(tongChiPhiTienCong);
-        this.loiNhuanRong = new SimpleDoubleProperty(loiNhuanRong);
+        this.loiNhuanRong = new SimpleDoubleProperty(tongDoanhThuBanHang - tongChiPhiVatTu - tongChiPhiTienCong);
     }
 
     // --- Getters for properties ---

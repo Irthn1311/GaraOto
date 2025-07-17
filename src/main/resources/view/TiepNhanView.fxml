@@ -16,7 +16,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.control.TableColumn?>
 
-<VBox alignment="TOP_CENTER" prefHeight="680.0" prefWidth="1050.0" spacing="20.0" style="-fx-background-color: #f5f7f9;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.TiepNhanController">
+<VBox alignment="TOP_CENTER" prefHeight="750.0" prefWidth="1050.0" spacing="20.0" style="-fx-background-color: #f5f7f9;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.TiepNhanController">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
@@ -43,6 +43,7 @@
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="250.0" />
             </columnConstraints>
             <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -82,6 +83,12 @@
                     <font><Font size="14.0" /></font>
                 </Label>
                 <DatePicker fx:id="dpNgayTiepNhan" prefWidth="250.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+                <!-- Row 4 -->
+                <Label text="Tình trạng xe:" GridPane.columnIndex="0" GridPane.rowIndex="4">
+                    <font><Font size="14.0" /></font>
+                </Label>
+                <TextField fx:id="txtTinhTrangXe" promptText="Ghi chú tình trạng xe lúc tiếp nhận" GridPane.columnIndex="1" GridPane.rowIndex="4" GridPane.columnSpan="3" />
             </children>
         </GridPane>
 
@@ -125,11 +132,13 @@
                 </HBox>
                 <TableView fx:id="tblXeTiepNhanTrongNgay" prefHeight="250.0" prefWidth="1000.0" style="-fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8;">
                     <columns>
-                        <TableColumn fx:id="colBienSo" prefWidth="150.0" text="Biển số xe" />
-                        <TableColumn fx:id="colTenChuXe" prefWidth="250.0" text="Tên chủ xe" />
-                        <TableColumn fx:id="colHieuXe" prefWidth="150.0" text="Hiệu xe" />
-                        <TableColumn fx:id="colDienThoai" prefWidth="150.0" text="Điện thoại" />
-                        <TableColumn fx:id="colDiaChi" prefWidth="300.0" text="Địa chỉ" />
+                        <TableColumn fx:id="colBienSo" prefWidth="120.0" text="Biển số xe" />
+                        <TableColumn fx:id="colTenChuXe" prefWidth="180.0" text="Tên chủ xe" />
+                        <TableColumn fx:id="colHieuXe" prefWidth="120.0" text="Hiệu xe" />
+                        <TableColumn fx:id="colDienThoai" prefWidth="120.0" text="Điện thoại" />
+                        <TableColumn fx:id="colDiaChi" prefWidth="200.0" text="Địa chỉ" />
+                        <TableColumn fx:id="colTinhTrangXe" prefWidth="200.0" text="Tình trạng" />
+                        <TableColumn fx:id="colTrangThai" prefWidth="110.0" text="Trạng thái" />
                     </columns>
                     <columnResizePolicy>
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

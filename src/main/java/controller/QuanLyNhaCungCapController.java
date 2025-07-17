@@ -9,6 +9,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import model.NhaCungCap;
 import dao.NhaCungCapDAO;
+import dao.PhieuNhapKhoVatTuDAO; // Import the DAO
 import utils.AlertUtils;
 
 import java.sql.SQLException;
@@ -48,11 +49,13 @@ public class QuanLyNhaCungCapController {
     private TableColumn<NhaCungCap, String> colEmail;
 
     private NhaCungCapDAO nhaCungCapDAO;
+    private PhieuNhapKhoVatTuDAO phieuNhapKhoVatTuDAO; // Add the DAO
     private ObservableList<NhaCungCap> nhaCungCapList;
 
     @FXML
     public void initialize() {
         nhaCungCapDAO = new NhaCungCapDAO();
+        phieuNhapKhoVatTuDAO = new PhieuNhapKhoVatTuDAO(); // Initialize the DAO
         nhaCungCapList = FXCollections.observableArrayList();
 
         // Configure TableView columns
@@ -134,6 +137,12 @@ public class QuanLyNhaCungCapController {
         }
 
         try {
+            // Check for duplicate name
+            if (nhaCungCapDAO.getNhaCungCapByTen(tenNhaCungCap) != null) {
+                AlertUtils.showErrorAlert("Lỗi trùng lặp", "Tên nhà cung cấp này đã tồn tại.");
+                return;
+            }
+
             NhaCungCap newNhaCungCap = new NhaCungCap();
             newNhaCungCap.setTenNhaCungCap(tenNhaCungCap);
             newNhaCungCap.setDienThoai(dienThoai);
@@ -184,6 +193,13 @@ public class QuanLyNhaCungCapController {
         }
 
         try {
+            // Check if the new name duplicates another existing entry
+            NhaCungCap existingNhaCungCap = nhaCungCapDAO.getNhaCungCapByTen(tenNhaCungCapMoi);
+            if (existingNhaCungCap != null && existingNhaCungCap.getMaNhaCungCap() != selectedNhaCungCap.getMaNhaCungCap()) {
+                AlertUtils.showErrorAlert("Lỗi trùng lặp", "Tên nhà cung cấp này đã tồn tại ở một mục khác.");
+                return;
+            }
+
             selectedNhaCungCap.setTenNhaCungCap(tenNhaCungCapMoi);
             selectedNhaCungCap.setDienThoai(dienThoaiMoi);
             selectedNhaCungCap.setDiaChi(diaChiMoi);
@@ -208,22 +224,24 @@ public class QuanLyNhaCungCapController {
             AlertUtils.showWarningAlert("Chưa chọn", "Vui lòng chọn một nhà cung cấp để xóa.");
             return;
         }
+        
+        try {
+            // Check if the supplier is used in any import slips
+            boolean isUsed = phieuNhapKhoVatTuDAO.isNhaCungCapUsed(selectedNhaCungCap.getMaNhaCungCap());
+            if (isUsed) {
+                AlertUtils.showErrorAlert("Không thể xóa", "Nhà cung cấp này đã được sử dụng trong các phiếu nhập kho và không thể xóa.");
+                return;
+            }
 
-        if (AlertUtils.showConfirmationAlert("Xác nhận xóa", "Bạn có chắc chắn muốn xóa nhà cung cấp '" + selectedNhaCungCap.getTenNhaCungCap() + "' không?")) {
-            try {
+            if (AlertUtils.showConfirmationAlert("Xác nhận xóa", "Bạn có chắc chắn muốn xóa nhà cung cấp '" + selectedNhaCungCap.getTenNhaCungCap() + "' không?")) {
                 nhaCungCapDAO.deleteNhaCungCap(selectedNhaCungCap.getMaNhaCungCap());
                 AlertUtils.showInformationAlert("Thành công", "Xóa nhà cung cấp thành công!");
                 loadNhaCungCapData();
                 clearFields();
-            } catch (SQLException e) {
-                // Handle foreign key constraint violation (e.g., if there are import receipts from this supplier)
-                if (e.getSQLState().startsWith("23")) { // SQLSTATE for integrity constraint violation
-                    AlertUtils.showErrorAlert("Lỗi ràng buộc", "Không thể xóa nhà cung cấp này vì có phiếu nhập kho liên quan. Vui lòng xóa các phiếu nhập kho liên quan trước.");
-                } else {
-                    AlertUtils.showErrorAlert("Lỗi cơ sở dữ liệu", "Lỗi khi xóa nhà cung cấp: " + e.getMessage());
-                }
-                e.printStackTrace();
             }
+        } catch (SQLException e) {
+            AlertUtils.showErrorAlert("Lỗi cơ sở dữ liệu", "Lỗi khi xóa nhà cung cấp: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
