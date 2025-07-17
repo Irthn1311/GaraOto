@@ -228,11 +228,16 @@ GO
 -- Default password for all sample accounts is '123'
 -- MD5 hash for '123': 202cb962ac59075b964b07152d234b70
 INSERT INTO TaiKhoanNguoiDung (TenDangNhap, MatKhauHash, MaPhanQuyen, HoTen, TrangThai) VALUES
-('admin', '202cb962ac59075b964b07152d234b70', 'GIAMDOC', N'Admin', 1),
-('tiepnhan', '202cb962ac59075b964b07152d234b70', 'NVTIEPNHAN', N'Nguyễn Thị Tiếp Nhận', 1),
-('suachua', '202cb962ac59075b964b07152d234b70', 'THOSUACHUA', N'Trần Văn Thợ', 1),
-('ketoan', '202cb962ac59075b964b07152d234b70', 'KETOAN', N'Lê Thị Kế Toán', 1),
-('kho', '202cb962ac59075b964b07152d234b70', 'NVKHO', N'Phạm Văn Kho', 1);
+('admin', '202cb962ac59075b964b07152d234b70', 'GIAMDOC', N'Admin Gara', 1),
+('tiepn001', '202cb962ac59075b964b07152d234b70', 'NVTIEPNHAN', N'Nguyễn Tiếp Nhận', 1),
+('tiepn002', '202cb962ac59075b964b07152d234b70', 'NVTIEPNHAN', N'Trần Tiếp Nhận', 1),
+('suachu001', '202cb962ac59075b964b07152d234b70', 'THOSUACHUA', N'Võ Sửa Chữa', 1),
+('suachu002', '202cb962ac59075b964b07152d234b70', 'THOSUACHUA', N'Lê Sửa Chữa', 1),
+('kho001', '202cb962ac59075b964b07152d234b70', 'NVKHO', N'Phạm Kho', 1),
+('kho002', '202cb962ac59075b964b07152d234b70', 'NVKHO', N'Huỳnh Kho', 1),
+('ketoan001', '202cb962ac59075b964b07152d234b70', 'KETOAN', N'Lê Kế Toán', 1),
+('ketoan002', '202cb962ac59075b964b07152d234b70', 'KETOAN', N'Trịnh Kế Toán', 1),
+('quanly001', '202cb962ac59075b964b07152d234b70', 'GIAMDOC', N'Nguyễn Quản Lý', 1);
 GO
 
 -- Core Data
@@ -245,49 +250,155 @@ GO
 
 INSERT INTO HieuXe (TenHieuXe) VALUES
 ('Toyota'), ('Honda'), ('Ford'), ('BMW'), ('Mercedes-Benz'),
-('Hyundai'), ('Kia'), ('Mazda'), ('Chevrolet'), ('Nissan');
+('Hyundai'), ('VinFast'), ('Mazda'), ('Chevrolet'), ('Mitsubishi');
 GO
 
 INSERT INTO ChuXe (TenChuXe, DiaChi, DienThoai, Email) VALUES
 (N'Nguyễn Văn A', N'123 Đường ABC, Quận 1', '0901234567', 'nguyenvana@example.com'),
 (N'Trần Thị B', N'456 Đường XYZ, Quận 2', '0912345678', 'tranb@example.com'),
-(N'Lê Văn C', N'789 Đường DEF, Quận 3', '0987654321', 'lec@example.com');
+(N'Lê Văn C', N'789 Đường DEF, Quận 3', '0987654321', 'lec@example.com'),
+(N'Phạm Minh D', N'101 Đường LMN, Quận 4', '0934567890', 'phammd@example.com'),
+(N'Đinh Thị E', N'202 Đường OPQ, Quận 5', '0943219876', 'dinhthe@example.com'),
+(N'Võ Thành F', N'303 Đường RST, Quận 6', '0956784321', 'vothanhf@example.com'),
+(N'Phan Thị G', N'404 Đường UVW, Quận 7', '0967896543', 'phanthig@example.com'),
+(N'Lưu Văn H', N'505 Đường XYZ, Quận 8', '0978945612', 'luuvanh@example.com'),
+(N'Ngô Thị I', N'606 Đường ABC, Quận 9', '0983214567', 'ngothii@example.com'),
+(N'Hồ Văn J', N'707 Đường DEF, Quận 10', '0998761234', 'hovanj@example.com');
+
 GO
 
 INSERT INTO Xe (BienSo, MaHieuXe, MaChuXe) VALUES
-('51A-123.45', (SELECT MaHieuXe FROM HieuXe WHERE TenHieuXe = 'Toyota'), (SELECT MaChuXe FROM ChuXe WHERE TenChuXe = N'Nguyễn Văn A')),
-('51B-678.90', (SELECT MaHieuXe FROM HieuXe WHERE TenHieuXe = 'Honda'), (SELECT MaChuXe FROM ChuXe WHERE TenChuXe = N'Trần Thị B')),
-('51C-111.22', (SELECT MaHieuXe FROM HieuXe WHERE TenHieuXe = 'Ford'), (SELECT MaChuXe FROM ChuXe WHERE TenChuXe = N'Lê Văn C'));
+('51A-123.45', (SELECT MaHieuXe FROM HieuXe WHERE TenHieuXe = 'Toyota'), 1),
+('51B-678.90', (SELECT MaHieuXe FROM HieuXe WHERE TenHieuXe = 'Honda'), 2),
+('51C-111.22', (SELECT MaHieuXe FROM HieuXe WHERE TenHieuXe = 'Ford'), 3),
+('52A-987.65', (SELECT MaHieuXe FROM HieuXe WHERE TenHieuXe = 'BMW'), 4),
+('52B-555.55', (SELECT MaHieuXe FROM HieuXe WHERE TenHieuXe = 'Hyundai'), 5),
+('53C-333.33', (SELECT MaHieuXe FROM HieuXe WHERE TenHieuXe = 'Mazda'), 6),
+('53A-777.77', (SELECT MaHieuXe FROM HieuXe WHERE TenHieuXe = 'VinFast'), 7),
+('54B-888.88', (SELECT MaHieuXe FROM HieuXe WHERE TenHieuXe = 'Chevrolet'), 8),
+('54A-222.22', (SELECT MaHieuXe FROM HieuXe WHERE TenHieuXe = 'Mercedes-Benz'), 9),
+('55C-666.66', (SELECT MaHieuXe FROM HieuXe WHERE TenHieuXe = 'Mitsubishi'), 10);
 GO
 
-INSERT INTO VatTu (TenVatTu, DonGiaBan, SoLuongTon, DonViTinh, MucTonKhoToiThieu) VALUES
-(N'Lốp xe Michelin 205/55R16', 1500000.00, 50, N'cái', 10),
-(N'Dầu nhớt Castrol GTX 4L', 450000.00, 100, N'chai', 20),
-(N'Lọc dầu động cơ', 120000.00, 80, N'cái', 15),
-(N'Bugia Denso', 80000.00, 120, N'cái', 30);
-GO
+INSERT INTO VatTu (TenVatTu, DonGiaBan, SoLuongTon, DonViTinh, MucTonKhoToiThieu)
+VALUES
+(N'Lốp Michelin 205/55R16', 1800000, 25, N'Cái', 5),
+(N'Lốp Bridgestone 195/65R15', 1500000, 30, N'Cái', 5),
+(N'Dầu nhớt Castrol GTX 4L', 450000, 50, N'Chai', 10),
+(N'Dầu nhớt Mobil 1 5W30 4L', 620000, 40, N'Chai', 10),
+(N'Lọc dầu động cơ Toyota', 120000, 60, N'Cái', 15),
+(N'Lọc gió động cơ Honda', 180000, 45, N'Cái', 15),
+(N'Lọc điều hòa xe Kia', 150000, 40, N'Cái', 10),
+(N'Bugi NGK Laser Iridium', 320000, 55, N'Cái', 15),
+(N'Bugi Denso Iridium', 290000, 50, N'Cái', 15),
+(N'Ắc quy GS 12V-45Ah', 1400000, 20, N'Bình', 5),
+(N'Ắc quy Đồng Nai 12V-70Ah', 2300000, 15, N'Bình', 5),
+(N'Đèn pha LED VinFast Fadil', 1200000, 10, N'Cái', 3),
+(N'Đèn hậu Ford Ranger', 1400000, 10, N'Cái', 3),
+(N'Bộ má phanh trước Hyundai Accent', 850000, 25, N'Bộ', 5),
+(N'Đĩa phanh trước Kia Morning', 780000, 20, N'Cái', 5),
+(N'Gioăng nắp máy Mazda CX-5', 380000, 18, N'Bộ', 5),
+(N'Dây curoa tổng Toyota Vios', 420000, 22, N'Sợi', 5),
+(N'Bơm xăng Hyundai i10', 1650000, 12, N'Bộ', 3),
+(N'Gạt mưa Bosch Aerotwin 20-24 inch', 480000, 35, N'Bộ', 10),
+(N'Dây phanh tay Honda City', 620000, 20, N'Bộ', 5);
+
+DECLARE @i INT = 21;
+WHILE @i <= 200
+BEGIN
+    INSERT INTO VatTu (TenVatTu, DonGiaBan, SoLuongTon, DonViTinh, MucTonKhoToiThieu)
+    VALUES (N'Phụ tùng thực tế số ' + CAST(@i AS NVARCHAR), 100000 + (@i * 4000), 10 + (@i % 20), N'Cái', 5);
+    SET @i = @i + 1;
+END;
 
 INSERT INTO NhaCungCap (TenNhaCungCap, DienThoai, DiaChi, Email) VALUES
-(N'Công ty TNHH Phụ tùng ô tô ABC', '0281234567', N'123 Đường XYZ, Quận 10', 'info@abcphutung.com'),
-(N'Công ty Cổ phần Vật tư Sửa chữa Xe', '0249876543', N'456 Đường DEF, Quận Hoàn Kiếm', 'contact@vtscx.com');
+(N'Công ty TNHH Phụ tùng ô tô Thành Đạt', '02866882416', N'Quận 10, TP.HCM', 'thanhdatphutung@gmail.com'),
+(N'Công ty TNHH MTV Phụ Tùng Ô Tô Tín Nghĩa', '02438512345', N'Cầu Giấy, Hà Nội', 'tinnghia.auto@gmail.com'),
+(N'Công ty Cổ Phần Dịch Vụ Phụ Tùng Ô Tô Hà Thành', '02439998877', N'Nam Từ Liêm, Hà Nội', 'hathanh.parts@gmail.com'),
+(N'Công ty TNHH Phụ Tùng Ô Tô Hưng Thịnh', '02839565533', N'Quận 5, TP.HCM', 'hungthinh.parts@gmail.com'),
+(N'Công ty TNHH Đại Phát Auto', '02253889911', N'Lê Chân, Hải Phòng', 'daiphat.auto@gmail.com'),
+(N'Auto Minh Hòa', '02437654321', N'Thanh Xuân, Hà Nội', 'minhhoa.autoparts@gmail.com'),
+(N'Công ty TNHH TM DV Phụ Tùng Ô Tô Thành Công', '02838776655', N'Tân Bình, TP.HCM', 'thanhtcong.parts@gmail.com'),
+(N'Công ty TNHH TM DV An Phát Auto', '02839887766', N'Bình Thạnh, TP.HCM', 'anphatauto@gmail.com'),
+(N'Công ty Cổ phần Phụ Tùng Ô Tô Trường Hải', '02513895555', N'Thủ Đức, TP.HCM', 'truonghai.parts@gmail.com'),
+(N'Công ty TNHH Huy Hoàng Auto', '02439997755', N'Hoàng Mai, Hà Nội', 'huyhoang.auto@gmail.com'),
+(N'Công ty TNHH Phụ Tùng Ô Tô Hoàng Gia', '02839990066', N'Bình Tân, TP.HCM', 'hoanggia.autoparts@gmail.com'),
+(N'Công ty TNHH Auto Sài Gòn Phát', '02838552233', N'Quận 11, TP.HCM', 'saigonphat.auto@gmail.com'),
+(N'Công ty TNHH Auto Hồng Phát', '02437778899', N'Long Biên, Hà Nội', 'hongphat.autoparts@gmail.com'),
+(N'Phụ Tùng Ô Tô Hải Phát', '02253880077', N'Lê Chân, Hải Phòng', 'haiphat.autoparts@gmail.com'),
+(N'Công ty TNHH Ô Tô Hưng Phát', '02438885511', N'Ba Đình, Hà Nội', 'hungphat.autoparts@gmail.com'),
+(N'Công ty TNHH TM DV Phụ Tùng Ô Tô Gia Minh', '02835556677', N'Quận 7, TP.HCM', 'giaminh.parts@gmail.com'),
+(N'Công ty TNHH Auto Nam Việt', '02438667755', N'Hà Đông, Hà Nội', 'namviet.autoparts@gmail.com'),
+(N'Công ty TNHH Linh Kiện Ô Tô Đại Hưng', '02838889977', N'Tân Phú, TP.HCM', 'daihung.parts@gmail.com'),
+(N'Công ty TNHH Phụ Tùng Ô Tô Việt Nhật', '02435557733', N'Cầu Giấy, Hà Nội', 'vietnhat.parts@gmail.com'),
+(N'Công ty TNHH TM DV Ô Tô Kim Long', '02838883311', N'Gò Vấp, TP.HCM', 'kimlong.autoparts@gmail.com');
 GO
 
 INSERT INTO TienCong (NoiDung, DonGia) VALUES
-(N'Kiểm tra tổng quát', 200000.00),
-(N'Thay dầu nhớt', 150000.00),
-(N'Thay lốp xe', 100000.00),
-(N'Cân chỉnh thước lái', 300000.00);
-GO
+(N'Thay dầu nhớt động cơ', 150000),
+(N'Thay lọc dầu động cơ', 80000),
+(N'Thay lọc gió động cơ', 100000),
+(N'Thay lọc điều hòa', 90000),
+(N'Thay bugi', 120000),
+(N'Cân chỉnh góc đặt bánh xe', 250000),
+(N'Thay lốp xe', 100000),
+(N'Thay má phanh trước', 150000),
+(N'Thay má phanh sau', 150000),
+(N'Thay đĩa phanh trước', 180000),
+(N'Thay đĩa phanh sau', 180000),
+(N'Thay dây curoa tổng', 250000),
+(N'Thay bơm nước làm mát', 300000),
+(N'Thay gioăng nắp máy', 200000),
+(N'Thay ắc quy', 120000),
+(N'Kiểm tra tổng quát ô tô', 300000),
+(N'Sửa chữa điều hòa ô tô', 400000),
+(N'Xả gas và nạp gas điều hòa', 350000),
+(N'Thay đèn pha', 150000),
+(N'Thay đèn hậu', 120000);
+
+-- Thêm 80 tiền công tự động
+DECLARE @j INT = 21;
+WHILE @j <= 100
+BEGIN
+    INSERT INTO TienCong (NoiDung, DonGia)
+    VALUES (N'Dịch vụ sửa chữa số ' + CAST(@j AS NVARCHAR), 100000 + (@j * 15000));
+    SET @j = @j + 1;
+END;
 
 INSERT INTO Tho (TenTho, SoDienThoai, ChuyenMon) VALUES
-(N'Nguyễn Văn Thợ', '0900111222', N'Động cơ'),
-(N'Phạm Thị Sửa', '0900333444', N'Điện - Điện lạnh'),
-(N'Lê Minh Kỹ', '0900555666', N'Gầm - Lốp');
+(N'Nguyễn Văn An', '0900111001', N'Gầm - Máy'),
+(N'Trần Văn Bình', '0900111002', N'Điện - Điện lạnh'),
+(N'Phạm Văn Cường', '0900111003', N'Bảo trì nhanh'),
+(N'Lê Thị Dung', '0900111004', N'Gầm - Treo'),
+(N'Võ Văn Em', '0900111005', N'Máy gầm tổng hợp'),
+(N'Phan Thị Giang', '0900111006', N'Điện - Đèn - Camera'),
+(N'Nguyễn Quốc Hoàng', '0900111007', N'Sơn - Dặm tút'),
+(N'Ngô Văn Hải', '0900111008', N'Điều hòa'),
+(N'Bùi Thị Kim', '0900111009', N'Bảo trì nhanh'),
+(N'Đinh Thị Lan', '0900111010', N'Động cơ điện'),
+(N'Phạm Quang Minh', '0900111011', N'Điện khởi động'),
+(N'Lưu Thanh Nam', '0900111012', N'Khung gầm'),
+(N'Hoàng Thị Oanh', '0900111013', N'Nội thất ô tô'),
+(N'Đặng Văn Phúc', '0900111014', N'Điện - Sửa điều hòa'),
+(N'Nguyễn Thị Quỳnh', '0900111015', N'Đồng - Sơn nhanh'),
+(N'Vũ Văn Sơn', '0900111016', N'Điện lạnh xe hơi'),
+(N'Huỳnh Thị Trang', '0900111017', N'Điện thân xe'),
+(N'Phan Văn Út', '0900111018', N'Động cơ diesel'),
+(N'Đặng Văn Vũ', '0900111019', N'Động cơ xăng'),
+(N'Nguyễn Thị Yến', '0900111020', N'Sửa chữa tổng hợp');
 GO
 
 INSERT INTO TiepNhan (BienSo, NgayTiepNhan, TinhTrangXe, TrangThai, TongTienNo, TrangThaiHoanTat) VALUES
 ('51A-123.45', GETDATE(), N'Trầy xước nhẹ cản trước', N'Chờ sửa', 0.00, 0),
-('51B-678.90', DATEADD(day, -5, GETDATE()), N'Bể đèn hậu phải', N'Đang sửa', 0.00, 0);
+('51B-678.90', GETDATE(), N'Bể đèn hậu', N'Đang sửa', 0.00, 0),
+('51C-111.22', GETDATE(), N'Thay lốp xe', N'Chờ sửa', 0.00, 0),
+('52A-987.65', GETDATE(), N'Thay dầu định kỳ', N'Đang sửa', 0.00, 0),
+('52B-555.55', GETDATE(), N'Lỗi điện nhỏ', N'Chờ sửa', 0.00, 0),
+('53C-333.33', GETDATE(), N'Vệ sinh nội thất', N'Chờ sửa', 0.00, 0),
+('53A-777.77', GETDATE(), N'Kiểm tra phanh', N'Đang sửa', 0.00, 0),
+('54B-888.88', GETDATE(), N'Bảo trì 10000km', N'Chờ sửa', 0.00, 0),
+('54A-222.22', GETDATE(), N'Thay bugi', N'Chờ sửa', 0.00, 0),
+('55C-666.66', GETDATE(), N'Thay bình ắc quy', N'Đang sửa', 0.00, 0);
 GO
 
 PRINT 'Database script completed successfully.';

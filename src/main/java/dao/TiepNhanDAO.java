@@ -334,4 +334,38 @@ public class TiepNhanDAO {
         }
         return bienSoList;
     }
+
+    // New: Update only car condition (TinhTrangXe) for a TiepNhan record
+    public void updateTinhTrangXe(int maTiepNhan, String tinhTrangXe) throws SQLException {
+        String sql = "UPDATE TiepNhan SET TinhTrangXe = ? WHERE MaTiepNhan = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, tinhTrangXe);
+            pstmt.setInt(2, maTiepNhan);
+            pstmt.executeUpdate();
+        }
+    }
+
+    // New: Update status (TrangThai) with forward-only semantics handled at controller level.
+    // If TrangThai becomes 'Đã xong' then also mark TrangThaiHoanTat = 1
+    public void updateTrangThai(int maTiepNhan, String trangThaiMoi) throws SQLException {
+        String sql = "UPDATE TiepNhan SET TrangThai = ?, TrangThaiHoanTat = CASE WHEN ? = N'Đã xong' THEN 1 ELSE TrangThaiHoanTat END WHERE MaTiepNhan = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, trangThaiMoi);
+            pstmt.setString(2, trangThaiMoi);
+            pstmt.setInt(3, maTiepNhan);
+            pstmt.executeUpdate();
+        }
+    }
+
+    // New: Delete a TiepNhan record by its ID
+    public void deleteTiepNhan(int maTiepNhan) throws SQLException {
+        String sql = "DELETE FROM TiepNhan WHERE MaTiepNhan = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, maTiepNhan);
+            pstmt.executeUpdate();
+        }
+    }
 }

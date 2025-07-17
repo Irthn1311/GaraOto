@@ -52,7 +52,15 @@ public class TiepNhanController {
     private TableColumn<TiepNhan, String> colTinhTrangXe; // New column for car condition
     @FXML
     private TableColumn<TiepNhan, String> colTrangThai; // New column for status
+    @FXML
+    private Button btnSuaXe; // Button for editing selected record
+    @FXML
+    private Button btnXoaXe;  // Button for deleting selected record
+    @FXML
+    private Button btnTienTrangThai; // Button for advancing status
 
+    // Store currently selected record
+    private TiepNhan selectedTiepNhan;
 
     // Data Access Objects
     private HieuXeDAO hieuXeDAO;
@@ -82,6 +90,14 @@ public class TiepNhanController {
         // Initialize ObservableList
         danhSachXeTiepNhanTrongNgay = FXCollections.observableArrayList();
         tblXeTiepNhanTrongNgay.setItems(danhSachXeTiepNhanTrongNgay);
+
+        // Listen for row selection to enable editing/deleting
+        tblXeTiepNhanTrongNgay.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+            selectedTiepNhan = newSel;
+            if (newSel != null) {
+                populateForm(newSel);
+            }
+        });
 
         // Configure TableView columns
         // These PropertyValueFactory mappings now correctly use TiepNhan properties
@@ -272,6 +288,132 @@ public class TiepNhanController {
         }
     }
 
+    private void populateForm(TiepNhan record) {
+        txtTenChuXe.setText(record.getTenChuXe());
+        txtBienSoXe.setText(record.getBienSo());
+        txtDienThoai.setText(record.getDienThoaiChuXe());
+        txtDiaChi.setText(record.getDiaChiChuXe());
+        cbHieuXe.setValue(record.getTenHieuXe());
+        dpNgayTiepNhan.setValue(record.getNgayTiepNhan());
+        txtTinhTrangXe.setText(record.getTinhTrangXe());
+    }
+
+    @FXML
+    private void handleSuaXe() {
+        if (selectedTiepNhan == null) {
+            AlertUtils.showWarningAlert("Chưa chọn", "Vui lòng chọn xe cần sửa trong bảng.");
+            return;
+        }
+        // Reuse validation from handleTiepNhanXe
+        String tenChuXe = txtTenChuXe.getText().trim();
+        String bienSoXe = txtBienSoXe.getText().trim();
+        String dienThoai = txtDienThoai.getText().trim();
+        String diaChi = txtDiaChi.getText().trim();
+        String tenHieuXe = cbHieuXe.getValue();
+        String tinhTrangXe = txtTinhTrangXe.getText().trim();
+
+        if (tenChuXe.isEmpty() || bienSoXe.isEmpty() || tenHieuXe == null) {
+            AlertUtils.showWarningAlert("Thiếu thông tin", "Vui lòng nhập đầy đủ Tên chủ xe, Biển số xe và Hiệu xe.");
+            return;
+        }
+        if (!dienThoai.isEmpty() && !dienThoai.matches("\\d{10,15}")) {
+            AlertUtils.showWarningAlert("Lỗi định dạng", "Số điện thoại không hợp lệ. Vui lòng nhập từ 10 đến 15 chữ số.");
+            return;
+        }
+        try {
+            // Update owner
+            ChuXe chuXe = chuXeDAO.getChuXeByDienThoai(dienThoai);
+            int maChuXe;
+            if (chuXe == null) {
+                chuXe = new ChuXe();
+                chuXe.setTenChuXe(tenChuXe);
+                chuXe.setDienThoai(dienThoai);
+                chuXe.setDiaChi(diaChi);
+                maChuXe = chuXeDAO.addChuXe(chuXe);
+            } else {
+                maChuXe = chuXe.getMaChuXe();
+                chuXe.setTenChuXe(tenChuXe);
+                chuXe.setDiaChi(diaChi);
+                chuXeDAO.updateChuXe(chuXe);
+            }
+
+            // Update vehicle info
+            HieuXe hieuXe = hieuXeDAO.getHieuXeByName(tenHieuXe);
+            if (hieuXe == null) {
+                AlertUtils.showErrorAlert("Lỗi", "Hiệu xe không tồn tại trong hệ thống.");
+                return;
+            }
+            Xe xe = xeDAO.getXeByBienSo(bienSoXe);
+            if (xe != null) {
+                xe.setMaHieuXe(hieuXe.getMaHieuXe());
+                xe.setMaChuXe(maChuXe);
+                xeDAO.updateXe(xe);
+            }
+
+            // Update acceptance record condition
+            tiepNhanDAO.updateTinhTrangXe(selectedTiepNhan.getMaTiepNhan(), tinhTrangXe);
+
+            AlertUtils.showInformationAlert("Thành công", "Cập nhật thông tin xe thành công.");
+            loadXeTiepNhanTrongNgay();
+            handleLamMoi();
+        } catch (SQLException e) {
+            AlertUtils.showErrorAlert("Lỗi cơ sở dữ liệu", e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleXoaXe() {
+        if (selectedTiepNhan == null) {
+            AlertUtils.showWarningAlert("Chưa chọn", "Vui lòng chọn xe cần xóa trong bảng.");
+            return;
+        }
+        if (!AlertUtils.showConfirmationAlert("Xác nhận xóa", "Bạn có chắc chắn muốn xóa hồ sơ tiếp nhận xe này?")) {
+            return;
+        }
+        try {
+            tiepNhanDAO.deleteTiepNhan(selectedTiepNhan.getMaTiepNhan());
+            AlertUtils.showInformationAlert("Đã xóa", "Xóa hồ sơ tiếp nhận thành công.");
+            loadXeTiepNhanTrongNgay();
+            handleLamMoi();
+        } catch (SQLException e) {
+            AlertUtils.showErrorAlert("Lỗi cơ sở dữ liệu", e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleTienTrangThai() {
+        if (selectedTiepNhan == null) {
+            AlertUtils.showWarningAlert("Chưa chọn", "Vui lòng chọn xe trong bảng để thay đổi trạng thái.");
+            return;
+        }
+        String current = selectedTiepNhan.getTrangThai();
+        String next;
+        switch (current) {
+            case "Chờ sửa":
+                next = "Đang sửa";
+                break;
+            case "Đang sửa":
+                next = "Đã xong";
+                break;
+            default:
+                AlertUtils.showInformationAlert("Trạng thái cuối", "Xe đã hoàn tất sửa chữa.");
+                return;
+        }
+        if (!AlertUtils.showConfirmationAlert("Xác nhận", "Chuyển trạng thái xe từ '" + current + "' sang '" + next + "'?")) {
+            return;
+        }
+        try {
+            tiepNhanDAO.updateTrangThai(selectedTiepNhan.getMaTiepNhan(), next);
+            AlertUtils.showSuccessAlert("Thành công", "Cập nhật trạng thái thành công.");
+            loadXeTiepNhanTrongNgay();
+        } catch (SQLException e) {
+            AlertUtils.showErrorAlert("Lỗi cơ sở dữ liệu", e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Handles the "Làm mới" button action. Clears all input fields.
      */
@@ -284,5 +426,7 @@ public class TiepNhanController {
         cbHieuXe.getSelectionModel().clearSelection();
         dpNgayTiepNhan.setValue(LocalDate.now());
         txtTinhTrangXe.clear();
+        tblXeTiepNhanTrongNgay.getSelectionModel().clearSelection();
+        selectedTiepNhan = null;
     }
 }

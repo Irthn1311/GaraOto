@@ -141,6 +141,17 @@
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                     </columnResizePolicy>
                 </TableView>
+                <!-- New action buttons for edit/delete/status -->
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <VBox.margin>
+                        <Insets top="10.0" />
+                    </VBox.margin>
+                    <children>
+                        <Button fx:id="btnSuaXe" text="Sửa thông tin" onAction="#handleSuaXe" prefWidth="150.0" styleClass="button-warning" />
+                        <Button fx:id="btnXoaXe" text="Xóa" onAction="#handleXoaXe" prefWidth="100.0" styleClass="button-danger" />
+                        <Button fx:id="btnTienTrangThai" text="Tiến trạng thái" onAction="#handleTienTrangThai" prefWidth="150.0" styleClass="button-primary" />
+                    </children>
+                </HBox>
             </children>
         </VBox>
     </children>
