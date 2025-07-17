@@ -46,29 +46,32 @@ public class LoginController {
         }
 
         try {
-            TaiKhoanNguoiDung user = taiKhoanNguoiDungDAO.getTaiKhoanByUsername(username);
+            TaiKhoanNguoiDung user = taiKhoanNguoiDungDAO.getTaiKhoanNguoiDungByTenDangNhap(username); // Changed method name
 
             if (user != null) {
                 // Hash the input password and compare with the stored hash
                 String hashedPassword = PasswordHasher.hashPassword(password);
                 if (hashedPassword.equals(user.getMatKhauHash())) {
-                    AlertUtils.showInformationAlert("Thành công", "Đăng nhập thành công!");
+                    if (user.isTrangThai()) { // Check if account is active
+                        AlertUtils.showInformationAlert("Thành công", "Đăng nhập thành công!");
 
-                    // Load MainLayout.fxml
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MainLayout.fxml"));
-                    Parent mainLayoutRoot = loader.load();
+                        // Load MainLayout.fxml
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MainLayout.fxml"));
+                        Parent mainLayoutRoot = loader.load();
 
-                    // Pass logged-in user information to MainLayoutController
-                    MainLayoutController mainLayoutController = loader.getController();
-                    mainLayoutController.setLoggedInUser(user);
+                        // Pass logged-in user information to MainLayoutController
+                        MainLayoutController mainLayoutController = loader.getController();
+                        mainLayoutController.setLoggedInUser(user);
 
-                    Scene scene = new Scene(mainLayoutRoot);
-                    Stage stage = (Stage) btnLogin.getScene().getWindow();
-                    stage.setScene(scene);
-                    stage.setTitle("Quản lý Gara Ô tô");
-                    stage.setMaximized(true); // Maximize the main window
-                    stage.show();
-
+                        Scene scene = new Scene(mainLayoutRoot);
+                        Stage stage = (Stage) btnLogin.getScene().getWindow();
+                        stage.setScene(scene);
+                        stage.setTitle("Quản lý Gara Ô tô");
+                        stage.setMaximized(true); // Maximize the main window
+                        stage.show();
+                    } else {
+                        AlertUtils.showErrorAlert("Tài khoản bị khóa", "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.");
+                    }
                 } else {
                     AlertUtils.showErrorAlert("Lỗi đăng nhập", "Tên đăng nhập hoặc mật khẩu không đúng.");
                 }

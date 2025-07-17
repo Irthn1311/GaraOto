@@ -1,4 +1,4 @@
-package model; // Updated package
+package model;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -19,38 +19,20 @@ public class HieuXe {
         this.tenHieuXe = new SimpleStringProperty(tenHieuXe);
     }
 
-    // Getter for MaHieuXe
-    public int getMaHieuXe() {
-        return maHieuXe.get();
-    }
+    // Getters
+    public int getMaHieuXe() { return maHieuXe.get(); }
+    public String getTenHieuXe() { return tenHieuXe.get(); }
 
-    // Setter for MaHieuXe
-    public void setMaHieuXe(int maHieuXe) {
-        this.maHieuXe.set(maHieuXe);
-    }
+    // Setters
+    public void setMaHieuXe(int maHieuXe) { this.maHieuXe.set(maHieuXe); }
+    public void setTenHieuXe(String tenHieuXe) { this.tenHieuXe.set(tenHieuXe); }
 
-    // Property for MaHieuXe (for JavaFX binding)
-    public IntegerProperty maHieuXeProperty() {
-        return maHieuXe;
-    }
-
-    // Getter for TenHieuXe
-    public String getTenHieuXe() {
-        return tenHieuXe.get();
-    }
-
-    // Setter for TenHieuXe
-    public void setTenHieuXe(String tenHieuXe) {
-        this.tenHieuXe.set(tenHieuXe);
-    }
-
-    // Property for TenHieuXe (for JavaFX binding)
-    public StringProperty tenHieuXeProperty() {
-        return tenHieuXe;
-    }
+    // Properties for JavaFX binding
+    public IntegerProperty maHieuXeProperty() { return maHieuXe; }
+    public StringProperty tenHieuXeProperty() { return tenHieuXe; }
 
     @Override
     public String toString() {
-        return tenHieuXe.get(); // Useful for ComboBox display
+        return tenHieuXe.get();
     }
 }

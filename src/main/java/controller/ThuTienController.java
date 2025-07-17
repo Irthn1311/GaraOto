@@ -13,6 +13,8 @@ import dao.PhieuThuTienDAO;
 import utils.AlertUtils;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Locale;
+import java.text.NumberFormat;
 
 public class ThuTienController {
 
@@ -69,6 +71,9 @@ public class ThuTienController {
     // Currently selected TiepNhan record
     private TiepNhan selectedTiepNhan;
 
+    // Currency formatting
+    private NumberFormat currencyFormat;
+
     /**
      * Initializes the controller. This method is automatically called after the FXML file has been loaded.
      */
@@ -93,6 +98,19 @@ public class ThuTienController {
         colTongTienNo.setCellValueFactory(cellData -> cellData.getValue().tongTienNoProperty().asObject());
         colTrangThai.setCellValueFactory(cellData -> cellData.getValue().trangThaiHoanTatProperty().asObject());
 
+        // Custom cell factory for currency formatting
+        colTongTienNo.setCellFactory(tc -> new TableCell<TiepNhan, Double>() {
+            @Override
+            protected void updateItem(Double price, boolean empty) {
+                super.updateItem(price, empty);
+                if (empty || price == null) {
+                    setText(null);
+                } else {
+                    setText(currencyFormat.format(price));
+                }
+            }
+        });
+
         // Add listener to table selection to display selected TiepNhan info
         tblHoSoCanThanhToan.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
@@ -116,6 +134,9 @@ public class ThuTienController {
 
         // Disable payment form elements initially
         setPaymentFormEnabled(false);
+
+        // Initialize currency format
+        currencyFormat = NumberFormat.getCurrencyInstance(Locale.of("vi", "VN"));
     }
 
     /**
@@ -183,7 +204,7 @@ public class ThuTienController {
         lblBienSoXe.setText(tiepNhan.getBienSo());
         lblTenChuXeSelected.setText(tiepNhan.getTenChuXe());
         lblDienThoaiSelected.setText(tiepNhan.getDienThoaiChuXe());
-        lblTongTienNoSelected.setText(String.format("%.2f VNĐ", tiepNhan.getTongTienNo()));
+        lblTongTienNoSelected.setText(currencyFormat.format(tiepNhan.getTongTienNo()));
         calculateSoTienConNo(); // Recalculate based on current input
     }
 
@@ -195,8 +216,8 @@ public class ThuTienController {
         lblBienSoXe.setText("[Chưa chọn]");
         lblTenChuXeSelected.setText("[Chưa chọn]");
         lblDienThoaiSelected.setText("[Chưa chọn]");
-        lblTongTienNoSelected.setText("0.00 VNĐ");
-        lblSoTienConNo.setText("0.00 VNĐ");
+        lblTongTienNoSelected.setText(currencyFormat.format(0.0));
+        lblSoTienConNo.setText(currencyFormat.format(0.0));
         txtSoTienThu.clear();
     }
 
@@ -205,7 +226,7 @@ public class ThuTienController {
      */
     private void calculateSoTienConNo() {
         if (selectedTiepNhan == null) {
-            lblSoTienConNo.setText("0.00 VNĐ");
+            lblSoTienConNo.setText(currencyFormat.format(0.0));
             return;
         }
 
@@ -221,7 +242,7 @@ public class ThuTienController {
         }
 
         double conNo = tongTienNo - soTienThu;
-        lblSoTienConNo.setText(String.format("%.2f VNĐ", conNo));
+        lblSoTienConNo.setText(currencyFormat.format(conNo));
 
         // Highlight if remaining debt is negative (overpayment) or exactly zero
         if (conNo < 0) {

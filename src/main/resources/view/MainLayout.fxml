@@ -69,6 +69,36 @@
                         <Insets bottom="10.0" />
                     </VBox.margin>
                 </Button>
+                <!-- Button for QuanLyHieuXe -->
+                <Button fx:id="btnQuanLyHieuXe" mnemonicParsing="false" onAction="#handleQuanLyHieuXe" prefHeight="50.0" prefWidth="220.0" styleClass="sidebar-button" text="  &#xf1b9; Quản lý Hiệu xe">
+                    <VBox.margin>
+                        <Insets bottom="10.0" />
+                    </VBox.margin>
+                </Button>
+                <!-- Button for QuanLyTienCong -->
+                <Button fx:id="btnQuanLyTienCong" mnemonicParsing="false" onAction="#handleQuanLyTienCong" prefHeight="50.0" prefWidth="220.0" styleClass="sidebar-button" text="  &#xf155; Quản lý Tiền công">
+                    <VBox.margin>
+                        <Insets bottom="10.0" />
+                    </VBox.margin>
+                </Button>
+                <!-- Button for QuanLyTho -->
+                <Button fx:id="btnQuanLyTho" mnemonicParsing="false" onAction="#handleQuanLyTho" prefHeight="50.0" prefWidth="220.0" styleClass="sidebar-button" text="  &#xf0ad; Quản lý Thợ">
+                    <VBox.margin>
+                        <Insets bottom="10.0" />
+                    </VBox.margin>
+                </Button>
+                <!-- Button for QuanLyNhaCungCap -->
+                <Button fx:id="btnQuanLyNhaCungCap" mnemonicParsing="false" onAction="#handleQuanLyNhaCungCap" prefHeight="50.0" prefWidth="220.0" styleClass="sidebar-button" text="  &#xf0d1; Quản lý NCC">
+                    <VBox.margin>
+                        <Insets bottom="10.0" />
+                    </VBox.margin>
+                </Button>
+                <!-- New button for QuanLyVatTu -->
+                <Button fx:id="btnQuanLyVatTu" mnemonicParsing="false" onAction="#handleQuanLyVatTu" prefHeight="50.0" prefWidth="220.0" styleClass="sidebar-button" text="  &#xf02d; Quản lý Vật tư">
+                    <VBox.margin>
+                        <Insets bottom="10.0" />
+                    </VBox.margin>
+                </Button>
                 <Region VBox.vgrow="ALWAYS" /> <!-- Spacer -->
                 <Button fx:id="btnDangXuat" mnemonicParsing="false" onAction="#handleDangXuat" prefHeight="50.0" prefWidth="220.0" style="-fx-background-color: #e74c3c; -fx-text-fill: #ffffff; -fx-font-size: 15px; -fx-background-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 0);" text="  &#xf08b; Đăng xuất">
                     <VBox.margin>

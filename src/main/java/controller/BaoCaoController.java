@@ -4,14 +4,21 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import model.DoanhThuEntry; // New model for revenue report
+import model.DoanhThuEntry; // Model for revenue report
 import model.VatTu;
 import model.TiepNhan;
+import model.PhieuSuaChua; // Import PhieuSuaChua
+import model.ChiTietSuaChua; // Import ChiTietSuaChua
+import model.LuotTiepNhanSuaChuaEntry; // Model for acceptance/repair count report
+import model.TieuHaoVatTuEntry; // Model for material consumption report
+import model.LoiNhuanEntry; // Model for overall profit report
+import model.LoaiTienCong; // Import LoaiTienCong for LoiNhuan calculation
 
 import dao.PhieuSuaChuaDAO;
 import dao.PhieuThuTienDAO;
 import dao.VatTuDAO;
 import dao.TiepNhanDAO;
+import dao.ChiTietSuaChuaDAO; // Import ChiTietSuaChuaDAO
 import utils.AlertUtils;
 
 import java.sql.SQLException;
@@ -19,6 +26,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.text.NumberFormat; // For currency formatting
+import java.util.Locale; // For currency formatting
+import java.util.Comparator; // For sorting
 
 public class BaoCaoController {
 
@@ -82,11 +92,75 @@ public class BaoCaoController {
     @FXML
     private Label lblTongCongNoKhachHang;
 
+    // FXML elements for Lượt tiếp nhận và sửa chữa Tab (NEW)
+    @FXML
+    private DatePicker dpLuotFrom;
+    @FXML
+    private DatePicker dpLuotTo;
+    @FXML
+    private Button btnXemLuot;
+    @FXML
+    private TableView<LuotTiepNhanSuaChuaEntry> tblLuotTiepNhanSuaChua;
+    @FXML
+    private TableColumn<LuotTiepNhanSuaChuaEntry, LocalDate> colNgayLuot;
+    @FXML
+    private TableColumn<LuotTiepNhanSuaChuaEntry, Integer> colSoLuotTiepNhan;
+    @FXML
+    private TableColumn<LuotTiepNhanSuaChuaEntry, Integer> colSoPhieuSuaChuaLuot;
+
+    // FXML elements for Tiêu hao vật tư Tab (NEW)
+    @FXML
+    private DatePicker dpTieuHaoFrom;
+    @FXML
+    private DatePicker dpTieuHaoTo;
+    @FXML
+    private Button btnXemTieuHao;
+    @FXML
+    private TableView<TieuHaoVatTuEntry> tblTieuHaoVatTu;
+    @FXML
+    private TableColumn<TieuHaoVatTuEntry, Integer> colMaVatTuTH;
+    @FXML
+    private TableColumn<TieuHaoVatTuEntry, String> colTenVatTuTH;
+    @FXML
+    private TableColumn<TieuHaoVatTuEntry, String> colDonViTinhTH;
+    @FXML
+    private TableColumn<TieuHaoVatTuEntry, Integer> colSoLuongTieuHaoTH;
+    @FXML
+    private TableColumn<TieuHaoVatTuEntry, Double> colTongGiaTriTieuHaoTH;
+    @FXML
+    private Label lblTongGiaTriTieuHao;
+
+    // FXML elements for Lợi nhuận tổng thể Tab (NEW)
+    @FXML
+    private DatePicker dpLoiNhuanFrom;
+    @FXML
+    private DatePicker dpLoiNhuanTo;
+    @FXML
+    private Button btnXemLoiNhuan;
+    @FXML
+    private TableView<LoiNhuanEntry> tblLoiNhuan;
+    @FXML
+    private TableColumn<LoiNhuanEntry, LocalDate> colNgayLoiNhuan;
+    @FXML
+    private TableColumn<LoiNhuanEntry, Double> colTongDoanhThuBanHangLN;
+    @FXML
+    private TableColumn<LoiNhuanEntry, Double> colTongChiPhiVatTuLN;
+    @FXML
+    private TableColumn<LoiNhuanEntry, Double> colTongChiPhiTienCongLN;
+    @FXML
+    private TableColumn<LoiNhuanEntry, Double> colLoiNhuanRongLN;
+    @FXML
+    private Label lblTongLoiNhuanRong;
+
+
     // DAOs
     private PhieuSuaChuaDAO phieuSuaChuaDAO;
     private PhieuThuTienDAO phieuThuTienDAO;
     private VatTuDAO vatTuDAO;
     private TiepNhanDAO tiepNhanDAO;
+    private ChiTietSuaChuaDAO chiTietSuaChuaDAO; // New DAO for ChiTietSuaChua
+
+    private NumberFormat currencyFormat; // For currency formatting
 
     /**
      * Initializes the controller. This method is automatically called after the FXML file has been loaded.
@@ -98,11 +172,22 @@ public class BaoCaoController {
         phieuThuTienDAO = new PhieuThuTienDAO();
         vatTuDAO = new VatTuDAO();
         tiepNhanDAO = new TiepNhanDAO();
+        chiTietSuaChuaDAO = new ChiTietSuaChuaDAO(); // Initialize new DAO
 
-        // Set default dates for Doanh thu report (e.g., current month)
+        // Initialize currency formatter
+        currencyFormat = NumberFormat.getCurrencyInstance(Locale.of("vi", "VN"));
+
+        // Set default dates for all reports (e.g., current month)
         LocalDate today = LocalDate.now();
         dpDoanhThuFrom.setValue(today.withDayOfMonth(1));
         dpDoanhThuTo.setValue(today);
+        dpLuotFrom.setValue(today.withDayOfMonth(1));
+        dpLuotTo.setValue(today);
+        dpTieuHaoFrom.setValue(today.withDayOfMonth(1));
+        dpTieuHaoTo.setValue(today);
+        dpLoiNhuanFrom.setValue(today.withDayOfMonth(1));
+        dpLoiNhuanTo.setValue(today);
+
 
         // Configure TableView columns for Doanh thu
         colNgayDoanhThu.setCellValueFactory(cellData -> cellData.getValue().ngayProperty());
@@ -110,13 +195,21 @@ public class BaoCaoController {
         colTongTienPhieuSC.setCellValueFactory(cellData -> cellData.getValue().tongTienPhieuSCProperty().asObject());
         colTongTienThu.setCellValueFactory(cellData -> cellData.getValue().tongTienThuProperty().asObject());
         colTienConNoDoanhThu.setCellValueFactory(cellData -> cellData.getValue().tienConNoProperty().asObject());
+        // Custom cell factories for currency formatting
+        setupCurrencyColumn(colTongTienPhieuSC);
+        setupCurrencyColumn(colTongTienThu);
+        setupCurrencyColumn(colTienConNoDoanhThu);
 
         // Configure TableView columns for Tồn kho vật tư
         colMaVatTu.setCellValueFactory(cellData -> cellData.getValue().maVatTuProperty().asObject());
         colTenVatTu.setCellValueFactory(cellData -> cellData.getValue().tenVatTuProperty());
-        colDonGiaTon.setCellValueFactory(cellData -> cellData.getValue().donGiaProperty().asObject());
+        colDonGiaTon.setCellValueFactory(cellData -> cellData.getValue().donGiaBanProperty().asObject()); // Use DonGiaBan for inventory value
         colSoLuongTon.setCellValueFactory(cellData -> cellData.getValue().soLuongTonProperty().asObject());
-        colTongGiaTriTon.setCellValueFactory(cellData -> cellData.getValue().donGiaProperty().multiply(cellData.getValue().soLuongTonProperty()).asObject());
+        colTongGiaTriTon.setCellValueFactory(cellData -> cellData.getValue().donGiaBanProperty().multiply(cellData.getValue().soLuongTonProperty()).asObject());
+        // Custom cell factories for currency formatting
+        setupCurrencyColumn(colDonGiaTon);
+        setupCurrencyColumn(colTongGiaTriTon);
+
 
         // Configure TableView columns for Công nợ khách hàng
         colMaTiepNhanCN.setCellValueFactory(cellData -> cellData.getValue().maTiepNhanProperty().asObject());
@@ -125,11 +218,52 @@ public class BaoCaoController {
         colDienThoaiCN.setCellValueFactory(cellData -> cellData.getValue().dienThoaiChuXeProperty());
         colNgayTiepNhanCN.setCellValueFactory(cellData -> cellData.getValue().ngayTiepNhanProperty());
         colTongTienNoCN.setCellValueFactory(cellData -> cellData.getValue().tongTienNoProperty().asObject());
+        // Custom cell factory for currency formatting
+        setupCurrencyColumn(colTongTienNoCN);
 
-        // Initial load for default reports (optional, can be triggered by buttons)
-        // handleXemDoanhThu();
-        // handleXemTonKho();
-        // handleXemCongNo();
+        // Configure TableView columns for Lượt tiếp nhận và sửa chữa
+        colNgayLuot.setCellValueFactory(cellData -> cellData.getValue().ngayProperty());
+        colSoLuotTiepNhan.setCellValueFactory(cellData -> cellData.getValue().soLuotTiepNhanProperty().asObject());
+        colSoPhieuSuaChuaLuot.setCellValueFactory(cellData -> cellData.getValue().soPhieuSuaChuaProperty().asObject());
+
+        // Configure TableView columns for Tiêu hao vật tư
+        colMaVatTuTH.setCellValueFactory(cellData -> cellData.getValue().maVatTuProperty().asObject());
+        colTenVatTuTH.setCellValueFactory(cellData -> cellData.getValue().tenVatTuProperty());
+        colDonViTinhTH.setCellValueFactory(cellData -> cellData.getValue().donViTinhProperty());
+        colSoLuongTieuHaoTH.setCellValueFactory(cellData -> cellData.getValue().soLuongTieuHaoProperty().asObject());
+        colTongGiaTriTieuHaoTH.setCellValueFactory(cellData -> cellData.getValue().tongGiaTriTieuHaoProperty().asObject());
+        // Custom cell factory for currency formatting
+        setupCurrencyColumn(colTongGiaTriTieuHaoTH);
+
+        // Configure TableView columns for Lợi nhuận tổng thể
+        colNgayLoiNhuan.setCellValueFactory(cellData -> cellData.getValue().ngayProperty());
+        colTongDoanhThuBanHangLN.setCellValueFactory(cellData -> cellData.getValue().tongDoanhThuBanHangProperty().asObject());
+        colTongChiPhiVatTuLN.setCellValueFactory(cellData -> cellData.getValue().tongChiPhiVatTuProperty().asObject());
+        colTongChiPhiTienCongLN.setCellValueFactory(cellData -> cellData.getValue().tongChiPhiTienCongProperty().asObject());
+        colLoiNhuanRongLN.setCellValueFactory(cellData -> cellData.getValue().loiNhuanRongProperty().asObject());
+        // Custom cell factories for currency formatting
+        setupCurrencyColumn(colTongDoanhThuBanHangLN);
+        setupCurrencyColumn(colTongChiPhiVatTuLN);
+        setupCurrencyColumn(colTongChiPhiTienCongLN);
+        setupCurrencyColumn(colLoiNhuanRongLN);
+    }
+
+    /**
+     * Helper method to set up currency formatting for TableColumns.
+     * @param column The TableColumn to apply currency formatting to.
+     */
+    private <S> void setupCurrencyColumn(TableColumn<S, Double> column) {
+        column.setCellFactory(tc -> new TableCell<S, Double>() {
+            @Override
+            protected void updateItem(Double price, boolean empty) {
+                super.updateItem(price, empty);
+                if (empty || price == null) {
+                    setText(null);
+                } else {
+                    setText(currencyFormat.format(price));
+                }
+            }
+        });
     }
 
     /**
@@ -154,7 +288,7 @@ public class BaoCaoController {
             // Get all repair slips and payment receipts within the date range
             List<model.PhieuSuaChua> phieuSuaChuaList = phieuSuaChuaDAO.getPhieuSuaChuaByDateRange(fromDate, toDate);
             List<model.PhieuThuTien> phieuThuTienList = phieuThuTienDAO.getPhieuThuTienByDateRange(fromDate, toDate);
-            List<TiepNhan> allTiepNhan = tiepNhanDAO.getAllTiepNhan(); // To get current outstanding debt for each TiepNhan
+            // No need to fetch all TiepNhan here, as we are focusing on daily aggregates of SC and TT.
 
             // Group repair slips and payments by date
             Map<LocalDate, List<model.PhieuSuaChua>> scByDate = phieuSuaChuaList.stream()
@@ -173,19 +307,19 @@ public class BaoCaoController {
                 double tongTienThu = ttByDate.getOrDefault(date, List.of()).stream()
                         .mapToDouble(model.PhieuThuTien::getSoTienThu).sum();
 
-                // Calculate outstanding debt for this specific day's records (this is complex for daily cumulative)
-                // For simplicity, TienConNoDoanhThu for a day will be the sum of TongTienNo of TiepNhan records
-                // that were *active* on that day and still have debt.
-                // A more accurate daily "Tien con no" would require tracking cumulative debt changes.
-                // For this report, let's consider it as the *new* debt accumulated on that day.
-                double tienConNo = tongTienSC - tongTienThu; // This is actually net change for the day
+                // TienConNoDoanhThu for a day represents the net change in debt for that specific day,
+                // or more accurately, the difference between what was charged and what was collected on that day.
+                double tienConNo = tongTienSC - tongTienThu;
 
                 reportData.add(new DoanhThuEntry(date, soPhieuSC, tongTienSC, tongTienThu, tienConNo));
                 totalRevenueInPeriod += tongTienThu; // Total revenue is sum of collected payments
             }
 
+            // Sort reportData by date
+            reportData.sort(Comparator.comparing(DoanhThuEntry::getNgay));
+
             tblDoanhThu.setItems(reportData);
-            lblTongDoanhThuTrongKy.setText(String.format("%.2f VNĐ", totalRevenueInPeriod));
+            lblTongDoanhThuTrongKy.setText(currencyFormat.format(totalRevenueInPeriod));
 
         } catch (SQLException e) {
             AlertUtils.showErrorAlert("Lỗi báo cáo doanh thu", "Không thể tạo báo cáo doanh thu: " + e.getMessage());
@@ -204,9 +338,9 @@ public class BaoCaoController {
             tblTonKhoVatTu.setItems(vatTuList);
 
             double totalInventoryValue = vatTuList.stream()
-                    .mapToDouble(vt -> vt.getDonGia() * vt.getSoLuongTon())
+                    .mapToDouble(vt -> vt.getDonGiaBan() * vt.getSoLuongTon()) // Use DonGiaBan
                     .sum();
-            lblTongGiaTriTonKho.setText(String.format("%.2f VNĐ", totalInventoryValue));
+            lblTongGiaTriTonKho.setText(currencyFormat.format(totalInventoryValue));
 
         } catch (SQLException e) {
             AlertUtils.showErrorAlert("Lỗi báo cáo tồn kho", "Không thể tạo báo cáo tồn kho vật tư: " + e.getMessage());
@@ -235,11 +369,199 @@ public class BaoCaoController {
                 }
             }
 
+            // Sort outstandingDebtRecords by MaTiepNhan
+            outstandingDebtRecords.sort(Comparator.comparing(TiepNhan::getMaTiepNhan));
+
             tblCongNoKhachHang.setItems(outstandingDebtRecords);
-            lblTongCongNoKhachHang.setText(String.format("%.2f VNĐ", totalOutstandingDebt));
+            lblTongCongNoKhachHang.setText(currencyFormat.format(totalOutstandingDebt));
 
         } catch (SQLException e) {
             AlertUtils.showErrorAlert("Lỗi báo cáo công nợ", "Không thể tạo báo cáo công nợ khách hàng: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Handles the "Xem báo cáo" button action for Lượt tiếp nhận và sửa chữa.
+     * Generates and displays the report for acceptance and repair counts.
+     */
+    @FXML
+    private void handleXemLuot() {
+        LocalDate fromDate = dpLuotFrom.getValue();
+        LocalDate toDate = dpLuotTo.getValue();
+
+        if (fromDate == null || toDate == null) {
+            AlertUtils.showWarningAlert("Thiếu thông tin", "Vui lòng chọn đầy đủ ngày bắt đầu và ngày kết thúc.");
+            return;
+        }
+        if (fromDate.isAfter(toDate)) {
+            AlertUtils.showWarningAlert("Lỗi ngày", "Ngày bắt đầu không thể sau ngày kết thúc.");
+            return;
+        }
+
+        try {
+            // Get all TiepNhan and PhieuSuaChua records within the date range
+            List<TiepNhan> tiepNhanList = tiepNhanDAO.getTiepNhanByDateRange(fromDate, toDate);
+            List<PhieuSuaChua> phieuSuaChuaList = phieuSuaChuaDAO.getPhieuSuaChuaByDateRange(fromDate, toDate);
+
+            // Group by date
+            Map<LocalDate, Long> tiepNhanCountByDate = tiepNhanList.stream()
+                    .collect(Collectors.groupingBy(TiepNhan::getNgayTiepNhan, Collectors.counting()));
+            Map<LocalDate, Long> phieuSuaChuaCountByDate = phieuSuaChuaList.stream()
+                    .collect(Collectors.groupingBy(PhieuSuaChua::getNgaySuaChua, Collectors.counting()));
+
+            ObservableList<LuotTiepNhanSuaChuaEntry> reportData = FXCollections.observableArrayList();
+
+            // Iterate through each day in the range to combine data
+            for (LocalDate date = fromDate; !date.isAfter(toDate); date = date.plusDays(1)) {
+                int soLuotTiepNhan = tiepNhanCountByDate.getOrDefault(date, 0L).intValue();
+                int soPhieuSuaChua = phieuSuaChuaCountByDate.getOrDefault(date, 0L).intValue();
+                reportData.add(new LuotTiepNhanSuaChuaEntry(date, soLuotTiepNhan, soPhieuSuaChua));
+            }
+
+            // Sort reportData by date
+            reportData.sort(Comparator.comparing(LuotTiepNhanSuaChuaEntry::getNgay));
+
+            tblLuotTiepNhanSuaChua.setItems(reportData);
+
+        } catch (SQLException e) {
+            AlertUtils.showErrorAlert("Lỗi báo cáo lượt tiếp nhận và sửa chữa", "Không thể tạo báo cáo: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Handles the "Xem báo cáo" button action for Tiêu hao vật tư.
+     * Generates and displays the material consumption report.
+     */
+    @FXML
+    private void handleXemTieuHao() {
+        LocalDate fromDate = dpTieuHaoFrom.getValue();
+        LocalDate toDate = dpTieuHaoTo.getValue();
+
+        if (fromDate == null || toDate == null) {
+            AlertUtils.showWarningAlert("Thiếu thông tin", "Vui lòng chọn đầy đủ ngày bắt đầu và ngày kết thúc.");
+            return;
+        }
+        if (fromDate.isAfter(toDate)) {
+            AlertUtils.showWarningAlert("Lỗi ngày", "Ngày bắt đầu không thể sau ngày kết thúc.");
+            return;
+        }
+
+        try {
+            // Get all ChiTietSuaChua within the date range, including VatTu details
+            List<ChiTietSuaChua> chiTietList = chiTietSuaChuaDAO.getChiTietSuaChuaByDateRange(fromDate, toDate);
+
+            // Aggregate material consumption
+            Map<Integer, TieuHaoVatTuEntry> aggregatedTieuHao = new java.util.HashMap<>();
+
+            for (ChiTietSuaChua chiTiet : chiTietList) {
+                if (chiTiet.getVatTu() != null) { // Only process if it's a material
+                    VatTu vatTu = chiTiet.getVatTu();
+                    int maVatTu = vatTu.getMaVatTu();
+                    int soLuongTieuHao = chiTiet.getSoLuong();
+                    double donGiaNhap = vatTu.getDonGiaBan(); // Use DonGiaBan for cost (assuming DonGiaNhap is stored in DonGiaBan field for simplicity)
+
+                    aggregatedTieuHao.compute(maVatTu, (key, existingEntry) -> {
+                        if (existingEntry == null) {
+                            return new TieuHaoVatTuEntry(maVatTu, vatTu.getTenVatTu(), vatTu.getDonViTinh(), soLuongTieuHao, soLuongTieuHao * donGiaNhap);
+                        } else {
+                            existingEntry.setSoLuongTieuHao(existingEntry.getSoLuongTieuHao() + soLuongTieuHao);
+                            existingEntry.setTongGiaTriTieuHao(existingEntry.getTongGiaTriTieuHao() + (soLuongTieuHao * donGiaNhap));
+                            return existingEntry;
+                        }
+                    });
+                }
+            }
+
+            ObservableList<TieuHaoVatTuEntry> reportData = FXCollections.observableArrayList(aggregatedTieuHao.values());
+
+            // Sort reportData by TenVatTu
+            reportData.sort(Comparator.comparing(TieuHaoVatTuEntry::getTenVatTu));
+
+            tblTieuHaoVatTu.setItems(reportData);
+
+            double totalGiaTriTieuHao = reportData.stream()
+                    .mapToDouble(TieuHaoVatTuEntry::getTongGiaTriTieuHao)
+                    .sum();
+            lblTongGiaTriTieuHao.setText(currencyFormat.format(totalGiaTriTieuHao));
+
+        } catch (SQLException e) {
+            AlertUtils.showErrorAlert("Lỗi báo cáo tiêu hao vật tư", "Không thể tạo báo cáo tiêu hao vật tư: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Handles the "Xem báo cáo" button action for Lợi nhuận tổng thể.
+     * Generates and displays the overall profit report.
+     */
+    @FXML
+    private void handleXemLoiNhuan() {
+        LocalDate fromDate = dpLoiNhuanFrom.getValue();
+        LocalDate toDate = dpLoiNhuanTo.getValue();
+
+        if (fromDate == null || toDate == null) {
+            AlertUtils.showWarningAlert("Thiếu thông tin", "Vui lòng chọn đầy đủ ngày bắt đầu và ngày kết thúc.");
+            return;
+        }
+        if (fromDate.isAfter(toDate)) {
+            AlertUtils.showWarningAlert("Lỗi ngày", "Ngày bắt đầu không thể sau ngày kết thúc.");
+            return;
+        }
+
+        try {
+            // Get all detailed repair slips within the date range
+            List<PhieuSuaChua> phieuSuaChuaDetailsList = phieuSuaChuaDAO.getPhieuSuaChuaDetailsByDateRange(fromDate, toDate);
+
+            // Group by date
+            Map<LocalDate, LoiNhuanEntry> aggregatedLoiNhuan = new java.util.HashMap<>();
+
+            for (PhieuSuaChua ps : phieuSuaChuaDetailsList) {
+                LocalDate ngay = ps.getNgaySuaChua();
+                double doanhThuBanHang = ps.getTongTien(); // Total selling price from repair slip
+                final double[] chiPhiVatTu = {0.0};
+                final double[] chiPhiTienCong = {0.0};
+
+                for (ChiTietSuaChua cts : ps.getChiTietSuaChuaList()) {
+                    if (cts.getVatTu() != null) {
+                        // Cost of material is SoLuong * DonGiaNhap (from ChiTietPhieuSuaChua_VatTu)
+                        chiPhiVatTu[0] += cts.getSoLuong() * cts.getVatTu().getDonGiaBan(); // Assuming DonGiaBan holds DonGiaNhap
+                    }
+                    if (cts.getLoaiTienCong() != null) {
+                        // Cost of labor is DonGia (from ChiTietPhieuSuaChua_TienCong)
+                        chiPhiTienCong[0] += cts.getLoaiTienCong().getDonGiaTienCong();
+                    }
+                }
+
+                aggregatedLoiNhuan.compute(ngay, (key, existingEntry) -> {
+                    if (existingEntry == null) {
+                        return new LoiNhuanEntry(ngay, doanhThuBanHang, chiPhiVatTu[0], chiPhiTienCong[0], doanhThuBanHang - chiPhiVatTu[0] - chiPhiTienCong[0]);
+                    } else {
+                        existingEntry.setTongDoanhThuBanHang(existingEntry.getTongDoanhThuBanHang() + doanhThuBanHang);
+                        existingEntry.setTongChiPhiVatTu(existingEntry.getTongChiPhiVatTu() + chiPhiVatTu[0]);
+                        existingEntry.setTongChiPhiTienCong(existingEntry.getTongChiPhiTienCong() + chiPhiTienCong[0]);
+                        existingEntry.setLoiNhuanRong(existingEntry.getTongDoanhThuBanHang() - existingEntry.getTongChiPhiVatTu() - existingEntry.getTongChiPhiTienCong());
+                        return existingEntry;
+                    }
+                });
+            }
+
+            ObservableList<LoiNhuanEntry> reportData = FXCollections.observableArrayList(aggregatedLoiNhuan.values());
+
+            // Sort reportData by date
+            reportData.sort(Comparator.comparing(LoiNhuanEntry::getNgay));
+
+
+            tblLoiNhuan.setItems(reportData);
+
+            double totalLoiNhuanRong = reportData.stream()
+                    .mapToDouble(LoiNhuanEntry::getLoiNhuanRong)
+                    .sum();
+            lblTongLoiNhuanRong.setText(currencyFormat.format(totalLoiNhuanRong));
+
+        } catch (SQLException e) {
+            AlertUtils.showErrorAlert("Lỗi báo cáo lợi nhuận", "Không thể tạo báo cáo lợi nhuận tổng thể: " + e.getMessage());
             e.printStackTrace();
         }
     }

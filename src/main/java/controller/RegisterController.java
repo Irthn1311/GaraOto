@@ -62,7 +62,7 @@ public class RegisterController {
 
         try {
             // 2. Check if username already exists
-            if (taiKhoanNguoiDungDAO.getTaiKhoanByUsername(username) != null) {
+            if (taiKhoanNguoiDungDAO.getTaiKhoanNguoiDungByTenDangNhap(username) != null) { // Changed method name
                 AlertUtils.showErrorAlert("Lỗi đăng ký", "Tên đăng nhập đã tồn tại. Vui lòng chọn tên khác.");
                 return;
             }
@@ -76,8 +76,9 @@ public class RegisterController {
             newUser.setTenDangNhap(username);
             newUser.setMatKhauHash(hashedPassword);
             newUser.setLoaiTaiKhoan("NhanVien"); // Default type for new registrations
+            newUser.setTrangThai(true); // New: Default to active
 
-            int newAccountId = taiKhoanNguoiDungDAO.addTaiKhoan(newUser);
+            int newAccountId = taiKhoanNguoiDungDAO.addTaiKhoanNguoiDung(newUser); // Changed method name
 
             if (newAccountId != -1) {
                 AlertUtils.showInformationAlert("Thành công", "Đăng ký tài khoản thành công! Bạn có thể đăng nhập ngay bây giờ.");

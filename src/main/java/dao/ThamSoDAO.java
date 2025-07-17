@@ -9,29 +9,8 @@ import java.util.List;
 public class ThamSoDAO {
 
     /**
-     * Retrieves all system parameters (ThamSo) from the database.
-     * @return A list of ThamSo objects.
-     * @throws SQLException if a database access error occurs.
-     */
-    public List<ThamSo> getAllThamSo() throws SQLException {
-        List<ThamSo> thamSoList = new ArrayList<>();
-        String sql = "SELECT TenThamSo, GiaTri FROM ThamSo";
-        try (Connection conn = DBConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                ThamSo thamSo = new ThamSo();
-                thamSo.setTenThamSo(rs.getString("TenThamSo"));
-                thamSo.setGiaTri(rs.getInt("GiaTri"));
-                thamSoList.add(thamSo);
-            }
-        }
-        return thamSoList;
-    }
-
-    /**
-     * Retrieves a system parameter (ThamSo) by its name.
-     * @param tenThamSo The name of the parameter.
+     * Retrieves a system parameter by its name.
+     * @param tenThamSo The name of the parameter (e.g., "SoXeToiDaMoiNgay", "MucTonKhoToiThieuMacDinh").
      * @return The ThamSo object if found, null otherwise.
      * @throws SQLException if a database access error occurs.
      */
@@ -53,7 +32,7 @@ public class ThamSoDAO {
     }
 
     /**
-     * Updates an existing system parameter's value in the database.
+     * Updates an existing system parameter.
      * @param thamSo The ThamSo object with updated information.
      * @throws SQLException if a database access error occurs.
      */
@@ -65,5 +44,26 @@ public class ThamSoDAO {
             pstmt.setString(2, thamSo.getTenThamSo());
             pstmt.executeUpdate();
         }
+    }
+
+    /**
+     * Retrieves all system parameters.
+     * @return A list of ThamSo objects.
+     * @throws SQLException if a database access error occurs.
+     */
+    public List<ThamSo> getAllThamSo() throws SQLException {
+        List<ThamSo> thamSoList = new ArrayList<>();
+        String sql = "SELECT TenThamSo, GiaTri FROM ThamSo";
+        try (Connection conn = DBConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                ThamSo thamSo = new ThamSo();
+                thamSo.setTenThamSo(rs.getString("TenThamSo"));
+                thamSo.setGiaTri(rs.getInt("GiaTri"));
+                thamSoList.add(thamSo);
+            }
+        }
+        return thamSoList;
     }
 }

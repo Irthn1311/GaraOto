@@ -12,27 +12,34 @@ public class ChiTietSuaChua {
     private IntegerProperty maPhieuSC; // FK to PhieuSuaChua
     private IntegerProperty maVatTu; // FK to VatTu (can be NULL in DB, 0 in Java if not used)
     private IntegerProperty soLuong; // Can be NULL in DB, 0 in Java if not used
-    private IntegerProperty maTienCong; // FK to TienCong (can be NULL in DB, 0 in Java if not used)
+    private IntegerProperty maLoaiTienCong; // Changed from maTienCong to maLoaiTienCong
     private DoubleProperty thanhTien;
 
     // Properties for TableView display (not directly from DB, but derived/combined)
     private IntegerProperty stt; // For sequential numbering in TableView
     private StringProperty noiDung; // Name of VatTu or TienCong description
     private StringProperty loai; // "Vật tư" or "Tiền công" or "Vật tư & Công"
-    private DoubleProperty donGia; // Unit price of VatTu or TienCong
+    private DoubleProperty donGia; // Unit price of VatTu or TienCong (used for display, typically DonGiaBan for VatTu)
+
+    // References to actual objects for detailed calculations (e.g., DonGiaNhap for VatTu)
+    private VatTu vatTu;
+    private LoaiTienCong loaiTienCong;
 
     public ChiTietSuaChua() {
         this.maChiTiet = new SimpleIntegerProperty();
         this.maPhieuSC = new SimpleIntegerProperty();
         this.maVatTu = new SimpleIntegerProperty(0); // Default to 0 for no selection
         this.soLuong = new SimpleIntegerProperty(0); // Default to 0
-        this.maTienCong = new SimpleIntegerProperty(0); // Default to 0 for no selection
+        this.maLoaiTienCong = new SimpleIntegerProperty(0); // Changed from maTienCong to maLoaiTienCong, Default to 0 for no selection
         this.thanhTien = new SimpleDoubleProperty();
 
         this.stt = new SimpleIntegerProperty();
         this.noiDung = new SimpleStringProperty();
         this.loai = new SimpleStringProperty();
         this.donGia = new SimpleDoubleProperty();
+
+        this.vatTu = null;
+        this.loaiTienCong = null;
     }
 
     // Getters
@@ -40,7 +47,7 @@ public class ChiTietSuaChua {
     public int getMaPhieuSC() { return maPhieuSC.get(); }
     public int getMaVatTu() { return maVatTu.get(); }
     public int getSoLuong() { return soLuong.get(); }
-    public int getMaTienCong() { return maTienCong.get(); }
+    public int getMaLoaiTienCong() { return maLoaiTienCong.get(); }
     public double getThanhTien() { return thanhTien.get(); }
 
     // Setters
@@ -48,7 +55,7 @@ public class ChiTietSuaChua {
     public void setMaPhieuSC(int maPhieuSC) { this.maPhieuSC.set(maPhieuSC); }
     public void setMaVatTu(int maVatTu) { this.maVatTu.set(maVatTu); }
     public void setSoLuong(int soLuong) { this.soLuong.set(soLuong); }
-    public void setMaTienCong(int maTienCong) { this.maTienCong.set(maTienCong); }
+    public void setMaLoaiTienCong(int maLoaiTienCong) { this.maLoaiTienCong.set(maLoaiTienCong); }
     public void setThanhTien(double thanhTien) { this.thanhTien.set(thanhTien); }
 
     // Properties for JavaFX binding
@@ -56,7 +63,7 @@ public class ChiTietSuaChua {
     public IntegerProperty maPhieuSCProperty() { return maPhieuSC; }
     public IntegerProperty maVatTuProperty() { return maVatTu; }
     public IntegerProperty soLuongProperty() { return soLuong; }
-    public IntegerProperty maTienCongProperty() { return maTienCong; }
+    public IntegerProperty maLoaiTienCongProperty() { return maLoaiTienCong; }
     public DoubleProperty thanhTienProperty() { return thanhTien; }
 
     // Getters/Setters/Properties for TableView display
@@ -75,4 +82,21 @@ public class ChiTietSuaChua {
     public double getDonGia() { return donGia.get(); }
     public void setDonGia(double donGia) { this.donGia.set(donGia); }
     public DoubleProperty donGiaProperty() { return donGia; }
+
+    // Getters and Setters for VatTu and LoaiTienCong objects
+    public VatTu getVatTu() {
+        return vatTu;
+    }
+
+    public void setVatTu(VatTu vatTu) {
+        this.vatTu = vatTu;
+    }
+
+    public LoaiTienCong getLoaiTienCong() {
+        return loaiTienCong;
+    }
+
+    public void setLoaiTienCong(LoaiTienCong loaiTienCong) {
+        this.loaiTienCong = loaiTienCong;
+    }
 }

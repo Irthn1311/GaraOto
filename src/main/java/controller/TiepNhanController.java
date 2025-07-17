@@ -8,6 +8,7 @@ import dao.HieuXeDAO;
 import dao.XeDAO;
 import dao.ChuXeDAO; // Import ChuXeDAO
 import dao.TiepNhanDAO; // Import TiepNhanDAO (formerly HoSoSuaChuaDAO)
+import dao.ThamSoDAO; // Import ThamSoDAO
 import model.HieuXe;
 import model.Xe;
 import model.ChuXe; // Import ChuXe entity
@@ -51,6 +52,7 @@ public class TiepNhanController {
     private XeDAO xeDAO;
     private ChuXeDAO chuXeDAO; // New DAO for ChuXe
     private TiepNhanDAO tiepNhanDAO; // Renamed from HoSoSuaChuaDAO
+    private ThamSoDAO thamSoDAO; // New DAO for ThamSo
 
     // ObservableList for the TableView
     private ObservableList<TiepNhan> danhSachXeTiepNhanTrongNgay; // Changed to TiepNhan
@@ -65,6 +67,7 @@ public class TiepNhanController {
         xeDAO = new XeDAO();
         chuXeDAO = new ChuXeDAO(); // Initialize new DAO
         tiepNhanDAO = new TiepNhanDAO(); // Initialize renamed DAO
+        thamSoDAO = new ThamSoDAO(); // Initialize new DAO
 
         // Set default date for DatePicker to today
         dpNgayTiepNhan.setValue(LocalDate.now());
@@ -119,7 +122,7 @@ public class TiepNhanController {
             // Update the count label
             try {
                 // Use the correct parameter name from your updated SQL script
-                int maxXeTrongNgay = Integer.parseInt(hieuXeDAO.getThamSoHeThong("SoXeToiDaMoiNgay"));
+                int maxXeTrongNgay = thamSoDAO.getThamSoByName("SoXeToiDaMoiNgay").getGiaTri();
                 lblSoXeTrongNgay.setText(danhSachXeTiepNhanTrongNgay.size() + "/" + maxXeTrongNgay);
                 if (danhSachXeTiepNhanTrongNgay.size() >= maxXeTrongNgay) {
                     lblSoXeTrongNgay.setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
@@ -165,7 +168,7 @@ public class TiepNhanController {
 
         try {
             // Check daily acceptance limit (QĐ1)
-            int maxXeTrongNgay = Integer.parseInt(hieuXeDAO.getThamSoHeThong("SoXeToiDaMoiNgay")); // Use new param name
+            int maxXeTrongNgay = thamSoDAO.getThamSoByName("SoXeToiDaMoiNgay").getGiaTri(); // Use new param name
             if (danhSachXeTiepNhanTrongNgay.size() >= maxXeTrongNgay) {
                 AlertUtils.showErrorAlert("Vượt quá giới hạn", "Số lượng xe tiếp nhận trong ngày đã đạt giới hạn tối đa (" + maxXeTrongNgay + " xe).");
                 return;

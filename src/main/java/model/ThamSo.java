@@ -7,7 +7,7 @@ import javafx.beans.property.StringProperty;
 
 public class ThamSo {
     private StringProperty tenThamSo;
-    private IntegerProperty giaTri;
+    private IntegerProperty giaTri; // Assuming GiaTri is INT based on your SQL script
 
     public ThamSo() {
         this.tenThamSo = new SimpleStringProperty();
@@ -30,9 +30,4 @@ public class ThamSo {
     // Properties for JavaFX binding
     public StringProperty tenThamSoProperty() { return tenThamSo; }
     public IntegerProperty giaTriProperty() { return giaTri; }
-
-    @Override
-    public String toString() {
-        return tenThamSo.get() + ": " + giaTri.get();
-    }
 }

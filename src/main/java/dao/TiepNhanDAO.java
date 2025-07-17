@@ -6,6 +6,8 @@ import java.sql.*;
 import java.time.LocalDate;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import java.util.ArrayList; // Added import
+import java.util.List; // Added import
 
 public class TiepNhanDAO {
 
@@ -159,6 +161,36 @@ public class TiepNhanDAO {
                 tiepNhan.setTenHieuXe(rs.getString("TenHieuXe"));
 
                 tiepNhanList.add(tiepNhan);
+            }
+        }
+        return tiepNhanList;
+    }
+
+    /**
+     * Retrieves TiepNhan records within a specified date range.
+     * This method is useful for reports like acceptance counts.
+     * @param fromDate The start date of the range (inclusive).
+     * @param toDate The end date of the range (inclusive).
+     * @return A list of TiepNhan objects within the date range.
+     * @throws SQLException if a database access error occurs.
+     */
+    public List<TiepNhan> getTiepNhanByDateRange(LocalDate fromDate, LocalDate toDate) throws SQLException {
+        List<TiepNhan> tiepNhanList = new ArrayList<>();
+        String sql = "SELECT MaTiepNhan, BienSo, NgayTiepNhan, TongTienNo, TrangThaiHoanTat FROM TiepNhan WHERE NgayTiepNhan BETWEEN ? AND ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setDate(1, Date.valueOf(fromDate));
+            pstmt.setDate(2, Date.valueOf(toDate));
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    TiepNhan tiepNhan = new TiepNhan();
+                    tiepNhan.setMaTiepNhan(rs.getInt("MaTiepNhan"));
+                    tiepNhan.setBienSo(rs.getString("BienSo"));
+                    tiepNhan.setNgayTiepNhan(rs.getDate("NgayTiepNhan").toLocalDate());
+                    tiepNhan.setTongTienNo(rs.getDouble("TongTienNo"));
+                    tiepNhan.setTrangThaiHoanTat(rs.getBoolean("TrangThaiHoanTat"));
+                    tiepNhanList.add(tiepNhan);
+                }
             }
         }
         return tiepNhanList;

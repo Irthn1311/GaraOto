@@ -6,15 +6,17 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import model.TiepNhan; // Import TiepNhan entity
 import model.VatTu;    // New entity for VatTu
-import model.TienCong; // New entity for TienCong
+import model.LoaiTienCong; // New entity for TienCong
 import model.PhieuSuaChua; // New entity for PhieuSuaChua
 import model.ChiTietSuaChua; // New entity for ChiTietSuaChua
+import model.Tho; // Import Tho entity
 
 import dao.TiepNhanDAO; // DAO for TiepNhan
 import dao.VatTuDAO;    // New DAO for VatTu
-import dao.TienCongDAO; // New DAO for TienCong
+import dao.LoaiTienCongDAO; // New DAO for TienCong
 import dao.PhieuSuaChuaDAO; // New DAO for PhieuSuaChua
 import dao.ChiTietSuaChuaDAO; // New DAO for ChiTietSuaChua
+import dao.ThoDAO; // New DAO for Tho
 
 import utils.AlertUtils;
 import java.sql.SQLException;
@@ -76,6 +78,8 @@ public class SuaChuaController {
     @FXML
     private TextArea txtGhiChu;
     @FXML
+    private ComboBox<String> cbThoPhanCong; // New: ComboBox for assigning mechanic
+    @FXML
     private Button btnLapPhieuSuaChua;
     @FXML
     private Button btnLamMoiPhieu;
@@ -83,9 +87,10 @@ public class SuaChuaController {
     // DAOs
     private TiepNhanDAO tiepNhanDAO;
     private VatTuDAO vatTuDAO;
-    private TienCongDAO tienCongDAO;
+    private LoaiTienCongDAO tienCongDAO;
     private PhieuSuaChuaDAO phieuSuaChuaDAO;
     private ChiTietSuaChuaDAO chiTietSuaChuaDAO;
+    private ThoDAO thoDAO; // New DAO for Tho
 
     // Data for the TableView
     private ObservableList<ChiTietSuaChua> danhSachChiTietSuaChua;
@@ -101,9 +106,10 @@ public class SuaChuaController {
         // Initialize DAOs
         tiepNhanDAO = new TiepNhanDAO();
         vatTuDAO = new VatTuDAO();
-        tienCongDAO = new TienCongDAO();
+        tienCongDAO = new LoaiTienCongDAO();
         phieuSuaChuaDAO = new PhieuSuaChuaDAO();
         chiTietSuaChuaDAO = new ChiTietSuaChuaDAO();
+        thoDAO = new ThoDAO(); // Initialize ThoDAO
 
         // Set default date for DatePicker
         dpNgaySuaChua.setValue(LocalDate.now());
@@ -128,6 +134,7 @@ public class SuaChuaController {
         // Load initial data for ComboBoxes
         loadVatTuData();
         loadTienCongData();
+        loadThoData(); // Load mechanic data
 
         // Disable elements until a TiepNhan record is selected
         setFormEnabled(false);
@@ -146,6 +153,7 @@ public class SuaChuaController {
         btnXoaChiTiet.setDisable(!enable);
         dpNgaySuaChua.setDisable(!enable);
         txtGhiChu.setDisable(!enable);
+        cbThoPhanCong.setDisable(!enable); // Enable/disable mechanic combobox
         btnLapPhieuSuaChua.setDisable(!enable);
         btnLamMoiPhieu.setDisable(!enable);
     }
@@ -172,12 +180,28 @@ public class SuaChuaController {
     private void loadTienCongData() {
         try {
             ObservableList<String> tienCongContents = FXCollections.observableArrayList();
-            for (TienCong tc : tienCongDAO.getAllTienCong()) {
-                tienCongContents.add(tc.getNoiDung());
+            for (LoaiTienCong tc : tienCongDAO.getAllLoaiTienCong()) {
+                tienCongContents.add(tc.getTenLoaiTienCong());
             }
             cbTienCong.setItems(tienCongContents);
         } catch (SQLException e) {
             AlertUtils.showErrorAlert("Lỗi tải dữ liệu", "Không thể tải danh sách tiền công từ cơ sở dữ liệu.");
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Loads Tho (mechanics) from the database into the ComboBox.
+     */
+    private void loadThoData() {
+        try {
+            ObservableList<String> thoNames = FXCollections.observableArrayList();
+            for (Tho tho : thoDAO.getAllTho()) {
+                thoNames.add(tho.getTenTho());
+            }
+            cbThoPhanCong.setItems(thoNames);
+        } catch (SQLException e) {
+            AlertUtils.showErrorAlert("Lỗi tải dữ liệu", "Không thể tải danh sách thợ từ cơ sở dữ liệu.");
             e.printStackTrace();
         }
     }
@@ -276,7 +300,6 @@ public class SuaChuaController {
         colTongTienNoDialog.setPrefWidth(100);
 
         selectionTable.getColumns().addAll(colMaTiepNhan, colBienSoDialog, colTenChuXeDialog, colNgayTiepNhanDialog, colTongTienNoDialog);
-        selectionTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         dialog.getDialogPane().setContent(selectionTable);
 
@@ -368,33 +391,33 @@ public class SuaChuaController {
                 chiTiet.setNoiDung(vatTu.getTenVatTu());
                 chiTiet.setLoai("Vật tư");
                 chiTiet.setSoLuong(soLuong);
-                chiTiet.setDonGia(vatTu.getDonGia());
-                thanhTien += vatTu.getDonGia() * soLuong;
-                donGia = vatTu.getDonGia(); // Set for display
+                chiTiet.setDonGia(vatTu.getDonGiaBan()); // Use DonGiaBan from VatTu
+                thanhTien += vatTu.getDonGiaBan() * soLuong; // Use DonGiaBan for calculation
+                donGia = vatTu.getDonGiaBan(); // Set for display
             }
 
             if (selectedTienCong != null) {
-                TienCong tienCong = tienCongDAO.getTienCongByNoiDung(selectedTienCong);
+                LoaiTienCong tienCong = tienCongDAO.getLoaiTienCongByName(selectedTienCong);
                 if (tienCong == null) {
                     AlertUtils.showErrorAlert("Lỗi", "Tiền công không tồn tại.");
                     return;
                 }
                 // If both vatTu and tienCong are selected, combine them into one detail line
                 if (selectedVatTu != null) {
-                    chiTiet.setMaTienCong(tienCong.getMaTienCong());
-                    chiTiet.setNoiDung(chiTiet.getNoiDung() + " + " + tienCong.getNoiDung());
+                    chiTiet.setMaLoaiTienCong(tienCong.getMaLoaiTienCong()); // Use MaLoaiTienCong
+                    chiTiet.setNoiDung(chiTiet.getNoiDung() + " + " + tienCong.getTenLoaiTienCong());
                     chiTiet.setLoai("Vật tư & Công");
-                    thanhTien += tienCong.getDonGia(); // Add labor cost
+                    thanhTien += tienCong.getDonGiaTienCong(); // Add labor cost
                     // DonGia for display in this case is tricky, might show 0 or average or sum
                     // For simplicity, let's just show the total for this detail line
                 } else {
-                    chiTiet.setMaTienCong(tienCong.getMaTienCong());
-                    chiTiet.setNoiDung(tienCong.getNoiDung());
+                    chiTiet.setMaLoaiTienCong(tienCong.getMaLoaiTienCong()); // Use MaLoaiTienCong
+                    chiTiet.setNoiDung(tienCong.getTenLoaiTienCong());
                     chiTiet.setLoai("Tiền công");
                     chiTiet.setSoLuong(1); // Labor is usually 1 unit
-                    chiTiet.setDonGia(tienCong.getDonGia());
-                    thanhTien += tienCong.getDonGia();
-                    donGia = tienCong.getDonGia(); // Set for display
+                    chiTiet.setDonGia(tienCong.getDonGiaTienCong());
+                    thanhTien += tienCong.getDonGiaTienCong();
+                    donGia = tienCong.getDonGiaTienCong(); // Set for display
                 }
             }
 
@@ -482,13 +505,32 @@ public class SuaChuaController {
             return;
         }
 
+        String selectedThoName = cbThoPhanCong.getValue();
+        Integer maTho = null;
+        if (selectedThoName != null && !selectedThoName.isEmpty()) {
+            try {
+                Tho tho = thoDAO.getThoByName(selectedThoName); // Assuming you have getThoByName in ThoDAO
+                if (tho != null) {
+                    maTho = tho.getMaTho();
+                }
+            } catch (SQLException e) {
+                AlertUtils.showErrorAlert("Lỗi thợ", "Không thể lấy thông tin thợ: " + e.getMessage());
+                e.printStackTrace();
+                return;
+            }
+        }
+
         try {
             // 1. Create PhieuSuaChua
             PhieuSuaChua phieuSuaChua = new PhieuSuaChua();
             phieuSuaChua.setMaTiepNhan(selectedTiepNhan.getMaTiepNhan());
             phieuSuaChua.setNgaySuaChua(ngaySuaChua);
             phieuSuaChua.setGhiChu(txtGhiChu.getText().trim());
-            phieuSuaChua.setTongTien(Double.parseDouble(lblTongTienPhieuSC.getText().replace(" VNĐ", ""))); // Get total from label
+            phieuSuaChua.setTongTien(Double.parseDouble(lblTongTienPhieuSC.getText().replace(" VNĐ", "").replace(",", ""))); // Get total from label
+            if (maTho != null) {
+                phieuSuaChua.setMaTho(maTho);
+            }
+            phieuSuaChua.setTrangThaiHoanTat(false); // Initially not completed
 
             int maPhieuSC = phieuSuaChuaDAO.addPhieuSuaChua(phieuSuaChua);
 
@@ -511,6 +553,8 @@ public class SuaChuaController {
             double currentTongTienNo = selectedTiepNhan.getTongTienNo();
             double newTongTienNo = currentTongTienNo + phieuSuaChua.getTongTien();
             selectedTiepNhan.setTongTienNo(newTongTienNo);
+            // TrangThaiHoanTat for TiepNhan should only be true if TongTienNo is 0
+            // We don't set it to true here, only when payment is received and debt becomes 0
             tiepNhanDAO.updateTongTienNoAndTrangThai(selectedTiepNhan.getMaTiepNhan(), newTongTienNo, selectedTiepNhan.isTrangThaiHoanTat());
 
             AlertUtils.showInformationAlert("Thành công", "Lập phiếu sửa chữa thành công!");
@@ -539,6 +583,7 @@ public class SuaChuaController {
         cbVatTu.getSelectionModel().clearSelection();
         txtSoLuongVatTu.clear();
         cbTienCong.getSelectionModel().clearSelection();
+        cbThoPhanCong.getSelectionModel().clearSelection(); // Clear mechanic selection
         selectedTiepNhan = null; // Clear selected TiepNhan
         setFormEnabled(false);
     }

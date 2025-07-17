@@ -33,7 +33,7 @@
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
-            <version>12.8.1.jre11</version> <!-- phiên bản mới hơn tương thích với Java 22 -->
+            <version>12.4.2.jre11</version> <!-- tương thích tốt từ Java 11–22 -->
         </dependency>
     </dependencies>
 
@@ -46,6 +46,10 @@
                 <version>0.0.8</version>
                 <configuration>
                     <mainClass>${exec.mainClass}</mainClass>
+                    <options>
+                        <option>--add-modules</option>
+                        <option>javafx.controls,javafx.fxml</option>
+                    </options>
                 </configuration>
                 <executions>
                     <execution>

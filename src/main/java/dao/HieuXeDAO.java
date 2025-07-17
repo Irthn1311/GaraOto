@@ -1,12 +1,38 @@
-package dao; // Updated package
+package dao;
 
-import model.HieuXe; // Updated import
-import database.DBConnection; // Updated import
+import model.HieuXe;
+import database.DBConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class HieuXeDAO {
+
+    /**
+     * Adds a new car brand (HieuXe) to the database.
+     * @param hieuXe The HieuXe object to add.
+     * @return The generated MaHieuXe (ID) of the new brand, or -1 if insertion fails.
+     * @throws SQLException if a database access error occurs.
+     */
+    public int addHieuXe(HieuXe hieuXe) throws SQLException {
+        String sql = "INSERT INTO HieuXe (TenHieuXe) VALUES (?)";
+        int generatedId = -1;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setString(1, hieuXe.getTenHieuXe());
+
+            int affectedRows = pstmt.executeUpdate();
+
+            if (affectedRows > 0) {
+                try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        generatedId = rs.getInt(1);
+                    }
+                }
+            }
+        }
+        return generatedId;
+    }
 
     /**
      * Retrieves all car brands (HieuXe) from the database.
@@ -27,6 +53,29 @@ public class HieuXeDAO {
             }
         }
         return hieuXeList;
+    }
+
+    /**
+     * Retrieves a car brand (HieuXe) by its ID.
+     * @param maHieuXe The ID of the car brand.
+     * @return The HieuXe object if found, null otherwise.
+     * @throws SQLException if a database access error occurs.
+     */
+    public HieuXe getHieuXeById(int maHieuXe) throws SQLException {
+        String sql = "SELECT MaHieuXe, TenHieuXe FROM HieuXe WHERE MaHieuXe = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, maHieuXe);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    HieuXe hieuXe = new HieuXe();
+                    hieuXe.setMaHieuXe(rs.getInt("MaHieuXe"));
+                    hieuXe.setTenHieuXe(rs.getString("TenHieuXe"));
+                    return hieuXe;
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -53,22 +102,31 @@ public class HieuXeDAO {
     }
 
     /**
-     * Retrieves a system parameter value by its name from ThamSo table.
-     * @param paramName The name of the parameter (e.g., "SoXeToiDaMoiNgay").
-     * @return The value of the parameter as a String, or null if not found.
+     * Updates an existing car brand (HieuXe) in the database.
+     * @param hieuXe The HieuXe object with updated information.
      * @throws SQLException if a database access error occurs.
      */
-    public String getThamSoHeThong(String paramName) throws SQLException {
-        String sql = "SELECT GiaTri FROM ThamSo WHERE TenThamSo = ?";
+    public void updateHieuXe(HieuXe hieuXe) throws SQLException {
+        String sql = "UPDATE HieuXe SET TenHieuXe = ? WHERE MaHieuXe = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, paramName);
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    return String.valueOf(rs.getInt("GiaTri")); // ThamSo.GiaTri is INT
-                }
-            }
+            pstmt.setString(1, hieuXe.getTenHieuXe());
+            pstmt.setInt(2, hieuXe.getMaHieuXe());
+            pstmt.executeUpdate();
         }
-        return null;
+    }
+
+    /**
+     * Deletes a car brand (HieuXe) from the database by its ID.
+     * @param maHieuXe The ID of the car brand to delete.
+     * @throws SQLException if a database access error occurs.
+     */
+    public void deleteHieuXe(int maHieuXe) throws SQLException {
+        String sql = "DELETE FROM HieuXe WHERE MaHieuXe = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, maHieuXe);
+            pstmt.executeUpdate();
+        }
     }
 }

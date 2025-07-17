@@ -1,0 +1,205 @@
+<mxfile host="app.diagrams.net" modified="2025-07-16T18:45:16.739Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36" etag="qG1gHh7fB2p_oXwJk3lA" version="24.6.4" type="device">
+  <diagram name="Page-1" id="C5R21U6A-iL1nL72XbE4">
+    <mxGraphModel dx="2536" dy="1541" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="actor-receptionist" value="Nhân Viên Tiếp Nhận" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="120" y="230" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="actor-mechanic" value="Thợ Sửa Chữa" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="120" y="530" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="actor-warehouse" value="Nhân Viên Kho" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="120" y="800" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="actor-accountant" value="Kế Toán" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="120" y="1250" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="actor-manager" value="Quản Lý" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="1490" y="760" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="actor-director" value="Giám Đốc" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="1490" y="1520" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pkg-reception" value="1. Nghiệp vụ Tiếp nhận xe" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;rounded=1;shadow=0;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="120" width="300" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-receive-car" value="Tiếp nhận xe" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-reception">
+          <mxGeometry x="0" y="30" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-add-owner" value="Thêm chủ xe mới" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-reception">
+          <mxGeometry x="0" y="80" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-search-car" value="Tra cứu xe" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-reception">
+          <mxGeometry x="0" y="130" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-edit-reception" value="Sửa, xóa tiếp nhận" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-reception">
+          <mxGeometry x="0" y="180" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-check-reception-limit" value="Kiểm tra số lượt tiếp nhận/ngày" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-reception">
+          <mxGeometry x="0" y="230" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="pkg-repair" value="2. Nghiệp vụ Quản lý phiếu sửa chữa" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;rounded=1;shadow=0;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="440" width="300" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-create-repair-order" value="Lập phiếu sửa chữa" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-repair">
+          <mxGeometry x="0" y="30" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-manage-repair-details" value="Thêm/sửa/xóa chi tiết sửa chữa" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-repair">
+          <mxGeometry x="0" y="80" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-update-repair-status" value="Cập nhật tình trạng sửa chữa" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-repair">
+          <mxGeometry x="0" y="130" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-search-print-repair" value="Tra cứu, in phiếu sửa chữa" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-repair">
+          <mxGeometry x="0" y="180" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="pkg-inventory" value="3. Nghiệp vụ Quản lý kho" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;rounded=1;shadow=0;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="710" width="300" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-manage-supplies" value="Thêm/sửa/xóa vật tư" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-inventory">
+          <mxGeometry x="0" y="30" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-check-inventory" value="Kiểm tra tồn kho" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-inventory">
+          <mxGeometry x="0" y="80" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-low-stock-alert" value="Cảnh báo tồn kho thấp" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-inventory">
+          <mxGeometry x="0" y="130" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-inventory-stats" value="Thống kê vật tư sử dụng" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-inventory">
+          <mxGeometry x="0" y="180" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="pkg-billing" value="5. Nghiệp vụ Thu tiền" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;rounded=1;shadow=0;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="1150" width="300" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-create-invoice" value="Lập phiếu thu tiền" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-billing">
+          <mxGeometry x="0" y="30" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-update-payment-status" value="Cập nhật tình trạng thanh toán" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-billing">
+          <mxGeometry x="0" y="80" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-search-print-invoice" value="Tra cứu, in phiếu thu" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-billing">
+          <mxGeometry x="0" y="130" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-revenue-stats" value="Thống kê doanh thu" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-billing">
+          <mxGeometry x="0" y="180" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="pkg-labor" value="4. Nghiệp vụ Quản lý tiền công" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;rounded=1;shadow=0;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="840" y="440" width="300" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-manage-labor-cost" value="Thêm/sửa/xóa tiền công" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-labor">
+          <mxGeometry x="0" y="30" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-labor-stats" value="Thống kê tiền công" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-labor">
+          <mxGeometry x="0" y="80" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="pkg-system" value="7. Nghiệp vụ Quản lý hệ thống" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;rounded=1;shadow=0;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="840" y="610" width="300" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-login-logout" value="Đăng nhập, đăng xuất" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-system">
+          <mxGeometry x="0" y="30" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-manage-users" value="Thêm/sửa/xóa nhân viên" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-system">
+          <mxGeometry x="0" y="80" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-manage-permissions" value="Phân quyền nhân viên" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-system">
+          <mxGeometry x="0" y="130" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-manage-account-status" value="Đình chỉ, kích hoạt lại tài khoản" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-system">
+          <mxGeometry x="0" y="180" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-change-rules" value="Thay đổi quy định hệ thống" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-system">
+          <mxGeometry x="0" y="230" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="pkg-reports" value="6. Nghiệp vụ Báo cáo" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;rounded=1;shadow=0;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="840" y="1150" width="300" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-report-revenue" value="Báo cáo doanh thu" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-reports">
+          <mxGeometry x="0" y="30" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-report-activity" value="Báo cáo lượt tiếp nhận, sửa chữa" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-reports">
+          <mxGeometry x="0" y="80" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-report-inventory" value="Báo cáo tồn kho" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-reports">
+          <mxGeometry x="0" y="130" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-report-supplies" value="Báo cáo tiêu hao vật tư" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-reports">
+          <mxGeometry x="0" y="180" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-report-profit" value="Báo cáo lợi nhuận" style="ellipse;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="pkg-reports">
+          <mxGeometry x="0" y="230" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="title" value="Sơ đồ Use Case - Hệ thống Quản lý Gara Ô tô" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="580" y="40" width="480" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc-receptionist-pkg" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;" edge="1" parent="1" source="actor-receptionist" target="pkg-reception">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc-mechanic-pkg" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;" edge="1" parent="1" source="actor-mechanic" target="pkg-repair">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc-warehouse-pkg" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;" edge="1" parent="1" source="actor-warehouse" target="pkg-inventory">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc-accountant-pkg" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;" edge="1" parent="1" source="actor-accountant" target="pkg-billing">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc-manager-repair" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="actor-manager" target="pkg-repair">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1270" y="555" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1270" y="790" />
+              <mxPoint x="1270" y="555" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="assoc-manager-inventory" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="actor-manager" target="pkg-inventory">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1270" y="825" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1310" y="790" />
+              <mxPoint x="1310" y="825" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="assoc-manager-labor" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="actor-manager" target="pkg-labor">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1270" y="505" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1350" y="790" />
+              <mxPoint x="1350" y="505" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="assoc-manager-system" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="actor-manager" target="pkg-system">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1270" y="750" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1390" y="790" />
+              <mxPoint x="1390" y="750" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="assoc-manager-reports" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="actor-manager" target="pkg-reports">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1270" y="1290" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1430" y="790" />
+              <mxPoint x="1430" y="1290" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="assoc-director-reports" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="actor-director" target="pkg-reports">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="note-director" value="Chỉ có quyền xem báo cáo" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="1520" width="130" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc-director-note" style="edgeStyle=none;dashed=1;html=1;endArrow=none;endFill=0;" edge="1" parent="1" source="actor-director" target="note-director">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
