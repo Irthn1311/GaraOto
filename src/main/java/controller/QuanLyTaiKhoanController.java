@@ -57,6 +57,18 @@ public class QuanLyTaiKhoanController {
         colTenDangNhap.setCellValueFactory(new PropertyValueFactory<>("tenDangNhap"));
         colHoTen.setCellValueFactory(new PropertyValueFactory<>("hoTen"));
         colTrangThai.setCellValueFactory(new PropertyValueFactory<>("trangThai"));
+        // Add custom cell factory to display readable status instead of boolean values
+        colTrangThai.setCellFactory(column -> new TableCell<TaiKhoanNguoiDung, Boolean>() {
+            @Override
+            protected void updateItem(Boolean item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item ? "Hoạt động" : "Bị Khóa");
+                }
+            }
+        });
         colPhanQuyen.setCellValueFactory(new PropertyValueFactory<>("maPhanQuyen"));
     }
     

@@ -22,7 +22,7 @@ import dao.VatTuDAO;
 import dao.TiepNhanDAO;
 import dao.ChiTietPhieuSuaChua_VatTuDAO;
 import dao.ChiTietPhieuSuaChua_TienCongDAO;
-import dao.ChiTietPhieuNhapKhoVatTuDAO; // Added for inventory report
+import dao.ChiTietPhieuNhapKhoVatTuDAO; // DAO for inventory report
 import utils.AlertUtils;
 
 import java.sql.SQLException;
@@ -164,7 +164,7 @@ public class BaoCaoController {
     private TiepNhanDAO tiepNhanDAO;
     private ChiTietPhieuSuaChua_VatTuDAO chiTietVatTuDAO;
     private ChiTietPhieuSuaChua_TienCongDAO chiTietTienCongDAO;
-    private ChiTietPhieuNhapKhoVatTuDAO chiTietNhapKhoDAO; // Added for inventory report
+    private ChiTietPhieuNhapKhoVatTuDAO chiTietNhapKhoDAO; // DAO for inventory report
 
 
     private NumberFormat currencyFormat; // For currency formatting
@@ -338,30 +338,42 @@ public class BaoCaoController {
     }
 
     /**
-     * Handles the "Xem tồn kho" button action for Tồn kho vật tư.
-     * Generates and displays the inventory report.
+     * Handles the action of viewing the inventory report.
      */
     @FXML
     private void handleXemTonKho() {
         try {
-            List<VatTu> vatTuList = vatTuDAO.getAllVatTu();
-            ObservableList<TonKhoEntry> reportData = FXCollections.observableArrayList();
-            
-            for (VatTu vt : vatTuList) {
-                double donGiaVon = chiTietNhapKhoDAO.getLatestDonGiaNhapByMaVatTu(vt.getMaVatTu());
-                reportData.add(new TonKhoEntry(vt.getMaVatTu(), vt.getTenVatTu(), donGiaVon, vt.getSoLuongTon()));
+            List<VatTu> allVatTu = vatTuDAO.getAllVatTu();
+
+            if (allVatTu.isEmpty()) {
+                tblTonKhoVatTu.setItems(FXCollections.observableArrayList());
+                lblTongGiaTriTonKho.setText(currencyFormat.format(0));
+                AlertUtils.showInformationAlert("Thông tin", "Không có vật tư nào trong kho.");
+                return;
             }
 
-            tblTonKhoVatTu.setItems(reportData);
+            ObservableList<TonKhoEntry> tonKhoEntries = FXCollections.observableArrayList();
+            double totalInventoryValue = 0.0;
 
-            double totalInventoryValue = reportData.stream()
-                    .mapToDouble(TonKhoEntry::getTongGiaTriTon)
-                    .sum();
+            for (VatTu vt : allVatTu) {
+                // Lấy đơn giá nhập gần nhất; nếu chưa từng nhập, dùng đơn giá bán làm tham chiếu
+                double donGiaVon = chiTietNhapKhoDAO.getLatestDonGiaNhapByMaVatTu(vt.getMaVatTu());
+                if (donGiaVon == 0.0) {
+                    donGiaVon = vt.getDonGiaBan();
+                }
+
+                TonKhoEntry entry = new TonKhoEntry(vt.getMaVatTu(), vt.getTenVatTu(), donGiaVon, vt.getSoLuongTon());
+                tonKhoEntries.add(entry);
+
+                totalInventoryValue += entry.getTongGiaTriTon();
+            }
+
+            tblTonKhoVatTu.setItems(tonKhoEntries);
             lblTongGiaTriTonKho.setText(currencyFormat.format(totalInventoryValue));
 
         } catch (SQLException e) {
-            AlertUtils.showErrorAlert("Lỗi báo cáo tồn kho", "Không thể tạo báo cáo tồn kho vật tư: " + e.getMessage());
             e.printStackTrace();
+            AlertUtils.showErrorAlert("Lỗi báo cáo tồn kho", "Không thể tạo báo cáo tồn kho: " + e.getMessage());
         }
     }
 

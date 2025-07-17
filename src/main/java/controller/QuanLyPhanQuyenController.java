@@ -29,6 +29,7 @@ public class QuanLyPhanQuyenController {
     @FXML private Button btnThem;
     @FXML private Button btnSua;
     @FXML private Button btnXoa;
+    @FXML private TextField txtTimKiem; // Ô tìm kiếm nhóm quyền
 
     private final PhanQuyenDAO phanQuyenDAO = new PhanQuyenDAOImpl();
     private final ObservableList<PhanQuyen> phanQuyenList = FXCollections.observableArrayList();
@@ -124,11 +125,17 @@ public class QuanLyPhanQuyenController {
         tvPhanQuyen.getSelectionModel().clearSelection();
         txtMaPhanQuyen.clear();
         txtTenPhanQuyen.clear();
+        if (txtTimKiem != null) {
+            txtTimKiem.clear();
+        }
         checkBoxes.values().forEach(cb -> cb.setSelected(false));
         txtMaPhanQuyen.setDisable(false);
         btnThem.setDisable(false);
         btnSua.setDisable(true);
         btnXoa.setDisable(true);
+
+        // Khôi phục danh sách đầy đủ sau khi làm mới
+        tvPhanQuyen.setItems(phanQuyenList);
     }
 
     @FXML
@@ -234,6 +241,29 @@ public class QuanLyPhanQuyenController {
             AlertUtils.showErrorAlert("Lỗi SQL", "Không thể kiểm tra việc sử dụng nhóm quyền.");
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Tìm kiếm nhóm quyền dựa trên mã hoặc tên.
+     */
+    @FXML
+    void handleTimKiem() {
+        if (txtTimKiem == null) return;
+        String keyword = txtTimKiem.getText() == null ? "" : txtTimKiem.getText().trim().toLowerCase();
+
+        // Nếu ô tìm kiếm rỗng → hiển thị toàn bộ
+        if (keyword.isEmpty()) {
+            tvPhanQuyen.setItems(phanQuyenList);
+            return;
+        }
+
+        // Lọc danh sách theo keyword
+        ObservableList<PhanQuyen> filtered = phanQuyenList.stream()
+                .filter(pq -> pq.getMaPhanQuyen().toLowerCase().contains(keyword)
+                        || pq.getTenPhanQuyen().toLowerCase().contains(keyword))
+                .collect(Collectors.toCollection(FXCollections::observableArrayList));
+
+        tvPhanQuyen.setItems(filtered);
     }
 
     private List<String> getSelectedChucNang() {

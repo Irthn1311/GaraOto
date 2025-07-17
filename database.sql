@@ -24,6 +24,9 @@ IF OBJECT_ID('dbo.Xe', 'U') IS NOT NULL DROP TABLE dbo.Xe;
 IF OBJECT_ID('dbo.HieuXe', 'U') IS NOT NULL DROP TABLE dbo.HieuXe;
 IF OBJECT_ID('dbo.ChuXe', 'U') IS NOT NULL DROP TABLE dbo.ChuXe;
 IF OBJECT_ID('dbo.VatTu', 'U') IS NOT NULL DROP TABLE dbo.VatTu;
+-- Drop new inventory receipt tables (child first)
+IF OBJECT_ID('dbo.ChiTietPhieuNhapKhoVatTu', 'U') IS NOT NULL DROP TABLE dbo.ChiTietPhieuNhapKhoVatTu;
+IF OBJECT_ID('dbo.PhieuNhapKhoVatTu', 'U') IS NOT NULL DROP TABLE dbo.PhieuNhapKhoVatTu;
 IF OBJECT_ID('dbo.TienCong', 'U') IS NOT NULL DROP TABLE dbo.TienCong;
 IF OBJECT_ID('dbo.ThamSo', 'U') IS NOT NULL DROP TABLE dbo.ThamSo;
 IF OBJECT_ID('dbo.Tho', 'U') IS NOT NULL DROP TABLE dbo.Tho;
@@ -112,6 +115,29 @@ CREATE TABLE NhaCungCap (
     DienThoai NVARCHAR(20),
     DiaChi NVARCHAR(200),
     Email NVARCHAR(100)
+);
+GO
+
+-- =========================
+-- Parts Receipt (Nhập kho vật tư)
+-- =========================
+
+-- Master receipt table
+CREATE TABLE PhieuNhapKhoVatTu (
+    MaPhieuNhap INT IDENTITY(1,1) PRIMARY KEY,
+    NgayNhap DATE NOT NULL,
+    MaNhaCungCap INT NOT NULL FOREIGN KEY REFERENCES NhaCungCap(MaNhaCungCap),
+    TongTienNhap DECIMAL(18,2) NOT NULL DEFAULT 0.00 CHECK (TongTienNhap >= 0)
+);
+GO
+
+-- Receipt detail table
+CREATE TABLE ChiTietPhieuNhapKhoVatTu (
+    MaChiTietPhieuNhap INT IDENTITY(1,1) PRIMARY KEY,
+    MaPhieuNhap INT NOT NULL FOREIGN KEY REFERENCES PhieuNhapKhoVatTu(MaPhieuNhap) ON DELETE CASCADE,
+    MaVatTu INT NOT NULL FOREIGN KEY REFERENCES VatTu(MaVatTu),
+    SoLuongNhap INT NOT NULL CHECK (SoLuongNhap > 0),
+    DonGiaNhap DECIMAL(18,2) NOT NULL CHECK (DonGiaNhap >= 0)
 );
 GO
 

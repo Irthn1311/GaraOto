@@ -3,6 +3,7 @@ package controller;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import model.ThamSo;
 import dao.ThamSoDAO;
 import utils.AlertUtils;
@@ -31,6 +32,22 @@ public class CauHinhController {
     private Map<String, TextField> paramTextFieldMap; // Map to easily manage text fields by parameter name
 
     /**
+     * Adds simple numeric-only validation for all configuration text fields using TextFormatter.
+     */
+    private void configureNumericTextFields() {
+        // Allow only digits in the text fields
+        for (TextField tf : paramTextFieldMap.values()) {
+            tf.setTextFormatter(new javafx.scene.control.TextFormatter<String>(change -> {
+                String newText = change.getControlNewText();
+                if (newText.matches("\\d*")) {
+                    return change; // Accept change (numbers only)
+                }
+                return null; // Reject non-numeric input
+            }));
+        }
+    }
+
+    /**
      * Initializes the controller. This method is automatically called after the FXML file has been loaded.
      */
     @FXML
@@ -42,6 +59,7 @@ public class CauHinhController {
         paramTextFieldMap.put("SoLoaiVatTuToiDa", txtSoLoaiVatTuToiDa);
         paramTextFieldMap.put("SoLoaiTienCongToiDa", txtSoLoaiTienCongToiDa);
 
+        configureNumericTextFields();
         loadParameters();
     }
 
@@ -68,6 +86,10 @@ public class CauHinhController {
      */
     @FXML
     private void handleLuuCauHinh() {
+        // Confirm with the user before persisting changes
+        if (!AlertUtils.showConfirmationAlert("Xác nhận lưu", "Bạn có chắc chắn muốn lưu các thay đổi cấu hình không?")) {
+            return;
+        }
         try {
             for (Map.Entry<String, TextField> entry : paramTextFieldMap.entrySet()) {
                 String paramName = entry.getKey();

@@ -19,7 +19,6 @@ import java.util.Map;
 public class MainLayoutController {
 
     @FXML private Label lblLoggedInUser;
-    @FXML private Label lblCurrentUser;
     @FXML private AnchorPane contentArea;
 
     // Navigation Buttons
@@ -64,7 +63,6 @@ public class MainLayoutController {
         
         if (user != null) {
             lblLoggedInUser.setText("Xin chào, " + user.getHoTen() + "!");
-            lblCurrentUser.setText("Chào mừng, " + user.getHoTen());
             updateUIVisibility();
             loadDefaultView();
         }
