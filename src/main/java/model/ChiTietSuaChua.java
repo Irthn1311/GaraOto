@@ -6,13 +6,15 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import model.TienCong;
+import model.VatTu;
 
 public class ChiTietSuaChua {
     private IntegerProperty maChiTiet;
     private IntegerProperty maPhieuSC; // FK to PhieuSuaChua
     private IntegerProperty maVatTu; // FK to VatTu (can be NULL in DB, 0 in Java if not used)
     private IntegerProperty soLuong; // Can be NULL in DB, 0 in Java if not used
-    private IntegerProperty maLoaiTienCong; // Changed from maTienCong to maLoaiTienCong
+    private IntegerProperty maTienCong; // Changed from maLoaiTienCong to maTienCong
     private DoubleProperty thanhTien;
 
     // Properties for TableView display (not directly from DB, but derived/combined)
@@ -21,16 +23,19 @@ public class ChiTietSuaChua {
     private StringProperty loai; // "Vật tư" or "Tiền công" or "Vật tư & Công"
     private DoubleProperty donGia; // Unit price of VatTu or TienCong (used for display, typically DonGiaBan for VatTu)
 
+    // New property to specifically hold the cost price of the material at the time of repair
+    private DoubleProperty donGiaNhapThoiDiemSuaChua;
+
     // References to actual objects for detailed calculations (e.g., DonGiaNhap for VatTu)
     private VatTu vatTu;
-    private LoaiTienCong loaiTienCong;
+    private TienCong tienCong;
 
     public ChiTietSuaChua() {
         this.maChiTiet = new SimpleIntegerProperty();
         this.maPhieuSC = new SimpleIntegerProperty();
         this.maVatTu = new SimpleIntegerProperty(0); // Default to 0 for no selection
         this.soLuong = new SimpleIntegerProperty(0); // Default to 0
-        this.maLoaiTienCong = new SimpleIntegerProperty(0); // Changed from maTienCong to maLoaiTienCong, Default to 0 for no selection
+        this.maTienCong = new SimpleIntegerProperty(0); // Changed from maLoaiTienCong to maTienCong, Default to 0 for no selection
         this.thanhTien = new SimpleDoubleProperty();
 
         this.stt = new SimpleIntegerProperty();
@@ -38,8 +43,10 @@ public class ChiTietSuaChua {
         this.loai = new SimpleStringProperty();
         this.donGia = new SimpleDoubleProperty();
 
+        this.donGiaNhapThoiDiemSuaChua = new SimpleDoubleProperty(0.0); // Initialize new property
+
         this.vatTu = null;
-        this.loaiTienCong = null;
+        this.tienCong = null;
     }
 
     // Getters
@@ -47,24 +54,33 @@ public class ChiTietSuaChua {
     public int getMaPhieuSC() { return maPhieuSC.get(); }
     public int getMaVatTu() { return maVatTu.get(); }
     public int getSoLuong() { return soLuong.get(); }
-    public int getMaLoaiTienCong() { return maLoaiTienCong.get(); }
+    public int getMaTienCong() { return maTienCong.get(); }
     public double getThanhTien() { return thanhTien.get(); }
+
+    // New Getter for donGiaNhapThoiDiemSuaChua
+    public double getDonGiaNhapThoiDiemSuaChua() { return donGiaNhapThoiDiemSuaChua.get(); }
 
     // Setters
     public void setMaChiTiet(int maChiTiet) { this.maChiTiet.set(maChiTiet); }
     public void setMaPhieuSC(int maPhieuSC) { this.maPhieuSC.set(maPhieuSC); }
     public void setMaVatTu(int maVatTu) { this.maVatTu.set(maVatTu); }
     public void setSoLuong(int soLuong) { this.soLuong.set(soLuong); }
-    public void setMaLoaiTienCong(int maLoaiTienCong) { this.maLoaiTienCong.set(maLoaiTienCong); }
+    public void setMaTienCong(int maTienCong) { this.maTienCong.set(maTienCong); }
     public void setThanhTien(double thanhTien) { this.thanhTien.set(thanhTien); }
+
+    // New Setter for donGiaNhapThoiDiemSuaChua
+    public void setDonGiaNhapThoiDiemSuaChua(double donGiaNhapThoiDiemSuaChua) { this.donGiaNhapThoiDiemSuaChua.set(donGiaNhapThoiDiemSuaChua); }
 
     // Properties for JavaFX binding
     public IntegerProperty maChiTietProperty() { return maChiTiet; }
     public IntegerProperty maPhieuSCProperty() { return maPhieuSC; }
     public IntegerProperty maVatTuProperty() { return maVatTu; }
     public IntegerProperty soLuongProperty() { return soLuong; }
-    public IntegerProperty maLoaiTienCongProperty() { return maLoaiTienCong; }
+    public IntegerProperty maTienCongProperty() { return maTienCong; }
     public DoubleProperty thanhTienProperty() { return thanhTien; }
+
+    // New Property for donGiaNhapThoiDiemSuaChua
+    public DoubleProperty donGiaNhapThoiDiemSuaChuaProperty() { return donGiaNhapThoiDiemSuaChua; }
 
     // Getters/Setters/Properties for TableView display
     public int getStt() { return stt.get(); }
@@ -83,7 +99,7 @@ public class ChiTietSuaChua {
     public void setDonGia(double donGia) { this.donGia.set(donGia); }
     public DoubleProperty donGiaProperty() { return donGia; }
 
-    // Getters and Setters for VatTu and LoaiTienCong objects
+    // Getters and Setters for VatTu and TienCong objects
     public VatTu getVatTu() {
         return vatTu;
     }
@@ -92,11 +108,11 @@ public class ChiTietSuaChua {
         this.vatTu = vatTu;
     }
 
-    public LoaiTienCong getLoaiTienCong() {
-        return loaiTienCong;
+    public TienCong getTienCong() {
+        return tienCong;
     }
 
-    public void setLoaiTienCong(LoaiTienCong loaiTienCong) {
-        this.loaiTienCong = loaiTienCong;
+    public void setTienCong(TienCong tienCong) {
+        this.tienCong = tienCong;
     }
 }

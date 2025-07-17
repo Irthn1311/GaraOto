@@ -7,40 +7,40 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-public class LoaiTienCong {
-    private IntegerProperty maLoaiTienCong;
-    private StringProperty tenLoaiTienCong;
-    private DoubleProperty donGiaTienCong;
+public class TienCong {
+    private IntegerProperty maTienCong;
+    private StringProperty noiDung;
+    private DoubleProperty donGia;
 
-    public LoaiTienCong() {
-        this.maLoaiTienCong = new SimpleIntegerProperty();
-        this.tenLoaiTienCong = new SimpleStringProperty();
-        this.donGiaTienCong = new SimpleDoubleProperty();
+    public TienCong() {
+        this.maTienCong = new SimpleIntegerProperty();
+        this.noiDung = new SimpleStringProperty();
+        this.donGia = new SimpleDoubleProperty();
     }
 
-    public LoaiTienCong(int maLoaiTienCong, String tenLoaiTienCong, double donGiaTienCong) {
-        this.maLoaiTienCong = new SimpleIntegerProperty(maLoaiTienCong);
-        this.tenLoaiTienCong = new SimpleStringProperty(tenLoaiTienCong);
-        this.donGiaTienCong = new SimpleDoubleProperty(donGiaTienCong);
+    public TienCong(int maTienCong, String noiDung, double donGia) {
+        this.maTienCong = new SimpleIntegerProperty(maTienCong);
+        this.noiDung = new SimpleStringProperty(noiDung);
+        this.donGia = new SimpleDoubleProperty(donGia);
     }
 
     // Getters
-    public int getMaLoaiTienCong() { return maLoaiTienCong.get(); }
-    public String getTenLoaiTienCong() { return tenLoaiTienCong.get(); }
-    public double getDonGiaTienCong() { return donGiaTienCong.get(); }
+    public int getMaTienCong() { return maTienCong.get(); }
+    public String getNoiDung() { return noiDung.get(); }
+    public double getDonGia() { return donGia.get(); }
 
     // Setters
-    public void setMaLoaiTienCong(int maLoaiTienCong) { this.maLoaiTienCong.set(maLoaiTienCong); }
-    public void setTenLoaiTienCong(String tenLoaiTienCong) { this.tenLoaiTienCong.set(tenLoaiTienCong); }
-    public void setDonGiaTienCong(double donGiaTienCong) { this.donGiaTienCong.set(donGiaTienCong); }
+    public void setMaTienCong(int maTienCong) { this.maTienCong.set(maTienCong); }
+    public void setNoiDung(String noiDung) { this.noiDung.set(noiDung); }
+    public void setDonGia(double donGia) { this.donGia.set(donGia); }
 
     // Properties for JavaFX binding
-    public IntegerProperty maLoaiTienCongProperty() { return maLoaiTienCong; }
-    public StringProperty tenLoaiTienCongProperty() { return tenLoaiTienCong; }
-    public DoubleProperty donGiaTienCongProperty() { return donGiaTienCong; }
+    public IntegerProperty maTienCongProperty() { return maTienCong; }
+    public StringProperty noiDungProperty() { return noiDung; }
+    public DoubleProperty donGiaProperty() { return donGia; }
 
     @Override
     public String toString() {
-        return tenLoaiTienCong.get();
+        return noiDung.get();
     }
 }

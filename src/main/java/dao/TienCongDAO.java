@@ -1,26 +1,26 @@
 package dao;
 
-import model.LoaiTienCong;
+import model.TienCong;
 import database.DBConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LoaiTienCongDAO {
+public class TienCongDAO {
 
     /**
-     * Adds a new labor cost type (LoaiTienCong) to the database.
-     * @param loaiTienCong The LoaiTienCong object to add.
-     * @return The generated MaLoaiTienCong (ID) of the new type, or -1 if insertion fails.
+     * Adds a new labor service (TienCong) to the database.
+     * @param tienCong The TienCong object to add.
+     * @return The generated MaTienCong (ID) of the new labor service, or -1 if insertion fails.
      * @throws SQLException if a database access error occurs.
      */
-    public int addLoaiTienCong(LoaiTienCong loaiTienCong) throws SQLException {
-        String sql = "INSERT INTO LoaiTienCong (TenLoaiTienCong, DonGiaTienCong) VALUES (?, ?)";
+    public int addTienCong(TienCong tienCong) throws SQLException {
+        String sql = "INSERT INTO TienCong (NoiDung, DonGia) VALUES (?, ?)";
         int generatedId = -1;
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt.setString(1, loaiTienCong.getTenLoaiTienCong());
-            pstmt.setDouble(2, loaiTienCong.getDonGiaTienCong());
+            pstmt.setString(1, tienCong.getNoiDung());
+            pstmt.setDouble(2, tienCong.getDonGia());
 
             int affectedRows = pstmt.executeUpdate();
 
@@ -36,45 +36,45 @@ public class LoaiTienCongDAO {
     }
 
     /**
-     * Retrieves all labor cost types (LoaiTienCong) from the database.
-     * @return A list of LoaiTienCong objects.
+     * Retrieves all labor services (TienCong) from the database.
+     * @return A list of TienCong objects.
      * @throws SQLException if a database access error occurs.
      */
-    public List<LoaiTienCong> getAllLoaiTienCong() throws SQLException {
-        List<LoaiTienCong> loaiTienCongList = new ArrayList<>();
-        String sql = "SELECT MaLoaiTienCong, TenLoaiTienCong, DonGiaTienCong FROM LoaiTienCong";
+    public List<TienCong> getAllTienCong() throws SQLException {
+        List<TienCong> tienCongList = new ArrayList<>();
+        String sql = "SELECT MaTienCong, NoiDung, DonGia FROM TienCong";
         try (Connection conn = DBConnection.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
-                LoaiTienCong loaiTienCong = new LoaiTienCong();
-                loaiTienCong.setMaLoaiTienCong(rs.getInt("MaLoaiTienCong"));
-                loaiTienCong.setTenLoaiTienCong(rs.getString("TenLoaiTienCong"));
-                loaiTienCong.setDonGiaTienCong(rs.getDouble("DonGiaTienCong"));
-                loaiTienCongList.add(loaiTienCong);
+                TienCong tienCong = new TienCong();
+                tienCong.setMaTienCong(rs.getInt("MaTienCong"));
+                tienCong.setNoiDung(rs.getString("NoiDung"));
+                tienCong.setDonGia(rs.getDouble("DonGia"));
+                tienCongList.add(tienCong);
             }
         }
-        return loaiTienCongList;
+        return tienCongList;
     }
 
     /**
-     * Retrieves a labor cost type (LoaiTienCong) by its ID.
-     * @param maLoaiTienCong The ID of the labor cost type.
-     * @return The LoaiTienCong object if found, null otherwise.
+     * Retrieves a labor service (TienCong) by its ID.
+     * @param maTienCong The ID of the labor service.
+     * @return The TienCong object if found, null otherwise.
      * @throws SQLException if a database access error occurs.
      */
-    public LoaiTienCong getLoaiTienCongById(int maLoaiTienCong) throws SQLException {
-        String sql = "SELECT MaLoaiTienCong, TenLoaiTienCong, DonGiaTienCong FROM LoaiTienCong WHERE MaLoaiTienCong = ?";
+    public TienCong getTienCongById(int maTienCong) throws SQLException {
+        String sql = "SELECT MaTienCong, NoiDung, DonGia FROM TienCong WHERE MaTienCong = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, maLoaiTienCong);
+            pstmt.setInt(1, maTienCong);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    LoaiTienCong loaiTienCong = new LoaiTienCong();
-                    loaiTienCong.setMaLoaiTienCong(rs.getInt("MaLoaiTienCong"));
-                    loaiTienCong.setTenLoaiTienCong(rs.getString("TenLoaiTienCong"));
-                    loaiTienCong.setDonGiaTienCong(rs.getDouble("DonGiaTienCong"));
-                    return loaiTienCong;
+                    TienCong tienCong = new TienCong();
+                    tienCong.setMaTienCong(rs.getInt("MaTienCong"));
+                    tienCong.setNoiDung(rs.getString("NoiDung"));
+                    tienCong.setDonGia(rs.getDouble("DonGia"));
+                    return tienCong;
                 }
             }
         }
@@ -82,23 +82,23 @@ public class LoaiTienCongDAO {
     }
 
     /**
-     * Retrieves a labor cost type (LoaiTienCong) by its name.
-     * @param tenLoaiTienCong The name of the labor cost type.
-     * @return The LoaiTienCong object if found, null otherwise.
+     * Retrieves a labor service (TienCong) by its content/name.
+     * @param noiDung The content/name of the labor service.
+     * @return The TienCong object if found, null otherwise.
      * @throws SQLException if a database access error occurs.
      */
-    public LoaiTienCong getLoaiTienCongByName(String tenLoaiTienCong) throws SQLException {
-        String sql = "SELECT MaLoaiTienCong, TenLoaiTienCong, DonGiaTienCong FROM LoaiTienCong WHERE TenLoaiTienCong = ?";
+    public TienCong getTienCongByName(String noiDung) throws SQLException {
+        String sql = "SELECT MaTienCong, NoiDung, DonGia FROM TienCong WHERE NoiDung = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, tenLoaiTienCong);
+            pstmt.setString(1, noiDung);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    LoaiTienCong loaiTienCong = new LoaiTienCong();
-                    loaiTienCong.setMaLoaiTienCong(rs.getInt("MaLoaiTienCong"));
-                    loaiTienCong.setTenLoaiTienCong(rs.getString("TenLoaiTienCong"));
-                    loaiTienCong.setDonGiaTienCong(rs.getDouble("DonGiaTienCong"));
-                    return loaiTienCong;
+                    TienCong tienCong = new TienCong();
+                    tienCong.setMaTienCong(rs.getInt("MaTienCong"));
+                    tienCong.setNoiDung(rs.getString("NoiDung"));
+                    tienCong.setDonGia(rs.getDouble("DonGia"));
+                    return tienCong;
                 }
             }
         }
@@ -106,32 +106,32 @@ public class LoaiTienCongDAO {
     }
 
     /**
-     * Updates an existing labor cost type (LoaiTienCong) in the database.
-     * @param loaiTienCong The LoaiTienCong object with updated information.
-     * @throws SQLException if a database access error occurs.
+     * Updates an existing labor service (TienCong) in the database.
+     * @param tienCong The TienCong object with updated information.
+     * @return True if the update was successful, false otherwise.
      */
-    public void updateLoaiTienCong(LoaiTienCong loaiTienCong) throws SQLException {
-        String sql = "UPDATE LoaiTienCong SET TenLoaiTienCong = ?, DonGiaTienCong = ? WHERE MaLoaiTienCong = ?";
+    public boolean updateTienCong(TienCong tienCong) throws SQLException {
+        String sql = "UPDATE TienCong SET NoiDung = ?, DonGia = ? WHERE MaTienCong = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, loaiTienCong.getTenLoaiTienCong());
-            pstmt.setDouble(2, loaiTienCong.getDonGiaTienCong());
-            pstmt.setInt(3, loaiTienCong.getMaLoaiTienCong());
-            pstmt.executeUpdate();
+            pstmt.setString(1, tienCong.getNoiDung());
+            pstmt.setDouble(2, tienCong.getDonGia());
+            pstmt.setInt(3, tienCong.getMaTienCong());
+            return pstmt.executeUpdate() > 0;
         }
     }
 
     /**
-     * Deletes a labor cost type (LoaiTienCong) from the database by its ID.
-     * @param maLoaiTienCong The ID of the labor cost type to delete.
-     * @throws SQLException if a database access error occurs.
+     * Deletes a labor service (TienCong) from the database by its ID.
+     * @param maTienCong The ID of the labor service to delete.
+     * @return True if the deletion was successful, false otherwise.
      */
-    public void deleteLoaiTienCong(int maLoaiTienCong) throws SQLException {
-        String sql = "DELETE FROM LoaiTienCong WHERE MaLoaiTienCong = ?";
+    public boolean deleteTienCong(int maTienCong) throws SQLException {
+        String sql = "DELETE FROM TienCong WHERE MaTienCong = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, maLoaiTienCong);
-            pstmt.executeUpdate();
+            pstmt.setInt(1, maTienCong);
+            return pstmt.executeUpdate() > 0;
         }
     }
 }

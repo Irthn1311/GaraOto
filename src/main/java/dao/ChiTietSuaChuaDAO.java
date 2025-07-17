@@ -1,9 +1,10 @@
 package dao;
 
 import model.ChiTietSuaChua;
-import model.VatTu; // Import VatTu to get DonGiaNhap
-import model.LoaiTienCong; // Import TienCong
+import model.VatTu;
+import model.TienCong;
 import database.DBConnection;
+
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -12,74 +13,44 @@ import java.util.List;
 public class ChiTietSuaChuaDAO {
 
     /**
-     * Adds a new repair detail (ChiTietSuaChua) to the database.
-     * This method now handles insertion into two separate tables: ChiTietPhieuSuaChua_VatTu
-     * and ChiTietPhieuSuaChua_TienCong based on whether it's a material or labor detail.
-     *
+     * Adds a new ChiTietSuaChua to the database.
+     * This method handles both material and labor details.
      * @param chiTiet The ChiTietSuaChua object to add.
-     * @return The generated ID of the new detail, or -1 if insertion fails.
+     * @return The generated MaChiTietSuaChua (ID) of the new detail, or -1 if insertion fails.
      * @throws SQLException if a database access error occurs.
      */
     public int addChiTietSuaChua(ChiTietSuaChua chiTiet) throws SQLException {
+        String sql = "INSERT INTO ChiTietSuaChua (MaPhieuSC, Loai, SoLuong, NoiDung, DonGiaNhapThoiDiemSuaChua, MaVatTu, MaTienCong) VALUES (?, ?, ?, ?, ?, ?, ?)";
         int generatedId = -1;
-        try (Connection conn = DBConnection.getConnection()) {
-            if (chiTiet.getMaVatTu() != 0) { // It's a material detail
-                String sql = "INSERT INTO ChiTietPhieuSuaChua_VatTu (MaPhieuSC, MaVatTu, SoLuong, DonGiaNhap, ThanhTien) VALUES (?, ?, ?, ?, ?)";
-                try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                    pstmt.setInt(1, chiTiet.getMaPhieuSC());
-                    pstmt.setInt(2, chiTiet.getMaVatTu());
-                    pstmt.setInt(3, chiTiet.getSoLuong());
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-                    // Fetch DonGiaNhap from VatTu for consistency or use a value from ChiTiet if available
-                    // Assuming VatTuDAO.getVatTuById is reliable for getting the current DonGiaNhap
-                    VatTuDAO vatTuDAO = new VatTuDAO();
-                    VatTu vatTu = vatTuDAO.getVatTuById(chiTiet.getMaVatTu());
-                    if (vatTu != null) {
-                        pstmt.setDouble(4, vatTu.getDonGiaBan()); // Use DonGiaNhap from VatTu entity
-                    } else {
-                        // Fallback or error if VatTu not found
-                        pstmt.setDouble(4, 0.0); // Or throw an error
-                    }
-                    pstmt.setDouble(5, chiTiet.getThanhTien());
+            pstmt.setInt(1, chiTiet.getMaPhieuSC());
+            pstmt.setString(2, chiTiet.getLoai());
+            pstmt.setInt(3, chiTiet.getSoLuong());
+            pstmt.setString(4, chiTiet.getNoiDung());
+            pstmt.setDouble(5, chiTiet.getDonGiaNhapThoiDiemSuaChua());
 
-                    int affectedRows = pstmt.executeUpdate();
-                    if (affectedRows > 0) {
-                        try (ResultSet rs = pstmt.getGeneratedKeys()) {
-                            if (rs.next()) {
-                                generatedId = rs.getInt(1);
-                            }
-                        }
-                    }
-                }
+            // Handle MaVatTu (can be null for labor)
+            if (chiTiet.getMaVatTu() > 0) {
+                pstmt.setInt(6, chiTiet.getMaVatTu());
+            } else {
+                pstmt.setNull(6, Types.INTEGER);
             }
 
-            if (chiTiet.getMaLoaiTienCong() != 0) { // It's a labor detail
-                String sql = "INSERT INTO ChiTietPhieuSuaChua_TienCong (MaPhieuSC, MaTienCong, DonGia, ThanhTien) VALUES (?, ?, ?, ?)";
-                try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                    pstmt.setInt(1, chiTiet.getMaPhieuSC());
-                    pstmt.setInt(2, chiTiet.getMaLoaiTienCong());
+            // Handle MaTienCong (can be null for materials)
+            if (chiTiet.getMaTienCong() > 0) {
+                pstmt.setInt(7, chiTiet.getMaTienCong());
+            } else {
+                pstmt.setNull(7, Types.INTEGER);
+            }
 
-                    // Fetch DonGia from TienCong for consistency
-                    LoaiTienCongDAO tienCongDAO = new LoaiTienCongDAO();
-                    LoaiTienCong tienCong = tienCongDAO.getLoaiTienCongById(chiTiet.getMaLoaiTienCong());
-                    if (tienCong != null) {
-                        pstmt.setDouble(3, tienCong.getDonGiaTienCong());
-                    } else {
-                        pstmt.setDouble(3, 0.0);
-                    }
-                    pstmt.setDouble(4, chiTiet.getThanhTien());
+            int affectedRows = pstmt.executeUpdate();
 
-                    int affectedRows = pstmt.executeUpdate();
-                    if (affectedRows > 0) {
-                        // If both material and labor are added in one ChiTietSuaChua object,
-                        // this will overwrite the generatedId from material.
-                        // In a real scenario, you might want separate IDs or a more complex join.
-                        // For now, we'll return the last generated ID.
-                        try (ResultSet rs = pstmt.getGeneratedKeys()) {
-                            if (rs.next()) {
-                                generatedId = rs.getInt(1);
-                            }
-                        }
+            if (affectedRows > 0) {
+                try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        generatedId = rs.getInt(1);
                     }
                 }
             }
@@ -87,102 +58,184 @@ public class ChiTietSuaChuaDAO {
         return generatedId;
     }
 
-
     /**
-     * Retrieves repair details (ChiTietSuaChua) within a specified date range,
-     * including associated VatTu and TienCong information.
-     * This is crucial for reports like material consumption and profit.
-     *
-     * @param fromDate The start date of the range (inclusive).
-     * @param toDate The end date of the range (inclusive).
-     * @return A list of ChiTietSuaChua objects with populated VatTu and TienCong details.
+     * Retrieves all ChiTietSuaChua records for a given MaPhieuSC.
+     * This method also populates associated VatTu or TienCong objects.
+     * @param maPhieuSC The ID of the repair slip.
+     * @return A list of ChiTietSuaChua objects.
      * @throws SQLException if a database access error occurs.
      */
-    public List<ChiTietSuaChua> getChiTietSuaChuaByDateRange(LocalDate fromDate, LocalDate toDate) throws SQLException {
+    public List<ChiTietSuaChua> getChiTietSuaChuaByMaPhieuSC(int maPhieuSC) throws SQLException {
         List<ChiTietSuaChua> chiTietList = new ArrayList<>();
+        String sql = "SELECT cs.*, vt.TenVatTu, vt.DonGiaBan, vt.DonViTinh, tc.NoiDung, tc.DonGia " +
+                     "FROM ChiTietSuaChua cs " +
+                     "LEFT JOIN VatTu vt ON cs.MaVatTu = vt.MaVatTu " +
+                     "LEFT JOIN TienCong tc ON cs.MaTienCong = tc.MaTienCong " +
+                     "WHERE cs.MaPhieuSC = ? ORDER BY cs.MaChiTietSuaChua";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, maPhieuSC);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    ChiTietSuaChua chiTiet = new ChiTietSuaChua();
+                    chiTiet.setMaChiTiet(rs.getInt("MaChiTietSuaChua")); // Changed from setMaChiTietSuaChua
+                    chiTiet.setMaPhieuSC(rs.getInt("MaPhieuSC"));
+                    chiTiet.setLoai(rs.getString("Loai"));
+                    chiTiet.setSoLuong(rs.getInt("SoLuong"));
+                    chiTiet.setNoiDung(rs.getString("NoiDung"));
+                    chiTiet.setDonGiaNhapThoiDiemSuaChua(rs.getDouble("DonGiaNhapThoiDiemSuaChua"));
 
-        // SQL to fetch material details (VatTu)
-        String sqlVatTu = "SELECT ctv.MaChiTietVatTu, ctv.MaPhieuSC, ctv.MaVatTu, ctv.SoLuong, ctv.DonGiaNhap, ctv.ThanhTien, " +
-                "vt.TenVatTu, vt.DonViTinh, vt.SoLuongTon, vt.DonGiaBan " +
-                "FROM ChiTietPhieuSuaChua_VatTu ctv " +
-                "JOIN PhieuSuaChua ps ON ctv.MaPhieuSC = ps.MaPhieuSC " +
-                "JOIN VatTu vt ON ctv.MaVatTu = vt.MaVatTu " +
-                "WHERE ps.NgaySuaChua BETWEEN ? AND ?";
-
-        // SQL to fetch labor details (TienCong)
-        String sqlTienCong = "SELECT ctc.MaChiTietTienCong, ctc.MaPhieuSC, ctc.MaTienCong, ctc.DonGia, ctc.ThanhTien, " +
-                "tc.NoiDung " +
-                "FROM ChiTietPhieuSuaChua_TienCong ctc " +
-                "JOIN PhieuSuaChua ps ON ctc.MaPhieuSC = ps.MaPhieuSC " +
-                "JOIN TienCong tc ON ctc.MaTienCong = tc.MaTienCong " +
-                "WHERE ps.NgaySuaChua BETWEEN ? AND ?";
-
-        try (Connection conn = DBConnection.getConnection()) {
-            // Fetch material details
-            try (PreparedStatement pstmtVatTu = conn.prepareStatement(sqlVatTu)) {
-                pstmtVatTu.setDate(1, Date.valueOf(fromDate));
-                pstmtVatTu.setDate(2, Date.valueOf(toDate));
-                try (ResultSet rs = pstmtVatTu.executeQuery()) {
-                    while (rs.next()) {
-                        ChiTietSuaChua chiTiet = new ChiTietSuaChua();
-                        chiTiet.setMaChiTiet(rs.getInt("MaChiTietVatTu"));
-                        chiTiet.setMaPhieuSC(rs.getInt("MaPhieuSC"));
-                        chiTiet.setMaVatTu(rs.getInt("MaVatTu"));
-                        chiTiet.setSoLuong(rs.getInt("SoLuong"));
-                        chiTiet.setThanhTien(rs.getDouble("ThanhTien"));
-                        chiTiet.setNoiDung(rs.getString("TenVatTu"));
-                        chiTiet.setLoai("Vật tư");
-                        chiTiet.setDonGia(rs.getDouble("DonGiaNhap")); // For display, use DonGiaNhap for cost
-
-                        // Set material details
+                    int maVatTu = rs.getInt("MaVatTu");
+                    if (!rs.wasNull()) {
+                        chiTiet.setMaVatTu(maVatTu);
                         VatTu vatTu = new VatTu();
-                        vatTu.setMaVatTu(rs.getInt("MaVatTu"));
+                        vatTu.setMaVatTu(maVatTu);
                         vatTu.setTenVatTu(rs.getString("TenVatTu"));
                         vatTu.setDonViTinh(rs.getString("DonViTinh"));
-                        vatTu.setSoLuongTon(rs.getInt("SoLuongTon"));
-                        vatTu.setDonGiaBan(rs.getDouble("DonGiaBan")); // Assuming DonGiaBan is the correct field for DonGiaNhap for consistency
-
-                        // Removed: Attempting to set LoaiTienCong properties for a material detail is incorrect.
-                        // LoaiTienCong loaiTienCong = new LoaiTienCong();
-                        // loaiTienCong.setMaLoaiTienCong(rs.getInt("MaTienCong"));
-                        // loaiTienCong.setTenLoaiTienCong(rs.getString("NoiDung"));
-                        // loaiTienCong.setDonGiaTienCong(rs.getDouble("DonGia"));
-
+                        // DonGiaBan in VatTu is for selling, use DonGiaNhapThoiDiemSuaChua for cost here
+                        vatTu.setDonGiaBan(rs.getDouble("DonGiaNhapThoiDiemSuaChua")); // Using DonGiaNhapThoiDiemSuaChua as DonGiaBan for cost
                         chiTiet.setVatTu(vatTu);
-                        // chiTiet.setLoaiTienCong(loaiTienCong); // Removed: Setting LoaiTienCong for a material detail
-
-                        chiTietList.add(chiTiet);
                     }
-                }
-            }
 
-            // Fetch labor details
-            try (PreparedStatement pstmtTienCong = conn.prepareStatement(sqlTienCong)) {
-                pstmtTienCong.setDate(1, Date.valueOf(fromDate));
-                pstmtTienCong.setDate(2, Date.valueOf(toDate));
-                try (ResultSet rs = pstmtTienCong.executeQuery()) {
-                    while (rs.next()) {
-                        ChiTietSuaChua chiTiet = new ChiTietSuaChua();
-                        chiTiet.setMaChiTiet(rs.getInt("MaChiTietTienCong"));
-                        chiTiet.setMaPhieuSC(rs.getInt("MaPhieuSC"));
-                        chiTiet.setMaLoaiTienCong(rs.getInt("MaTienCong"));
-                        chiTiet.setThanhTien(rs.getDouble("ThanhTien"));
-                        chiTiet.setNoiDung(rs.getString("NoiDung"));
-                        chiTiet.setLoai("Tiền công");
-                        chiTiet.setSoLuong(1); // Labor is typically 1 unit
-                        chiTiet.setDonGia(rs.getDouble("DonGia")); // For display, use DonGia for cost
-
-                        LoaiTienCong tienCong = new LoaiTienCong();
-                        tienCong.setMaLoaiTienCong(rs.getInt("MaTienCong"));
-                        tienCong.setTenLoaiTienCong(rs.getString("NoiDung"));
-                        tienCong.setDonGiaTienCong(rs.getDouble("DonGia")); // Crucial for profit calculation
-                        chiTiet.setLoaiTienCong(tienCong);
-
-                        chiTietList.add(chiTiet);
+                    int maTienCong = rs.getInt("MaTienCong");
+                    if (!rs.wasNull()) {
+                        chiTiet.setMaTienCong(maTienCong);
+                        TienCong tienCong = new TienCong();
+                        tienCong.setMaTienCong(maTienCong);
+                        tienCong.setNoiDung(rs.getString("NoiDung"));
+                        tienCong.setDonGia(rs.getDouble("DonGia"));
+                        chiTiet.setTienCong(tienCong);
                     }
+                    chiTietList.add(chiTiet);
                 }
             }
         }
         return chiTietList;
+    }
+
+    /**
+     * Retrieves ChiTietSuaChua records within a specified date range.
+     * This method is used for reports that need aggregated material/labor costs.
+     * It primarily fetches material details.
+     * @param fromDate The start date of the range (inclusive).
+     * @param toDate The end date of the range (inclusive).
+     * @return A list of ChiTietSuaChua objects for materials within the date range.
+     * @throws SQLException if a database access error occurs.
+     */
+    public List<ChiTietSuaChua> getChiTietSuaChuaByDateRange(LocalDate fromDate, LocalDate toDate) throws SQLException {
+        List<ChiTietSuaChua> chiTietList = new ArrayList<>();
+        String sql = "SELECT cts.MaChiTietSuaChua, cts.MaPhieuSC, cts.Loai, cts.SoLuong, cts.NoiDung, cts.DonGiaNhapThoiDiemSuaChua, cts.MaVatTu, cts.MaTienCong, " +
+                     "vt.TenVatTu, vt.DonViTinh, tc.NoiDung AS TienCongNoiDung, tc.DonGia AS TienCongDonGia " +
+                     "FROM ChiTietSuaChua cts " +
+                     "JOIN PhieuSuaChua ps ON cts.MaPhieuSC = ps.MaPhieuSC " +
+                     "LEFT JOIN VatTu vt ON cts.MaVatTu = vt.MaVatTu " +
+                     "LEFT JOIN TienCong tc ON cts.MaTienCong = tc.MaTienCong " +
+                     "WHERE ps.NgaySuaChua BETWEEN ? AND ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setDate(1, Date.valueOf(fromDate));
+            pstmt.setDate(2, Date.valueOf(toDate));
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    ChiTietSuaChua chiTiet = new ChiTietSuaChua();
+                    chiTiet.setMaChiTiet(rs.getInt("MaChiTietSuaChua")); // Changed from setMaChiTietSuaChua
+                    chiTiet.setMaPhieuSC(rs.getInt("MaPhieuSC"));
+                    chiTiet.setLoai(rs.getString("Loai"));
+                    chiTiet.setSoLuong(rs.getInt("SoLuong"));
+                    chiTiet.setNoiDung(rs.getString("NoiDung"));
+                    chiTiet.setDonGiaNhapThoiDiemSuaChua(rs.getDouble("DonGiaNhapThoiDiemSuaChua"));
+
+                    int maVatTu = rs.getInt("MaVatTu");
+                    if (!rs.wasNull()) {
+                        chiTiet.setMaVatTu(maVatTu);
+                        VatTu vatTu = new VatTu();
+                        vatTu.setMaVatTu(maVatTu);
+                        vatTu.setTenVatTu(rs.getString("TenVatTu"));
+                        vatTu.setDonViTinh(rs.getString("DonViTinh"));
+                        // DonGiaBan in VatTu is for selling, use DonGiaNhapThoiDiemSuaChua for cost here
+                        vatTu.setDonGiaBan(rs.getDouble("DonGiaNhapThoiDiemSuaChua")); // Using DonGiaNhapThoiDiemSuaChua as DonGiaBan for cost
+                        chiTiet.setVatTu(vatTu);
+                    }
+
+                    int maTienCong = rs.getInt("MaTienCong");
+                    if (!rs.wasNull()) {
+                        chiTiet.setMaTienCong(maTienCong);
+                        TienCong tienCong = new TienCong();
+                        tienCong.setMaTienCong(maTienCong);
+                        tienCong.setNoiDung(rs.getString("TienCongNoiDung"));
+                        tienCong.setDonGia(rs.getDouble("TienCongDonGia"));
+                        chiTiet.setTienCong(tienCong);
+                    }
+                    chiTietList.add(chiTiet);
+                }
+            }
+        }
+        return chiTietList;
+    }
+
+    /**
+     * Updates an existing ChiTietSuaChua record in the database.
+     * @param chiTiet The ChiTietSuaChua object with updated information.
+     * @return True if the update was successful, false otherwise.
+     * @throws SQLException if a database access error occurs.
+     */
+    public boolean updateChiTietSuaChua(ChiTietSuaChua chiTiet) throws SQLException {
+        String sql = "UPDATE ChiTietSuaChua SET Loai = ?, SoLuong = ?, NoiDung = ?, DonGiaNhapThoiDiemSuaChua = ?, MaVatTu = ?, MaTienCong = ? WHERE MaChiTietSuaChua = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, chiTiet.getLoai());
+            pstmt.setInt(2, chiTiet.getSoLuong());
+            pstmt.setString(3, chiTiet.getNoiDung());
+            pstmt.setDouble(4, chiTiet.getDonGiaNhapThoiDiemSuaChua());
+
+            // Handle nullable MaVatTu
+            if (chiTiet.getMaVatTu() > 0) {
+                pstmt.setInt(5, chiTiet.getMaVatTu());
+            } else {
+                pstmt.setNull(5, Types.INTEGER);
+            }
+
+            // Handle nullable MaTienCong
+            if (chiTiet.getMaTienCong() > 0) {
+                pstmt.setInt(6, chiTiet.getMaTienCong());
+            } else {
+                pstmt.setNull(6, Types.INTEGER);
+            }
+
+            pstmt.setInt(7, chiTiet.getMaChiTiet()); // Changed from getMaChiTietSuaChua
+            return pstmt.executeUpdate() > 0;
+        }
+    }
+
+    /**
+     * Deletes a ChiTietSuaChua record from the database by its ID.
+     * @param maChiTietSuaChua The ID of the detail to delete.
+     * @return True if the deletion was successful, false otherwise.
+     * @throws SQLException if a database access error occurs.
+     */
+    public boolean deleteChiTietSuaChua(int maChiTietSuaChua) throws SQLException {
+        String sql = "DELETE FROM ChiTietSuaChua WHERE MaChiTietSuaChua = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, maChiTietSuaChua);
+            return pstmt.executeUpdate() > 0;
+        }
+    }
+
+    /**
+     * Deletes all ChiTietSuaChua records associated with a given MaPhieuSC.
+     * @param maPhieuSC The ID of the repair slip.
+     * @return True if the deletion was successful, false otherwise.
+     * @throws SQLException if a database access error occurs.
+     */
+    public boolean deleteChiTietSuaChuaByMaPhieuSC(int maPhieuSC) throws SQLException {
+        String sql = "DELETE FROM ChiTietSuaChua WHERE MaPhieuSC = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, maPhieuSC);
+            return pstmt.executeUpdate() > 0;
+        }
     }
 }

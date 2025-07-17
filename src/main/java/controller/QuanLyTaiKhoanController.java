@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.util.StringConverter;
 import model.TaiKhoanNguoiDung;
 import dao.TaiKhoanNguoiDungDAO;
 import utils.AlertUtils;
@@ -11,6 +12,8 @@ import utils.PasswordHasher; // Utility for hashing passwords
 
 import java.sql.SQLException;
 import java.util.Optional;
+import java.util.Comparator;
+import java.util.Base64; // Add this import for Base64 if it's used directly in the file for hashing
 
 public class QuanLyTaiKhoanController {
 
@@ -49,8 +52,11 @@ public class QuanLyTaiKhoanController {
     private TaiKhoanNguoiDungDAO taiKhoanNguoiDungDAO;
     private ObservableList<TaiKhoanNguoiDung> danhSachTaiKhoan;
 
-    private TaiKhoanNguoiDung selectedAccount; // To keep track of the selected account for editing/deleting
+    private TaiKhoanNguoiDung selectedAccount; // Currently selected account for editing
 
+    /**
+     * Initializes the controller. This method is automatically called after the FXML file has been loaded.
+     */
     @FXML
     public void initialize() {
         taiKhoanNguoiDungDAO = new TaiKhoanNguoiDungDAO();
@@ -67,22 +73,9 @@ public class QuanLyTaiKhoanController {
         // Populate ComboBox for LoaiTaiKhoan
         cbLoaiTaiKhoan.setItems(FXCollections.observableArrayList("NhanVien", "QuanLy", "GiamDoc"));
 
-        // Add listener to TableView for selection changes
-        tblTaiKhoan.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newSelection) -> {
-            if (newSelection != null) {
-                selectedAccount = newSelection;
-                displayAccountDetails(newSelection);
-                btnThem.setDisable(true); // Disable Add when an item is selected for editing
-                btnSua.setDisable(false);
-                btnXoa.setDisable(false);
-            } else {
-                selectedAccount = null;
-                clearForm();
-                btnThem.setDisable(false); // Enable Add when no item is selected
-                btnSua.setDisable(true);
-                btnXoa.setDisable(true);
-            }
-        });
+        // Listener for table selection to populate text fields for editing
+        tblTaiKhoan.getSelectionModel().selectedItemProperty().addListener(
+                (observable, oldValue, newValue) -> showTaiKhoanDetails(newValue));
 
         loadTaiKhoanData();
         btnSua.setDisable(true); // Disable Edit/Delete initially
@@ -90,7 +83,7 @@ public class QuanLyTaiKhoanController {
     }
 
     /**
-     * Loads all user accounts from the database and populates the TableView.
+     * Loads account data from the database into the TableView.
      */
     private void loadTaiKhoanData() {
         try {
@@ -103,15 +96,25 @@ public class QuanLyTaiKhoanController {
     }
 
     /**
-     * Displays the details of the selected account in the form fields.
-     * @param account The TaiKhoanNguoiDung object to display.
+     * Displays the details of a selected account in the input fields.
+     * @param taiKhoan The TaiKhoanNguoiDung object to display.
      */
-    private void displayAccountDetails(TaiKhoanNguoiDung account) {
-        txtTenDangNhap.setText(account.getTenDangNhap());
-        txtMatKhau.setText(""); // Clear password field for security
-        txtHoTen.setText(account.getHoTen());
-        cbLoaiTaiKhoan.getSelectionModel().select(account.getLoaiTaiKhoan());
-        chkTrangThai.setSelected(account.isTrangThai());
+    private void showTaiKhoanDetails(TaiKhoanNguoiDung taiKhoan) {
+        if (taiKhoan != null) {
+            selectedAccount = taiKhoan;
+            txtTenDangNhap.setText(taiKhoan.getTenDangNhap());
+            txtMatKhau.setText(""); // Never display password
+            txtHoTen.setText(taiKhoan.getHoTen());
+            cbLoaiTaiKhoan.getSelectionModel().select(taiKhoan.getLoaiTaiKhoan());
+            chkTrangThai.setSelected(taiKhoan.isTrangThai());
+
+            btnThem.setDisable(true); // Disable Add when an item is selected for editing
+            btnSua.setDisable(false);
+            btnXoa.setDisable(false);
+        } else {
+            selectedAccount = null;
+            clearForm();
+        }
     }
 
     /**

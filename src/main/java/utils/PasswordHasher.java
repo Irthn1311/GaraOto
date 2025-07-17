@@ -18,7 +18,12 @@ public class PasswordHasher {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(password.getBytes());
             byte[] digest = md.digest();
-            return Base64.getEncoder().encodeToString(digest);
+            // Convert byte array to hexadecimal string instead of Base64
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
         } catch (NoSuchAlgorithmException e) {
             // This should ideally not happen for MD5
             throw new RuntimeException("MD5 algorithm not found.", e);

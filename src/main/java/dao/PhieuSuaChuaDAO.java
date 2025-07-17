@@ -3,8 +3,7 @@ package dao;
 import model.PhieuSuaChua;
 import model.ChiTietSuaChua; // Import ChiTietSuaChua
 import model.VatTu; // Import VatTu
-import model.LoaiTienCong; // Import TienCong
-import model.Tho; // Import Tho
+import model.TienCong; // Changed from LoaiTienCong
 import database.DBConnection;
 import java.sql.*;
 import java.time.LocalDate;
@@ -161,15 +160,15 @@ public class PhieuSuaChuaDAO {
                                 while (rsTienCong.next()) {
                                     ChiTietSuaChua chiTiet = new ChiTietSuaChua();
                                     chiTiet.setMaPhieuSC(phieuSuaChua.getMaPhieuSC());
-                                    chiTiet.setMaLoaiTienCong(rsTienCong.getInt("MaTienCong"));
+                                    chiTiet.setMaTienCong(rsTienCong.getInt("MaTienCong")); // Changed from setMaLoaiTienCong
                                     chiTiet.setThanhTien(rsTienCong.getDouble("ThanhTien"));
 
-                                    // Populate LoaiTienCong object for detailed cost (DonGia)
-                                    LoaiTienCong tienCong = new LoaiTienCong();
-                                    tienCong.setMaLoaiTienCong(rsTienCong.getInt("MaTienCong"));
-                                    tienCong.setTenLoaiTienCong(rsTienCong.getString("NoiDung"));
-                                    tienCong.setDonGiaTienCong(rsTienCong.getDouble("DonGia")); // Use DonGia for cost from TienCong table
-                                    chiTiet.setLoaiTienCong(tienCong);
+                                    // Populate TienCong object for detailed cost (DonGia)
+                                    TienCong tienCong = new TienCong(); // Changed from LoaiTienCong
+                                    tienCong.setMaTienCong(rsTienCong.getInt("MaTienCong"));
+                                    tienCong.setNoiDung(rsTienCong.getString("NoiDung")); // Changed from TenLoaiTienCong
+                                    tienCong.setDonGia(rsTienCong.getDouble("DonGia")); // Changed from DonGiaTienCong
+                                    chiTiet.setTienCong(tienCong); // Changed from setLoaiTienCong
 
                                     chiTietList.add(chiTiet);
                                 }

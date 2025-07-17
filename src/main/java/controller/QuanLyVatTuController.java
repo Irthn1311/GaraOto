@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.util.StringConverter;
 import model.VatTu;
 import model.NhaCungCap;
 import model.PhieuNhapKhoVatTu;
@@ -22,6 +23,7 @@ import java.util.Optional;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.cell.PropertyValueFactory; // For default cell factories
+import java.util.Comparator; // Keep if actually used for sorting
 
 public class QuanLyVatTuController {
 
@@ -133,8 +135,15 @@ public class QuanLyVatTuController {
             }
         });
 
+        // Listener for table selection to populate text fields for editing
         tblVatTu.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> showVatTuDetails(newValue));
+
+        // Listener for ComboBox to update DonViTinh when NhaCungCap changes (if applicable, remove if not)
+        cbNhaCungCap.valueProperty().addListener((
+                _observable, _oldValue, newValue) -> {
+            // Implement logic if needed, otherwise remove this listener
+        });
 
         // --- Configure NhapKho TableView ---
         colCTPN_TenVatTu.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTenVatTu()));

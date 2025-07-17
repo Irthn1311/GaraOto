@@ -14,13 +14,13 @@ public class ChiTietPhieuSuaChua_VatTuDAO {
      * @throws SQLException if a database access error occurs.
      */
     public void addChiTietVatTu(ChiTietPhieuSuaChua_VatTu chiTiet) throws SQLException {
-        String sql = "INSERT INTO ChiTietPhieuSuaChua_VatTu (MaPhieuSC, MaVatTu, SoLuongSuDung, DonGiaBanLucDo) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO ChiTietPhieuSuaChua_VatTu (MaPhieuSC, MaVatTu, SoLuong, DonGiaNhap) VALUES (?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, chiTiet.getMaPhieuSC());
             pstmt.setInt(2, chiTiet.getMaVatTu());
-            pstmt.setInt(3, chiTiet.getSoLuongSuDung());
-            pstmt.setDouble(4, chiTiet.getDonGiaBanLucDo());
+            pstmt.setInt(3, chiTiet.getSoLuong());
+            pstmt.setDouble(4, chiTiet.getDonGiaNhap());
             pstmt.executeUpdate();
         }
     }
@@ -33,7 +33,7 @@ public class ChiTietPhieuSuaChua_VatTuDAO {
      */
     public List<ChiTietPhieuSuaChua_VatTu> getChiTietVatTuByMaPhieuSC(int maPhieuSC) throws SQLException {
         List<ChiTietPhieuSuaChua_VatTu> chiTietList = new ArrayList<>();
-        String sql = "SELECT ctsv.MaPhieuSC, ctsv.MaVatTu, ctsv.SoLuongSuDung, ctsv.DonGiaBanLucDo, " +
+        String sql = "SELECT ctsv.MaPhieuSC, ctsv.MaVatTu, ctsv.SoLuong, ctsv.DonGiaNhap, " +
                 "vt.TenVatTu, vt.DonViTinh " +
                 "FROM ChiTietPhieuSuaChua_VatTu ctsv " +
                 "JOIN VatTu vt ON ctsv.MaVatTu = vt.MaVatTu " +
@@ -46,8 +46,8 @@ public class ChiTietPhieuSuaChua_VatTuDAO {
                     ChiTietPhieuSuaChua_VatTu chiTiet = new ChiTietPhieuSuaChua_VatTu();
                     chiTiet.setMaPhieuSC(rs.getInt("MaPhieuSC"));
                     chiTiet.setMaVatTu(rs.getInt("MaVatTu"));
-                    chiTiet.setSoLuongSuDung(rs.getInt("SoLuongSuDung"));
-                    chiTiet.setDonGiaBanLucDo(rs.getDouble("DonGiaBanLucDo"));
+                    chiTiet.setSoLuong(rs.getInt("SoLuong"));
+                    chiTiet.setDonGiaNhap(rs.getDouble("DonGiaNhap"));
                     chiTiet.setTenVatTu(rs.getString("TenVatTu"));
                     chiTiet.setDonViTinhVatTu(rs.getString("DonViTinh"));
                     chiTietList.add(chiTiet);
@@ -63,11 +63,11 @@ public class ChiTietPhieuSuaChua_VatTuDAO {
      * @throws SQLException if a database access error occurs.
      */
     public void updateChiTietVatTu(ChiTietPhieuSuaChua_VatTu chiTiet) throws SQLException {
-        String sql = "UPDATE ChiTietPhieuSuaChua_VatTu SET SoLuongSuDung = ?, DonGiaBanLucDo = ? WHERE MaPhieuSC = ? AND MaVatTu = ?";
+        String sql = "UPDATE ChiTietPhieuSuaChua_VatTu SET SoLuong = ?, DonGiaNhap = ? WHERE MaPhieuSC = ? AND MaVatTu = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, chiTiet.getSoLuongSuDung());
-            pstmt.setDouble(2, chiTiet.getDonGiaBanLucDo());
+            pstmt.setInt(1, chiTiet.getSoLuong());
+            pstmt.setDouble(2, chiTiet.getDonGiaNhap());
             pstmt.setInt(3, chiTiet.getMaPhieuSC());
             pstmt.setInt(4, chiTiet.getMaVatTu());
             pstmt.executeUpdate();

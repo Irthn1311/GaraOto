@@ -4,52 +4,59 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 
 public class ChiTietPhieuSuaChua_TienCong {
+    private IntegerProperty maChiTietTienCong;
     private IntegerProperty maPhieuSC;
-    private IntegerProperty maLoaiTienCong;
-    // private IntegerProperty soLuong; // Removed: Not present in database.sql
-    private DoubleProperty donGia; // Changed from donGiaTienCongLucDo to donGia
+    private IntegerProperty maTienCong;
+    private DoubleProperty donGia;
+    private DoubleProperty thanhTien;
 
-    // Derived property for UI display (from LoaiTienCong table)
-    private StringProperty tenLoaiTienCong;
+    private TienCong tienCong; // Renamed from loaiTienCong to tienCong for consistency
 
     public ChiTietPhieuSuaChua_TienCong() {
+        this.maChiTietTienCong = new SimpleIntegerProperty();
         this.maPhieuSC = new SimpleIntegerProperty();
-        this.maLoaiTienCong = new SimpleIntegerProperty();
-        // this.soLuong = new SimpleIntegerProperty(); // Removed
-        this.donGia = new SimpleDoubleProperty(); // Changed
-        this.tenLoaiTienCong = new SimpleStringProperty();
+        this.maTienCong = new SimpleIntegerProperty();
+        this.donGia = new SimpleDoubleProperty();
+        this.thanhTien = new SimpleDoubleProperty();
     }
 
-    public ChiTietPhieuSuaChua_TienCong(int maPhieuSC, int maLoaiTienCong, /* int soLuong, */ double donGia) {
+    public ChiTietPhieuSuaChua_TienCong(int maChiTietTienCong, int maPhieuSC, int maTienCong, double donGia, double thanhTien) {
+        this.maChiTietTienCong = new SimpleIntegerProperty(maChiTietTienCong);
         this.maPhieuSC = new SimpleIntegerProperty(maPhieuSC);
-        this.maLoaiTienCong = new SimpleIntegerProperty(maLoaiTienCong);
-        // this.soLuong = new SimpleIntegerProperty(soLuong); // Removed
-        this.donGia = new SimpleDoubleProperty(donGia); // Changed
-        this.tenLoaiTienCong = new SimpleStringProperty();
+        this.maTienCong = new SimpleIntegerProperty(maTienCong);
+        this.donGia = new SimpleDoubleProperty(donGia);
+        this.thanhTien = new SimpleDoubleProperty(thanhTien);
     }
 
     // Getters
+    public int getMaChiTietTienCong() { return maChiTietTienCong.get(); }
     public int getMaPhieuSC() { return maPhieuSC.get(); }
-    public int getMaLoaiTienCong() { return maLoaiTienCong.get(); }
-    // public int getSoLuong() { return soLuong.get(); } // Removed
-    public double getDonGia() { return donGia.get(); } // Changed from getDonGiaTienCongLucDo
-    public String getTenLoaiTienCong() { return tenLoaiTienCong.get(); }
+    public int getMaTienCong() { return maTienCong.get(); }
+    public double getDonGia() { return donGia.get(); }
+    public double getThanhTien() { return thanhTien.get(); }
 
     // Setters
+    public void setMaChiTietTienCong(int maChiTietTienCong) { this.maChiTietTienCong.set(maChiTietTienCong); }
     public void setMaPhieuSC(int maPhieuSC) { this.maPhieuSC.set(maPhieuSC); }
-    public void setMaLoaiTienCong(int maLoaiTienCong) { this.maLoaiTienCong.set(maLoaiTienCong); }
-    // public void setSoLuong(int soLuong) { this.soLuong.set(soLuong); } // Removed
-    public void setDonGia(double donGia) { this.donGia.set(donGia); } // Changed from setDonGiaTienCongLucDo
-    public void setTenLoaiTienCong(String tenLoaiTienCong) { this.tenLoaiTienCong.set(tenLoaiTienCong); }
+    public void setMaTienCong(int maTienCong) { this.maTienCong.set(maTienCong); }
+    public void setDonGia(double donGia) { this.donGia.set(donGia); }
+    public void setThanhTien(double thanhTien) { this.thanhTien.set(thanhTien); }
 
     // Properties for JavaFX binding
+    public IntegerProperty maChiTietTienCongProperty() { return maChiTietTienCong; }
     public IntegerProperty maPhieuSCProperty() { return maPhieuSC; }
-    public IntegerProperty maLoaiTienCongProperty() { return maLoaiTienCong; }
-    // public IntegerProperty soLuongProperty() { return soLuong; } // Removed
-    public DoubleProperty donGiaProperty() { return donGia; } // Changed from donGiaTienCongLucDoProperty
-    public StringProperty tenLoaiTienCongProperty() { return tenLoaiTienCong; }
+    public IntegerProperty maTienCongProperty() { return maTienCong; }
+    public DoubleProperty donGiaProperty() { return donGia; }
+    public DoubleProperty thanhTienProperty() { return thanhTien; }
+
+    // Getter and Setter for TienCong object
+    public TienCong getTienCong() {
+        return tienCong;
+    }
+
+    public void setTienCong(TienCong tienCong) {
+        this.tienCong = tienCong;
+    }
 }

@@ -6,17 +6,18 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import model.TiepNhan; // Import TiepNhan entity
 import model.VatTu;    // New entity for VatTu
-import model.LoaiTienCong; // New entity for TienCong
+import model.TienCong; // Import TienCong
 import model.PhieuSuaChua; // New entity for PhieuSuaChua
 import model.ChiTietSuaChua; // New entity for ChiTietSuaChua
 import model.Tho; // Import Tho entity
 
 import dao.TiepNhanDAO; // DAO for TiepNhan
 import dao.VatTuDAO;    // New DAO for VatTu
-import dao.LoaiTienCongDAO; // New DAO for TienCong
+import dao.TienCongDAO; // New DAO for TienCong
 import dao.PhieuSuaChuaDAO; // New DAO for PhieuSuaChua
 import dao.ChiTietSuaChuaDAO; // New DAO for ChiTietSuaChua
 import dao.ThoDAO; // New DAO for Tho
+import dao.ChiTietPhieuNhapKhoVatTuDAO; // New DAO for getting DonGiaNhap
 
 import utils.AlertUtils;
 import java.sql.SQLException;
@@ -51,7 +52,7 @@ public class SuaChuaController {
     @FXML
     private TextField txtSoLuongVatTu;
     @FXML
-    private ComboBox<String> cbTienCong;
+    private ComboBox<TienCong> cbTienCong; // Changed from ComboBox<String>
     @FXML
     private Button btnThemChiTiet;
     @FXML
@@ -87,10 +88,11 @@ public class SuaChuaController {
     // DAOs
     private TiepNhanDAO tiepNhanDAO;
     private VatTuDAO vatTuDAO;
-    private LoaiTienCongDAO tienCongDAO;
+    private TienCongDAO tienCongDAO; // Changed to TienCongDAO
     private PhieuSuaChuaDAO phieuSuaChuaDAO;
     private ChiTietSuaChuaDAO chiTietSuaChuaDAO;
     private ThoDAO thoDAO; // New DAO for Tho
+    private ChiTietPhieuNhapKhoVatTuDAO chiTietPhieuNhapKhoVatTuDAO; // New DAO for getting DonGiaNhap
 
     // Data for the TableView
     private ObservableList<ChiTietSuaChua> danhSachChiTietSuaChua;
@@ -106,10 +108,11 @@ public class SuaChuaController {
         // Initialize DAOs
         tiepNhanDAO = new TiepNhanDAO();
         vatTuDAO = new VatTuDAO();
-        tienCongDAO = new LoaiTienCongDAO();
+        tienCongDAO = new TienCongDAO(); // Changed to TienCongDAO
         phieuSuaChuaDAO = new PhieuSuaChuaDAO();
         chiTietSuaChuaDAO = new ChiTietSuaChuaDAO();
         thoDAO = new ThoDAO(); // Initialize ThoDAO
+        chiTietPhieuNhapKhoVatTuDAO = new ChiTietPhieuNhapKhoVatTuDAO(); // Initialize new DAO
 
         // Set default date for DatePicker
         dpNgaySuaChua.setValue(LocalDate.now());
@@ -179,13 +182,22 @@ public class SuaChuaController {
      */
     private void loadTienCongData() {
         try {
-            ObservableList<String> tienCongContents = FXCollections.observableArrayList();
-            for (LoaiTienCong tc : tienCongDAO.getAllLoaiTienCong()) {
-                tienCongContents.add(tc.getTenLoaiTienCong());
-            }
-            cbTienCong.setItems(tienCongContents);
+            ObservableList<TienCong> tienCongList = FXCollections.observableArrayList(tienCongDAO.getAllTienCong());
+            cbTienCong.setItems(tienCongList);
+            cbTienCong.setConverter(new javafx.util.StringConverter<TienCong>() {
+                @Override
+                public String toString(TienCong tienCong) {
+                    return (tienCong != null) ? tienCong.getNoiDung() : "";
+                }
+
+                @Override
+                public TienCong fromString(String string) {
+                    // Not used for this ComboBox
+                    return null;
+                }
+            });
         } catch (SQLException e) {
-            AlertUtils.showErrorAlert("Lỗi tải dữ liệu", "Không thể tải danh sách tiền công từ cơ sở dữ liệu.");
+            AlertUtils.showErrorAlert("Lỗi tải dữ liệu tiền công", "Không thể tải dữ liệu tiền công: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -264,9 +276,10 @@ public class SuaChuaController {
     }
 
     /**
-     * Displays a dialog for the user to select a specific TiepNhan record.
-     * @param records The list of TiepNhan records to choose from.
+     * Displays a dialog for the user to select a TiepNhan record from a list.
+     * @param records The list of TiepNhan records to display.
      */
+    @SuppressWarnings("unchecked") // Suppress warning about generic array creation for varargs
     private void showTiepNhanSelectionDialog(ObservableList<TiepNhan> records) {
         Dialog<TiepNhan> dialog = new Dialog<>();
         dialog.setTitle("Chọn Hồ Sơ Tiếp Nhận");
@@ -355,7 +368,7 @@ public class SuaChuaController {
     private void handleThemChiTiet() {
         String selectedVatTu = cbVatTu.getValue();
         String soLuongText = txtSoLuongVatTu.getText().trim();
-        String selectedTienCong = cbTienCong.getValue();
+        TienCong selectedTienCong = cbTienCong.getSelectionModel().getSelectedItem(); // Changed to TienCong
 
         // Validate inputs
         if (selectedVatTu == null && selectedTienCong == null) {
@@ -378,8 +391,9 @@ public class SuaChuaController {
 
         try {
             ChiTietSuaChua chiTiet = new ChiTietSuaChua();
-            double donGia = 0.0;
+            double donGiaHienThi = 0.0; // Price for display (DonGiaBan for materials)
             double thanhTien = 0.0;
+            double donGiaNhapChoChiPhi = 0.0; // Cost price (DonGiaNhap for materials)
 
             if (selectedVatTu != null) {
                 VatTu vatTu = vatTuDAO.getVatTuByName(selectedVatTu);
@@ -391,49 +405,33 @@ public class SuaChuaController {
                 chiTiet.setNoiDung(vatTu.getTenVatTu());
                 chiTiet.setLoai("Vật tư");
                 chiTiet.setSoLuong(soLuong);
-                chiTiet.setDonGia(vatTu.getDonGiaBan()); // Use DonGiaBan from VatTu
-                thanhTien += vatTu.getDonGiaBan() * soLuong; // Use DonGiaBan for calculation
-                donGia = vatTu.getDonGiaBan(); // Set for display
+
+                donGiaHienThi = vatTu.getDonGiaBan(); // Giá bán ra để hiển thị và tính tiền khách
+                thanhTien += vatTu.getDonGiaBan() * soLuong;
+
+                // Lấy DonGiaNhap từ ChiTietPhieuNhapKhoVatTuDAO để tính chi phí
+                donGiaNhapChoChiPhi = chiTietPhieuNhapKhoVatTuDAO.getLatestDonGiaNhapByMaVatTu(vatTu.getMaVatTu());
+                if (donGiaNhapChoChiPhi == 0.0) {
+                    AlertUtils.showWarningAlert("Cảnh báo", "Không tìm thấy giá vốn nhập kho cho vật tư \'" + vatTu.getTenVatTu() + "\'. Chi phí sẽ được tính là 0.");
+                }
+                chiTiet.setDonGiaNhapThoiDiemSuaChua(donGiaNhapChoChiPhi); // Set giá vốn vào model chi tiết
             }
 
             if (selectedTienCong != null) {
-                LoaiTienCong tienCong = tienCongDAO.getLoaiTienCongByName(selectedTienCong);
-                if (tienCong == null) {
-                    AlertUtils.showErrorAlert("Lỗi", "Tiền công không tồn tại.");
-                    return;
-                }
-                // If both vatTu and tienCong are selected, combine them into one detail line
-                if (selectedVatTu != null) {
-                    chiTiet.setMaLoaiTienCong(tienCong.getMaLoaiTienCong()); // Use MaLoaiTienCong
-                    chiTiet.setNoiDung(chiTiet.getNoiDung() + " + " + tienCong.getTenLoaiTienCong());
-                    chiTiet.setLoai("Vật tư & Công");
-                    thanhTien += tienCong.getDonGiaTienCong(); // Add labor cost
-                    // DonGia for display in this case is tricky, might show 0 or average or sum
-                    // For simplicity, let's just show the total for this detail line
-                } else {
-                    chiTiet.setMaLoaiTienCong(tienCong.getMaLoaiTienCong()); // Use MaLoaiTienCong
-                    chiTiet.setNoiDung(tienCong.getTenLoaiTienCong());
-                    chiTiet.setLoai("Tiền công");
-                    chiTiet.setSoLuong(1); // Labor is usually 1 unit
-                    chiTiet.setDonGia(tienCong.getDonGiaTienCong());
-                    thanhTien += tienCong.getDonGiaTienCong();
-                    donGia = tienCong.getDonGiaTienCong(); // Set for display
-                }
+                // Get selected TienCong and quantity
+                double donGia = selectedTienCong.getDonGia(); // Directly get donGia from TienCong object
+                chiTiet.setMaTienCong(selectedTienCong.getMaTienCong());
+                chiTiet.setNoiDung(selectedTienCong.getNoiDung());
+                chiTiet.setLoai("Tiền công");
+                chiTiet.setSoLuong(1); // Labor is usually 1 unit
+                donGiaHienThi = donGia; // Giá tiền công để hiển thị và tính tiền khách
+                thanhTien += donGia;
+                // For labor, DonGiaNhapThoiDiemSuaChua is typically 0 or not applicable
+                chiTiet.setDonGiaNhapThoiDiemSuaChua(0.0); // No cost price for labor itself
             }
 
-            // Ensure DonGia is set for display even if it's a combined item or only labor
-            if (selectedVatTu == null && selectedTienCong != null) {
-                chiTiet.setDonGia(donGia); // Set the labor cost as DonGia
-            } else if (selectedVatTu != null && selectedTienCong == null) {
-                chiTiet.setDonGia(donGia); // Set the material cost as DonGia
-            } else if (selectedVatTu != null && selectedTienCong != null) {
-                // For combined, DonGia might not be meaningful as a single value
-                // We can set it to 0 or leave it as the material's price.
-                // For now, let's set it to the material's price if material exists, else labor's price
-                chiTiet.setDonGia(donGia); // This will be material's price if selectedVatTu != null
-            }
-
-
+            // Set DonGia for display (this will be DonGiaBan for materials or DonGiaTienCong for labor)
+            chiTiet.setDonGia(donGiaHienThi);
             chiTiet.setThanhTien(thanhTien);
             chiTiet.setStt(danhSachChiTietSuaChua.size() + 1); // Set STT
 
@@ -588,3 +586,4 @@ public class SuaChuaController {
         setFormEnabled(false);
     }
 }
+

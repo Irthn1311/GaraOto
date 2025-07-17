@@ -12,6 +12,7 @@ import dao.NhaCungCapDAO;
 import utils.AlertUtils;
 
 import java.sql.SQLException;
+import java.util.Optional;
 
 public class QuanLyNhaCungCapController {
 
@@ -61,7 +62,7 @@ public class QuanLyNhaCungCapController {
         colDiaChi.setCellValueFactory(cellData -> cellData.getValue().diaChiProperty());
         colEmail.setCellValueFactory(cellData -> cellData.getValue().emailProperty());
 
-        // Listen for selection changes in the table and show details
+        // Listener for table selection to populate text fields for editing
         tblNhaCungCap.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> showNhaCungCapDetails(newValue));
 

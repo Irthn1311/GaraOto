@@ -13,6 +13,7 @@ import dao.HieuXeDAO;
 import utils.AlertUtils;
 
 import java.sql.SQLException;
+import java.util.Optional;
 
 public class QuanLyHieuXeController {
 
@@ -47,7 +48,7 @@ public class QuanLyHieuXeController {
         colMaHieuXe.setCellValueFactory(cellData -> cellData.getValue().maHieuXeProperty().asObject());
         colTenHieuXe.setCellValueFactory(cellData -> cellData.getValue().tenHieuXeProperty());
 
-        // Listen for selection changes in the table and show details
+        // Listen for selection changes in the table to show details
         tblHieuXe.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> showHieuXeDetails(newValue));
 

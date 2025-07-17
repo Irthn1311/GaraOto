@@ -14,6 +14,7 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 
 import java.sql.SQLException;
+import java.util.Optional;
 
 public class QuanLyThoController {
 
@@ -58,7 +59,7 @@ public class QuanLyThoController {
         colDienThoai.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getSoDienThoai()));
         colChuyenMon.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getChuyenMon()));
 
-        // Listen for selection changes in the table and show details
+        // Listener for table selection to populate text fields for editing
         tblTho.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> showThoDetails(newValue));
 

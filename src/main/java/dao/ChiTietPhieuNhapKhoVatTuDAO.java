@@ -101,4 +101,29 @@ public class ChiTietPhieuNhapKhoVatTuDAO {
             pstmt.executeUpdate();
         }
     }
+
+    /**
+     * Retrieves the latest DonGiaNhap for a given MaVatTu from ChiTietPhieuNhapKhoVatTu.
+     * This assumes the latest is determined by the most recent PhieuNhapKhoVatTu.
+     * @param maVatTu The ID of the material.
+     * @return The latest DonGiaNhap for the material, or 0.0 if not found.
+     * @throws SQLException if a database access error occurs.
+     */
+    public double getLatestDonGiaNhapByMaVatTu(int maVatTu) throws SQLException {
+        String sql = "SELECT TOP 1 ctpn.DonGiaNhap " +
+                     "FROM ChiTietPhieuNhapKhoVatTu ctpn " +
+                     "JOIN PhieuNhapKhoVatTu pnk ON ctpn.MaPhieuNhap = pnk.MaPhieuNhap " +
+                     "WHERE ctpn.MaVatTu = ? " +
+                     "ORDER BY pnk.NgayNhap DESC, ctpn.MaPhieuNhap DESC;";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, maVatTu);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble("DonGiaNhap");
+                }
+            }
+        }
+        return 0.0; // Return 0.0 if no entry found
+    }
 }

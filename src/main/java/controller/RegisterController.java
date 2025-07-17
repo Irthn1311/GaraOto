@@ -70,12 +70,12 @@ public class RegisterController {
             // 3. Hash password
             String hashedPassword = PasswordHasher.hashPassword(password);
 
-            // 4. Create new user account (default to "NhanVien" for new registrations)
+            // 4. Create new user account (default to "NhanVienTiepNhan" for new registrations)
             TaiKhoanNguoiDung newUser = new TaiKhoanNguoiDung();
             newUser.setHoTen(hoTen);
             newUser.setTenDangNhap(username);
             newUser.setMatKhauHash(hashedPassword);
-            newUser.setLoaiTaiKhoan("NhanVien"); // Default type for new registrations
+            newUser.setLoaiTaiKhoan("NhanVienTiepNhan"); // Default type for new registrations
             newUser.setTrangThai(true); // New: Default to active
 
             int newAccountId = taiKhoanNguoiDungDAO.addTaiKhoanNguoiDung(newUser); // Changed method name

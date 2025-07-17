@@ -50,8 +50,8 @@ public class LoginController {
 
             if (user != null) {
                 // Hash the input password and compare with the stored hash
-                String hashedPassword = PasswordHasher.hashPassword(password);
-                if (hashedPassword.equals(user.getMatKhauHash())) {
+                // Using PasswordHasher.verifyPassword for correct comparison
+                if (PasswordHasher.verifyPassword(password, user.getMatKhauHash())) {
                     if (user.isTrangThai()) { // Check if account is active
                         AlertUtils.showInformationAlert("Thành công", "Đăng nhập thành công!");
 

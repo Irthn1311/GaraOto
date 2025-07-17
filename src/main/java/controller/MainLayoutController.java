@@ -239,7 +239,7 @@ public class MainLayoutController {
     @FXML
     private void handleQuanLyTho() {
         if (loggedInUserHasRole(ROLE_GIAM_DOC, ROLE_QUAN_LY, ROLE_THO_SUA_CHUA)) {
-            loadView("/view/QuanLyThoView.fxml");
+            loadView("/view/QuanLyTho.fxml");
         } else {
             AlertUtils.showWarningAlert("Không có quyền", "Bạn không có quyền truy cập chức năng này.");
         }

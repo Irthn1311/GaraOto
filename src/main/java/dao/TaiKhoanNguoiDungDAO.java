@@ -124,7 +124,7 @@ public class TaiKhoanNguoiDungDAO {
      * @throws SQLException if a database access error occurs.
      */
     public TaiKhoanNguoiDung getTaiKhoanNguoiDungByTenDangNhap(String tenDangNhap) throws SQLException {
-        String sql = "SELECT MaTK, TenDangNhap, LoaiTaiKhoan, HoTen, TrangThai FROM TaiKhoanNguoiDung WHERE TenDangNhap = ?";
+        String sql = "SELECT MaTK, TenDangNhap, MatKhauHash, LoaiTaiKhoan, HoTen, TrangThai FROM TaiKhoanNguoiDung WHERE TenDangNhap = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, tenDangNhap);
@@ -133,6 +133,7 @@ public class TaiKhoanNguoiDungDAO {
                     TaiKhoanNguoiDung user = new TaiKhoanNguoiDung();
                     user.setMaTK(rs.getInt("MaTK"));
                     user.setTenDangNhap(rs.getString("TenDangNhap"));
+                    user.setMatKhauHash(rs.getString("MatKhauHash")); // Retrieve password hash
                     user.setLoaiTaiKhoan(rs.getString("LoaiTaiKhoan"));
                     user.setHoTen(rs.getString("HoTen"));
                     user.setTrangThai(rs.getBoolean("TrangThai"));

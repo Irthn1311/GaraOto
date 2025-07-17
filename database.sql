@@ -18,11 +18,12 @@ IF OBJECT_ID('dbo.Xe', 'U') IS NOT NULL DROP TABLE dbo.Xe;
 IF OBJECT_ID('dbo.HieuXe', 'U') IS NOT NULL DROP TABLE dbo.HieuXe;
 IF OBJECT_ID('dbo.ChuXe', 'U') IS NOT NULL DROP TABLE dbo.ChuXe;
 IF OBJECT_ID('dbo.VatTu', 'U') IS NOT NULL DROP TABLE dbo.VatTu;
-IF OBJECT_ID('dbo.TienCong', 'U') IS NOT NULL DROP TABLE dbo.TienCong;
+IF OBJECT_ID('dbo.TienCong', 'U') IS NOT NULL DROP TABLE dbo.TienCong; -- Changed from LoaiTienCong
 IF OBJECT_ID('dbo.ThamSo', 'U') IS NOT NULL DROP TABLE dbo.ThamSo;
 IF OBJECT_ID('dbo.TaiKhoanNguoiDung', 'U') IS NOT NULL DROP TABLE dbo.TaiKhoanNguoiDung;
 IF OBJECT_ID('dbo.Tho', 'U') IS NOT NULL DROP TABLE dbo.Tho;
 IF OBJECT_ID('dbo.PhanCongTho', 'U') IS NOT NULL DROP TABLE dbo.PhanCongTho; -- New: Drop PhanCongTho table if exists
+IF OBJECT_ID('dbo.NhaCungCap', 'U') IS NOT NULL DROP TABLE dbo.NhaCungCap; -- New: Drop NhaCungCap table if exists
 GO
 
 -- Bảng HieuXe (Car Brands)
@@ -74,11 +75,21 @@ CREATE TABLE VatTu (
 );
 GO
 
--- Bảng TienCong (Labor Services)
+-- NEW TABLE: NhaCungCap (Suppliers)
+CREATE TABLE NhaCungCap (
+                            MaNhaCungCap INT IDENTITY(1,1) PRIMARY KEY,
+                            TenNhaCungCap NVARCHAR(200) NOT NULL UNIQUE,
+                            DienThoai NVARCHAR(20),
+                            DiaChi NVARCHAR(200),
+                            Email NVARCHAR(100)
+);
+GO
+
+-- Bảng TienCong (Labor Services) - Renamed from LoaiTienCong
 CREATE TABLE TienCong (
                           MaTienCong INT IDENTITY(1,1) PRIMARY KEY,
-                          NoiDung NVARCHAR(100) NOT NULL UNIQUE,
-                          DonGia DECIMAL(18,2) NOT NULL CHECK (DonGia >= 0)
+                          NoiDung NVARCHAR(100) NOT NULL UNIQUE, -- Renamed from TenLoaiTienCong
+                          DonGia DECIMAL(18,2) NOT NULL CHECK (DonGia >= 0) -- Renamed from DonGiaTienCong
 );
 GO
 
@@ -118,7 +129,7 @@ GO
 CREATE TABLE ChiTietPhieuSuaChua_TienCong (
                                               MaChiTietTienCong INT IDENTITY(1,1) PRIMARY KEY,
                                               MaPhieuSC INT NOT NULL FOREIGN KEY REFERENCES PhieuSuaChua(MaPhieuSC),
-                                              MaTienCong INT NOT NULL FOREIGN KEY REFERENCES TienCong(MaTienCong),
+                                              MaTienCong INT NOT NULL FOREIGN KEY REFERENCES TienCong(MaTienCong), -- Changed from MaLoaiTienCong
                                               DonGia DECIMAL(18,2) NOT NULL CHECK (DonGia >= 0), -- Labor rate at the time of repair
                                               ThanhTien DECIMAL(18,2) NOT NULL CHECK (ThanhTien >= 0)
 );
@@ -186,6 +197,12 @@ INSERT INTO VatTu (TenVatTu, DonGiaBan, SoLuongTon, DonViTinh, MucTonKhoToiThieu
 (N'Bugia Denso', 80000.00, 120, N'cái', 30);
 GO
 
+-- Sample data for NhaCungCap
+INSERT INTO NhaCungCap (TenNhaCungCap, DienThoai, DiaChi, Email) VALUES
+(N'Công ty TNHH Phụ tùng ô tô ABC', '0281234567', N'123 Đường XYZ, Quận 10', 'info@abcphutung.com'),
+(N'Công ty Cổ phần Vật tư Sửa chữa Xe', '0249876543', N'456 Đường DEF, Quận Hoàn Kiếm', 'contact@vtscx.com');
+GO
+
 -- Sample data for TienCong
 INSERT INTO TienCong (NoiDung, DonGia) VALUES
 (N'Kiểm tra tổng quát', 200000.00),
@@ -214,5 +231,5 @@ GO
 -- Sample data for TiepNhan (for testing)
 INSERT INTO TiepNhan (BienSo, NgayTiepNhan, TongTienNo, TrangThaiHoanTat) VALUES
 ('51A-123.45', GETDATE(), 0.00, 0), -- Xe A được tiếp nhận hôm nay
-('51B-678.90', DATEADD(day, -5, GETDATE()), 0.00, 0); -- Xe B được tiếp nhận 5 ngày trước
+('51B-678.90', DATEADD(day, -5, GETDATE()), 0.00, 0);
 GO

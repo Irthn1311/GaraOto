@@ -12,7 +12,7 @@ import model.ChiTietSuaChua; // Import ChiTietSuaChua
 import model.LuotTiepNhanSuaChuaEntry; // Model for acceptance/repair count report
 import model.TieuHaoVatTuEntry; // Model for material consumption report
 import model.LoiNhuanEntry; // Model for overall profit report
-import model.LoaiTienCong; // Import LoaiTienCong for LoiNhuan calculation
+import model.TienCong;
 
 import dao.PhieuSuaChuaDAO;
 import dao.PhieuThuTienDAO;
@@ -457,17 +457,18 @@ public class BaoCaoController {
 
             for (ChiTietSuaChua chiTiet : chiTietList) {
                 if (chiTiet.getVatTu() != null) { // Only process if it's a material
-                    VatTu vatTu = chiTiet.getVatTu();
+                    VatTu vatTu = chiTiet.getVatTu(); // This vatTu object might not have DonGiaNhap directly
                     int maVatTu = vatTu.getMaVatTu();
                     int soLuongTieuHao = chiTiet.getSoLuong();
-                    double donGiaNhap = vatTu.getDonGiaBan(); // Use DonGiaBan for cost (assuming DonGiaNhap is stored in DonGiaBan field for simplicity)
+                    // Use donGiaNhapThoiDiemSuaChua directly from ChiTietSuaChua, which was set in SuaChuaController
+                    double donGiaNhapChoChiPhi = chiTiet.getDonGiaNhapThoiDiemSuaChua();
 
                     aggregatedTieuHao.compute(maVatTu, (key, existingEntry) -> {
                         if (existingEntry == null) {
-                            return new TieuHaoVatTuEntry(maVatTu, vatTu.getTenVatTu(), vatTu.getDonViTinh(), soLuongTieuHao, soLuongTieuHao * donGiaNhap);
+                            return new TieuHaoVatTuEntry(maVatTu, vatTu.getTenVatTu(), vatTu.getDonViTinh(), soLuongTieuHao, soLuongTieuHao * donGiaNhapChoChiPhi); // Use donGiaNhapChoChiPhi
                         } else {
                             existingEntry.setSoLuongTieuHao(existingEntry.getSoLuongTieuHao() + soLuongTieuHao);
-                            existingEntry.setTongGiaTriTieuHao(existingEntry.getTongGiaTriTieuHao() + (soLuongTieuHao * donGiaNhap));
+                            existingEntry.setTongGiaTriTieuHao(existingEntry.getTongGiaTriTieuHao() + (soLuongTieuHao * donGiaNhapChoChiPhi)); // Use donGiaNhapChoChiPhi
                             return existingEntry;
                         }
                     });
@@ -526,11 +527,12 @@ public class BaoCaoController {
                 for (ChiTietSuaChua cts : ps.getChiTietSuaChuaList()) {
                     if (cts.getVatTu() != null) {
                         // Cost of material is SoLuong * DonGiaNhap (from ChiTietPhieuSuaChua_VatTu)
-                        chiPhiVatTu[0] += cts.getSoLuong() * cts.getVatTu().getDonGiaBan(); // Assuming DonGiaBan holds DonGiaNhap
+                        // Now using donGiaNhapThoiDiemSuaChua from ChiTietSuaChua model
+                        chiPhiVatTu[0] += cts.getSoLuong() * cts.getDonGiaNhapThoiDiemSuaChua();
                     }
-                    if (cts.getLoaiTienCong() != null) {
+                    if (cts.getTienCong() != null) {
                         // Cost of labor is DonGia (from ChiTietPhieuSuaChua_TienCong)
-                        chiPhiTienCong[0] += cts.getLoaiTienCong().getDonGiaTienCong();
+                        chiPhiTienCong[0] += cts.getTienCong().getDonGia(); // Changed from getLoaiTienCong().getDonGiaTienCong()
                     }
                 }
 
