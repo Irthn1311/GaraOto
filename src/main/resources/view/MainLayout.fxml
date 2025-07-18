@@ -48,6 +48,11 @@
                         <Insets bottom="10.0" />
                     </VBox.margin>
                 </Button>
+                <Button fx:id="btnTrangThaiXuongXe" mnemonicParsing="false" onAction="#handleTrangThaiXuongXe" prefHeight="50.0" prefWidth="220.0" styleClass="sidebar-button" text="     Trạng thái Xưởng xe">
+                    <VBox.margin>
+                        <Insets bottom="10.0" />
+                    </VBox.margin>
+                </Button>
                 <Button fx:id="btnSuaChua" mnemonicParsing="false" onAction="#handleSuaChua" prefHeight="50.0" prefWidth="220.0" styleClass="sidebar-button" text="     Sửa chữa">
                     <VBox.margin>
                         <Insets bottom="10.0" />

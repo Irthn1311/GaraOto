@@ -214,12 +214,12 @@ GO
 
 -- Function codes for reference in the application:
 -- Q1: TiepNhan, Q2: SuaChua, Q3: ThuTien, Q4: BaoCao, Q5: CauHinh
--- Q6: QLHieuXe, Q7: QLTienCong, Q8: QLTho, Q9: QLNhaCungCap, Q10: QLVatTu, Q11: QLTaiKhoan, Q12: QLPhanQuyen
+-- Q6: QLHieuXe, Q7: QLTienCong, Q8: QLTho, Q9: QLNhaCungCap, Q10: QLVatTu, Q11: QLTaiKhoan, Q12: QLPhanQuyen, Q13: TrangThaiXuongXe
 INSERT INTO ChiTietPhanQuyen (MaPhanQuyen, MaChucNang) VALUES
 ('GIAMDOC', 'Q1'), ('GIAMDOC', 'Q2'), ('GIAMDOC', 'Q3'), ('GIAMDOC', 'Q4'),
 ('GIAMDOC', 'Q5'), ('GIAMDOC', 'Q6'), ('GIAMDOC', 'Q7'), ('GIAMDOC', 'Q8'),
-('GIAMDOC', 'Q9'), ('GIAMDOC', 'Q10'), ('GIAMDOC', 'Q11'), ('GIAMDOC', 'Q12'),
-('NVTIEPNHAN', 'Q1'),
+('GIAMDOC', 'Q9'), ('GIAMDOC', 'Q10'), ('GIAMDOC', 'Q11'), ('GIAMDOC', 'Q12'), ('GIAMDOC', 'Q13'),
+('NVTIEPNHAN', 'Q1'), ('NVTIEPNHAN', 'Q13'),
 ('THOSUACHUA', 'Q2'),
 ('KETOAN', 'Q3'), ('KETOAN', 'Q4'),
 ('NVKHO', 'Q9'), ('NVKHO', 'Q10');

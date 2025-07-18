@@ -117,4 +117,31 @@ public class PhieuSuaChuaDAO {
         }
         return false;
     }
+    
+    public PhieuSuaChua getPhieuSuaChuaByMaTiepNhan(int maTiepNhan) {
+        PhieuSuaChua psc = null;
+        String sql = "SELECT psc.*, t.TenTho FROM PhieuSuaChua psc " +
+                     "LEFT JOIN Tho t ON psc.MaTho = t.MaTho " +
+                     "WHERE psc.MaTiepNhan = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, maTiepNhan);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    psc = new PhieuSuaChua();
+                    psc.setMaPhieuSC(rs.getInt("MaPhieuSC"));
+                    psc.setMaTiepNhan(rs.getInt("MaTiepNhan"));
+                    psc.setNgaySuaChua(rs.getDate("NgaySuaChua").toLocalDate());
+                    psc.setGhiChu(rs.getString("GhiChu"));
+                    psc.setTongTien(rs.getDouble("TongTien"));
+                    psc.setMaTho(rs.getInt("MaTho"));
+                    psc.setTenTho(rs.getString("TenTho"));
+                    psc.setTrangThaiHoanTat(rs.getBoolean("TrangThaiHoanTat"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return psc;
+    }
 }

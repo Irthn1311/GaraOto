@@ -368,4 +368,60 @@ public class TiepNhanDAO {
             pstmt.executeUpdate();
         }
     }
+    public List<TiepNhan> getTatCaXeChuaHoanTat() {
+        List<TiepNhan> list = new ArrayList<>();
+        String sql = "SELECT tn.*, cx.TenChuXe " +
+                     "FROM TiepNhan tn " +
+                     "JOIN Xe x ON tn.BienSo = x.BienSo " +
+                     "JOIN ChuXe cx ON x.MaChuXe = cx.MaChuXe " +
+                     "WHERE tn.TrangThaiHoanTat = 0 " +
+                     "ORDER BY tn.NgayTiepNhan DESC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                TiepNhan tn = new TiepNhan();
+                tn.setMaTiepNhan(rs.getInt("MaTiepNhan"));
+                tn.setBienSo(rs.getString("BienSo"));
+                tn.setNgayTiepNhan(rs.getDate("NgayTiepNhan").toLocalDate());
+                tn.setTrangThai(rs.getString("TrangThai"));
+                tn.setTenChuXe(rs.getString("TenChuXe"));
+                list.add(tn);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<TiepNhan> getXeChuaHoanTatByDateRange(LocalDate fromDate, LocalDate toDate) {
+        List<TiepNhan> list = new ArrayList<>();
+        // Make sure to handle null dates, default to a very wide range if they are null
+        String sql = "SELECT tn.*, cx.TenChuXe " +
+                "FROM TiepNhan tn " +
+                "JOIN Xe x ON tn.BienSo = x.BienSo " +
+                "JOIN ChuXe cx ON x.MaChuXe = cx.MaChuXe " +
+                "WHERE tn.TrangThaiHoanTat = 0 AND tn.NgayTiepNhan BETWEEN ? AND ? " +
+                "ORDER BY tn.NgayTiepNhan DESC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setDate(1, Date.valueOf(fromDate));
+            pstmt.setDate(2, Date.valueOf(toDate));
+
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                TiepNhan tn = new TiepNhan();
+                tn.setMaTiepNhan(rs.getInt("MaTiepNhan"));
+                tn.setBienSo(rs.getString("BienSo"));
+                tn.setNgayTiepNhan(rs.getDate("NgayTiepNhan").toLocalDate());
+                tn.setTrangThai(rs.getString("TrangThai"));
+                tn.setTenChuXe(rs.getString("TenChuXe"));
+                list.add(tn);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }

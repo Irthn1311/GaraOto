@@ -23,6 +23,9 @@ public class PhieuSuaChua {
     private IntegerProperty maTho; // New: FK to Tho
     private BooleanProperty trangThaiHoanTat; // New: Status for this specific repair slip
 
+    // This field is not in the database table but is used for display purposes after a JOIN query
+    private StringProperty tenTho;
+
     private List<ChiTietPhieuSuaChua_VatTu> chiTietVatTuList;
     private List<ChiTietPhieuSuaChua_TienCong> chiTietTienCongList;
 
@@ -34,6 +37,7 @@ public class PhieuSuaChua {
         this.tongTien = new SimpleDoubleProperty();
         this.maTho = new SimpleIntegerProperty(0); // Initialize with default value
         this.trangThaiHoanTat = new SimpleBooleanProperty(false); // Initialize with default value
+        this.tenTho = new SimpleStringProperty(); // Initialize the new field
         this.chiTietVatTuList = new ArrayList<>();
         this.chiTietTienCongList = new ArrayList<>();
     }
@@ -46,6 +50,7 @@ public class PhieuSuaChua {
     public double getTongTien() { return tongTien.get(); }
     public int getMaTho() { return maTho.get(); } // New Getter
     public boolean isTrangThaiHoanTat() { return trangThaiHoanTat.get(); } // New Getter
+    public String getTenTho() { return tenTho.get(); } // Getter for tenTho
     public List<ChiTietPhieuSuaChua_VatTu> getChiTietVatTuList() { return chiTietVatTuList; }
     public List<ChiTietPhieuSuaChua_TienCong> getChiTietTienCongList() { return chiTietTienCongList; }
 
@@ -58,6 +63,7 @@ public class PhieuSuaChua {
     public void setTongTien(double tongTien) { this.tongTien.set(tongTien); }
     public void setMaTho(int maTho) { this.maTho.set(maTho); } // New Setter
     public void setTrangThaiHoanTat(boolean trangThaiHoanTat) { this.trangThaiHoanTat.set(trangThaiHoanTat); } // New Setter
+    public void setTenTho(String tenTho) { this.tenTho.set(tenTho); } // Setter for tenTho
     public void setChiTietVatTuList(List<ChiTietPhieuSuaChua_VatTu> chiTietVatTuList) { this.chiTietVatTuList = chiTietVatTuList; }
     public void setChiTietTienCongList(List<ChiTietPhieuSuaChua_TienCong> chiTietTienCongList) { this.chiTietTienCongList = chiTietTienCongList; }
 
@@ -71,4 +77,5 @@ public class PhieuSuaChua {
     public DoubleProperty tongTienProperty() { return tongTien; }
     public IntegerProperty maThoProperty() { return maTho; } // New Property
     public BooleanProperty trangThaiHoanTatProperty() { return trangThaiHoanTat; } // New Property
+    public StringProperty tenThoProperty() { return tenTho; } // Property for tenTho
 }

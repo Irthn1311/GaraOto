@@ -127,6 +127,17 @@
                         </Label>
                     </children>
                 </HBox>
+                <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-padding: 0 0 10 0;">
+                    <children>
+                        <Label text="Tìm kiếm theo:" textFill="#2c3e50">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                        </Label>
+                        <ComboBox fx:id="cbTieuChiTimKiem" prefWidth="150.0" />
+                        <TextField fx:id="txtTimKiem" promptText="Nhập từ khóa để tìm kiếm..." HBox.hgrow="ALWAYS" />
+                    </children>
+                </HBox>
                 <TableView fx:id="tblXeTiepNhanTrongNgay" VBox.vgrow="ALWAYS">
                     <columns>
                         <TableColumn fx:id="colBienSo" prefWidth="120.0" text="Biển số xe" />

@@ -9,6 +9,8 @@ import dao.XeDAO;
 import dao.ChuXeDAO; // Import ChuXeDAO
 import dao.TiepNhanDAO; // Import TiepNhanDAO (formerly HoSoSuaChuaDAO)
 import dao.ThamSoDAO; // Import ThamSoDAO
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import model.HieuXe;
 import model.Xe;
 import model.ChuXe; // Import ChuXe entity
@@ -16,6 +18,7 @@ import model.TiepNhan; // Import TiepNhan entity (formerly HoSoSuaChua)
 import utils.AlertUtils; // Utility class for showing alerts
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.function.Predicate;
 
 public class TiepNhanController {
 
@@ -58,6 +61,10 @@ public class TiepNhanController {
     private Button btnXoaXe;  // Button for deleting selected record
     @FXML
     private Button btnTienTrangThai; // Button for advancing status
+    @FXML
+    private ComboBox<String> cbTieuChiTimKiem;
+    @FXML
+    private TextField txtTimKiem;
 
     // Store currently selected record
     private TiepNhan selectedTiepNhan;
@@ -71,6 +78,7 @@ public class TiepNhanController {
 
     // ObservableList for the TableView
     private ObservableList<TiepNhan> danhSachXeTiepNhanTrongNgay; // Changed to TiepNhan
+    private FilteredList<TiepNhan> filteredData;
 
     /**
      * Initializes the controller. This method is automatically called after the FXML file has been loaded.
@@ -87,9 +95,29 @@ public class TiepNhanController {
         // Set default date for DatePicker to today
         dpNgayTiepNhan.setValue(LocalDate.now());
 
-        // Initialize ObservableList
+        // Initialize ObservableList and FilteredList
         danhSachXeTiepNhanTrongNgay = FXCollections.observableArrayList();
-        tblXeTiepNhanTrongNgay.setItems(danhSachXeTiepNhanTrongNgay);
+        filteredData = new FilteredList<>(danhSachXeTiepNhanTrongNgay, p -> true);
+
+        // Setup search
+        cbTieuChiTimKiem.setItems(FXCollections.observableArrayList("Biển số xe", "Tên chủ xe", "Điện thoại", "Địa chỉ"));
+        cbTieuChiTimKiem.setValue("Biển số xe"); // Default search criteria
+
+        txtTimKiem.textProperty().addListener((observable, oldValue, newValue) ->
+                filteredData.setPredicate(createPredicate(newValue))
+        );
+        cbTieuChiTimKiem.valueProperty().addListener((observable, oldValue, newValue) ->
+                filteredData.setPredicate(createPredicate(txtTimKiem.getText()))
+        );
+
+        // Wrap the FilteredList in a SortedList.
+        SortedList<TiepNhan> sortedData = new SortedList<>(filteredData);
+
+        // Bind the SortedList comparator to the TableView comparator.
+        sortedData.comparatorProperty().bind(tblXeTiepNhanTrongNgay.comparatorProperty());
+
+        // Add sorted (and filtered) data to the table.
+        tblXeTiepNhanTrongNgay.setItems(sortedData);
 
         // Listen for row selection to enable editing/deleting
         tblXeTiepNhanTrongNgay.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
@@ -112,6 +140,33 @@ public class TiepNhanController {
         // Load initial data
         loadHieuXeData();
         loadXeTiepNhanTrongNgay(); // Corrected method name
+    }
+
+    private Predicate<TiepNhan> createPredicate(String filterText) {
+        return tiepNhan -> {
+            if (filterText == null || filterText.isEmpty()) {
+                return true;
+            }
+
+            String lowerCaseFilter = filterText.toLowerCase();
+            String searchCriteria = cbTieuChiTimKiem.getValue();
+
+            if (searchCriteria == null) {
+                return true;
+            }
+
+            if ("Biển số xe".equals(searchCriteria)) {
+                return tiepNhan.getBienSo().toLowerCase().contains(lowerCaseFilter);
+            } else if ("Tên chủ xe".equals(searchCriteria)) {
+                return tiepNhan.getTenChuXe().toLowerCase().contains(lowerCaseFilter);
+            } else if ("Điện thoại".equals(searchCriteria)) {
+                return tiepNhan.getDienThoaiChuXe().toLowerCase().contains(lowerCaseFilter);
+            } else if ("Địa chỉ".equals(searchCriteria)) {
+                return tiepNhan.getDiaChiChuXe().toLowerCase().contains(lowerCaseFilter);
+            }
+
+            return false; // No match
+        };
     }
 
     /**
@@ -428,5 +483,9 @@ public class TiepNhanController {
         txtTinhTrangXe.clear();
         tblXeTiepNhanTrongNgay.getSelectionModel().clearSelection();
         selectedTiepNhan = null;
+        // Clear search
+        txtTimKiem.clear();
+        cbTieuChiTimKiem.setValue("Biển số xe");
+        filteredData.setPredicate(null); // Reset filter
     }
 }

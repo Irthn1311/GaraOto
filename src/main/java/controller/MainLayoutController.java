@@ -23,6 +23,7 @@ public class MainLayoutController {
 
     // Navigation Buttons
     @FXML private Button btnTiepNhan;
+    @FXML private Button btnTrangThaiXuongXe;
     @FXML private Button btnSuaChua;
     @FXML private Button btnThuTien;
     @FXML private Button btnBaoCao;
@@ -45,6 +46,7 @@ public class MainLayoutController {
     
     private void mapButtonsToPermissions() {
         buttonPermissions.put(btnTiepNhan, "Q1");
+        buttonPermissions.put(btnTrangThaiXuongXe, "Q13"); // Using the new, specific permission code
         buttonPermissions.put(btnSuaChua, "Q2");
         buttonPermissions.put(btnThuTien, "Q3");
         buttonPermissions.put(btnBaoCao, "Q4");
@@ -99,6 +101,11 @@ public class MainLayoutController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent view = loader.load();
+            // Anchor the loaded view to the contentArea to make it fill the space
+            AnchorPane.setTopAnchor(view, 0.0);
+            AnchorPane.setBottomAnchor(view, 0.0);
+            AnchorPane.setLeftAnchor(view, 0.0);
+            AnchorPane.setRightAnchor(view, 0.0);
             contentArea.getChildren().setAll(view);
         } catch (IOException e) {
             AlertUtils.showErrorAlert("Lỗi tải giao diện", "Không thể tải giao diện: " + fxmlPath);
@@ -107,6 +114,7 @@ public class MainLayoutController {
     }
 
     @FXML private void handleTiepNhan() { loadView("/view/TiepNhanView.fxml"); }
+    @FXML private void handleTrangThaiXuongXe() { loadView("/view/TrangThaiXuongXeView.fxml"); }
     @FXML private void handleSuaChua() { loadView("/view/SuaChuaView.fxml"); }
     @FXML private void handleThuTien() { loadView("/view/ThuTienView.fxml"); }
     @FXML private void handleBaoCao() { loadView("/view/BaoCaoView.fxml"); }

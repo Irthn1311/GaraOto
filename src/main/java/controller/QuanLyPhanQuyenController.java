@@ -50,6 +50,7 @@ public class QuanLyPhanQuyenController {
         CHUC_NANG_MAP.put("Q10", "Quản Lý Vật Tư");
         CHUC_NANG_MAP.put("Q11", "Quản Lý Tài Khoản");
         CHUC_NANG_MAP.put("Q12", "Quản Lý Phân Quyền");
+        CHUC_NANG_MAP.put("Q13", "Trạng Thái Xưởng Xe");
     }
 
     @FXML
